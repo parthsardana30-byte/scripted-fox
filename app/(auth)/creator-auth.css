@@ -1,0 +1,294 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Authentication Diptych · design-system: design.md · designed-as-app · pre-emit critique: P5 H5 E5 S5 R5 V5 · tone: focused creator access · anchor hue: warm playback red */
+.auth-shell {
+  --auth-signal: var(--app-color-signal);
+  --auth-signal-hover: var(--app-color-signal-hover);
+  --font-display: var(--landing-font-display);
+  --font-body: var(--landing-font-body);
+  --font-wordmark: var(--landing-font-display);
+  color-scheme: light;
+  background: var(--auth-paper);
+  font-family: var(--font-body);
+}
+
+:root[data-next-video-theme="dark"] .auth-shell {
+  color-scheme: dark;
+}
+
+html:has(.auth-shell),
+body:has(.auth-shell) {
+  background: var(--app-color-paper);
+}
+
+.auth-shell__form-side {
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background: var(--auth-paper);
+}
+
+.auth-header {
+  justify-content: space-between;
+}
+
+.auth-wordmark {
+  font-family: var(--font-wordmark);
+  font-size: 1.05rem;
+  letter-spacing: -0.025em;
+}
+
+.auth-wordmark__mark {
+  border-radius: 0.625rem;
+  background: var(--auth-accent-soft);
+  color: var(--auth-signal);
+}
+
+.auth-header .theme-toggle {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--auth-muted);
+  cursor: pointer;
+}
+
+.auth-header .theme-toggle:hover,
+.auth-header .theme-toggle:focus-visible {
+  background: var(--auth-surface-muted);
+  color: var(--auth-ink);
+}
+
+.auth-header .theme-toggle:active {
+  transform: translateY(1px);
+}
+
+.auth-header .theme-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.auth-header .landing-theme-toggle__sun {
+  display: none;
+}
+
+:root[data-next-video-theme="dark"] .auth-header .landing-theme-toggle__moon {
+  display: none;
+}
+
+:root[data-next-video-theme="dark"] .auth-header .landing-theme-toggle__sun {
+  display: block;
+}
+
+.auth-card {
+  width: min(100%, 30rem);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 1.25rem;
+  background: var(--auth-surface);
+}
+
+.auth-card h1,
+.auth-aside h2 {
+  font-family: var(--font-display);
+  font-stretch: condensed;
+}
+
+.auth-card h1 {
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  line-height: 0.98;
+}
+
+.auth-eyebrow {
+  color: var(--auth-signal);
+  font-weight: 650;
+}
+
+.auth-google,
+.auth-shell .button {
+  border-radius: 999px;
+}
+
+.auth-google span {
+  color: var(--auth-signal);
+}
+
+.auth-card form > label > div {
+  border-radius: 999px;
+  background: var(--auth-paper);
+}
+
+.auth-card form > label > div:focus-within {
+  border-color: var(--auth-signal);
+  outline-color: var(--auth-signal);
+}
+
+.auth-shell .button--primary {
+  background: var(--auth-ink);
+  color: var(--auth-paper);
+}
+
+.auth-shell .button--primary:hover {
+  background: var(--auth-ink-2);
+}
+
+.auth-shell .button--primary svg {
+  color: var(--auth-signal);
+}
+
+.auth-form-help a,
+.auth-switch a {
+  color: var(--auth-ink);
+  text-decoration-color: var(--auth-signal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.auth-form-help a:hover,
+.auth-switch a:hover,
+.auth-form-help a:focus-visible,
+.auth-switch a:focus-visible {
+  color: var(--auth-signal-hover);
+}
+
+.auth-aside {
+  border-color: var(--auth-rule);
+  background: var(--auth-ink);
+  color: var(--auth-paper);
+}
+
+.auth-aside__content {
+  width: min(100%, 38rem);
+  gap: var(--space-xl);
+}
+
+.auth-aside__label,
+.auth-aside__lede {
+  color: color-mix(in oklch, var(--auth-paper) 70%, transparent);
+}
+
+.auth-aside__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.auth-aside__label::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--auth-signal);
+}
+
+.auth-aside h2 {
+  max-width: 11ch;
+  color: var(--auth-paper);
+  font-size: clamp(3rem, 5vw, 5.25rem);
+  line-height: 0.92;
+}
+
+.auth-aside__flow {
+  position: relative;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-xs);
+  padding-block-start: var(--space-lg);
+  color: var(--auth-paper);
+}
+
+.auth-aside__flow::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--auth-signal) 0 38%, color-mix(in oklch, var(--auth-paper) 22%, transparent) 38% 100%);
+}
+
+.auth-aside__flow span {
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--auth-paper) 10%, transparent);
+  color: var(--auth-paper);
+}
+
+.auth-aside__flow i {
+  display: none;
+}
+
+@media (min-width: 56rem) {
+  .auth-shell {
+    grid-template-columns: minmax(27rem, 0.88fr) minmax(0, 1.12fr);
+  }
+}
+
+@media (min-width: 56rem) and (max-height: 48rem) {
+  .auth-shell__form-side {
+    gap: var(--space-xs);
+    padding: 1.25rem 2rem;
+  }
+
+  .auth-shell__content {
+    padding-block: 0;
+  }
+
+  .auth-card--sign-up {
+    padding: 1.25rem 2rem;
+  }
+
+  .auth-card--sign-up h1 {
+    margin-block: var(--space-2xs) var(--space-xs);
+    font-size: 2.35rem;
+  }
+
+  .auth-card--sign-up .auth-description {
+    line-height: 1.35;
+  }
+
+  .auth-card--sign-up .auth-google {
+    min-height: 2.5rem;
+    margin-block-start: var(--space-sm);
+  }
+
+  .auth-card--sign-up .auth-divider {
+    margin-block: var(--space-xs);
+  }
+
+  .auth-card--sign-up form {
+    gap: var(--space-xs);
+  }
+
+  .auth-card--sign-up form > label {
+    gap: var(--space-2xs);
+  }
+
+  .auth-card--sign-up form > label > div,
+  .auth-card--sign-up .auth-submit {
+    height: 2.5rem;
+    min-height: 2.5rem;
+  }
+
+  .auth-card--sign-up .auth-switch {
+    margin-block-start: var(--space-xs);
+  }
+
+  .auth-card--sign-up .auth-switch a {
+    min-height: 2rem;
+  }
+}
+
+@media (max-width: 30rem) {
+  .auth-card {
+    padding: var(--space-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell *,
+  .auth-shell *::before,
+  .auth-shell *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,196 @@
+/* Hallmark · tokens: Creator Playback · paper-band: light + dark · display-style: condensed media-sans · accent-hue: warm playback red */
+:root {
+  --color-paper: oklch(97.8% 0.009 62);
+  --color-paper-2: oklch(94.8% 0.012 62);
+  --color-paper-3: oklch(91.5% 0.014 62);
+  --color-surface: oklch(99.2% 0.005 62);
+  --color-ink: oklch(20% 0.018 52);
+  --color-ink-2: oklch(29% 0.016 52);
+  --color-muted: oklch(43% 0.014 52);
+  --color-rule: oklch(82% 0.017 62);
+  --color-rule-strong: oklch(66% 0.022 54);
+  --color-accent: oklch(55% 0.18 32);
+  --color-accent-hover: oklch(49% 0.18 32);
+  --color-accent-soft: oklch(91% 0.042 38);
+  --color-accent-ink: oklch(98% 0.008 62);
+  --color-focus: oklch(42% 0.17 250);
+  --color-success: oklch(43% 0.11 153);
+  --color-success-soft: oklch(92% 0.035 153);
+  --color-error: oklch(48% 0.18 25);
+  --color-graphite: oklch(22% 0.018 52);
+  --color-graphite-2: oklch(28% 0.019 52);
+  --color-on-graphite: oklch(94% 0.01 62);
+  --color-on-graphite-muted: oklch(76% 0.012 62);
+
+  --font-display: "Segoe UI", Arial, ui-sans-serif, sans-serif;
+  --font-body: "Segoe UI", Arial, ui-sans-serif, sans-serif;
+  --font-wordmark: "Segoe UI", Arial, ui-sans-serif, sans-serif;
+  --font-mono: "Cascadia Mono", "Segoe UI Mono", ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5625rem;
+  --text-xl: 1.953rem;
+  --text-2xl: 2.441rem;
+  --text-3xl: 3.052rem;
+  --text-display-s: clamp(2.5rem, 6vw, 4.35rem);
+  --text-display: clamp(2.75rem, 6vw, 5.15rem);
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --rule-hair: 1px;
+  --page-max: 88rem;
+  --page-gutter: clamp(1rem, 3vw, 3.5rem);
+  --nav-height: 4.5rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* Dashboard application shell */
+  --color-sidebar: oklch(25% 0.02 52);
+  --color-sidebar-hover: oklch(31% 0.023 52);
+  --color-sidebar-active: oklch(37% 0.055 42);
+  --color-warning: oklch(58% 0.14 75);
+  --color-warning-soft: oklch(94% 0.04 75);
+  --color-info-soft: oklch(92% 0.035 250);
+  --dashboard-sidebar: 15.5rem;
+  --dashboard-sidebar-collapsed: 4.75rem;
+  --dashboard-header: 4.25rem;
+  --dashboard-content-max: 96rem;
+  --control-height: 2.75rem;
+  --document-width: 52rem;
+
+  /* Next Video app system · design.md */
+  --app-color-paper: oklch(98.5% 0.003 25);
+  --app-color-surface: oklch(99.5% 0.002 25);
+  --app-color-surface-muted: oklch(95% 0.004 25);
+  --app-color-ink: oklch(18% 0.006 25);
+  --app-color-ink-2: oklch(32% 0.006 25);
+  --app-color-muted: oklch(48% 0.006 25);
+  --app-color-rule: oklch(86% 0.006 25);
+  --app-color-rule-strong: oklch(72% 0.008 25);
+  --app-color-accent: oklch(18% 0.006 25);
+  --app-color-accent-hover: oklch(32% 0.006 25);
+  --app-color-accent-soft: oklch(94% 0.03 25);
+  --app-color-accent-ink: oklch(98.5% 0.003 25);
+  --app-color-focus: oklch(58% 0.23 25);
+  --app-color-signal: oklch(58% 0.23 25);
+  --app-color-signal-hover: oklch(52% 0.22 25);
+  --app-font-display: "Manrope Variable", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --app-font-body: "Manrope Variable", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --app-font-wordmark: "Manrope Variable", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --app-color-overlay: oklch(18% 0.006 25 / 0.52);
+  --app-shadow-menu: 0 0.75rem 2.5rem oklch(18% 0.006 25 / 0.1);
+  --app-shadow-document: 0 0.25rem 1.5rem oklch(18% 0.006 25 / 0.055);
+  --app-shadow-toast: 0 0.75rem 2rem oklch(18% 0.006 25 / 0.18);
+  --app-shadow-drawer: -0.75rem 0 2rem oklch(18% 0.006 25 / 0.14);
+  --app-radius-control: 999px;
+  --app-radius-panel: 1rem;
+  --app-sidebar-width: 15rem;
+  --app-sidebar-collapsed: 4.5rem;
+
+  /* Landing experiment · creator playback */
+  --landing-light-paper: oklch(98.5% 0.003 25);
+  --landing-light-surface: oklch(99.5% 0.002 25);
+  --landing-light-surface-muted: oklch(95% 0.004 25);
+  --landing-light-ink: oklch(18% 0.006 25);
+  --landing-light-ink-2: oklch(32% 0.006 25);
+  --landing-light-muted: oklch(48% 0.006 25);
+  --landing-light-rule: oklch(86% 0.006 25);
+  --landing-light-rule-strong: oklch(72% 0.008 25);
+  --landing-light-accent: oklch(58% 0.23 25);
+  --landing-light-accent-hover: oklch(52% 0.22 25);
+  --landing-light-accent-soft: oklch(94% 0.03 25);
+  --landing-light-shadow: 0 1.5rem 5rem oklch(18% 0.006 25 / 0.09);
+  --landing-light-shadow-soft: 0 0.5rem 1.5rem oklch(18% 0.006 25 / 0.05);
+  --landing-dark-paper: oklch(13.5% 0.006 25);
+  --landing-dark-surface: oklch(17% 0.006 25);
+  --landing-dark-surface-muted: oklch(21% 0.006 25);
+  --landing-dark-ink: oklch(94% 0.004 25);
+  --landing-dark-ink-2: oklch(83% 0.004 25);
+  --landing-dark-muted: oklch(68% 0.004 25);
+  --landing-dark-rule: oklch(29% 0.006 25);
+  --landing-dark-rule-strong: oklch(40% 0.008 25);
+  --landing-dark-accent: oklch(64% 0.2 25);
+  --landing-dark-accent-hover: oklch(70% 0.18 25);
+  --landing-dark-accent-soft: oklch(24% 0.04 25);
+  --landing-dark-shadow: 0 1.5rem 5rem oklch(4% 0.002 25 / 0.35);
+  --landing-dark-shadow-soft: 0 0.5rem 1.5rem oklch(4% 0.002 25 / 0.24);
+  --landing-font-display: "Bahnschrift", "Arial Narrow", Arial, sans-serif;
+  --landing-font-body: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+  --landing-font-utility: "Cascadia Mono", "Segoe UI Mono", ui-monospace, monospace;
+}
+
+:root[data-next-video-theme="dark"] {
+  --app-color-paper: oklch(13.5% 0.006 25);
+  --app-color-surface: oklch(17% 0.006 25);
+  --app-color-surface-muted: oklch(21% 0.006 25);
+  --app-color-ink: oklch(94% 0.004 25);
+  --app-color-ink-2: oklch(83% 0.004 25);
+  --app-color-muted: oklch(68% 0.004 25);
+  --app-color-rule: oklch(29% 0.006 25);
+  --app-color-rule-strong: oklch(40% 0.008 25);
+  --app-color-accent: oklch(94% 0.004 25);
+  --app-color-accent-hover: oklch(83% 0.004 25);
+  --app-color-accent-soft: oklch(24% 0.04 25);
+  --app-color-accent-ink: oklch(13.5% 0.006 25);
+  --app-color-focus: oklch(64% 0.2 25);
+  --app-color-signal: oklch(64% 0.2 25);
+  --app-color-signal-hover: oklch(70% 0.18 25);
+  --app-color-overlay: oklch(4% 0.002 25 / 0.68);
+  --app-shadow-menu: 0 0.75rem 2.5rem oklch(4% 0.002 25 / 0.35);
+  --app-shadow-document: 0 0.25rem 1.5rem oklch(4% 0.002 25 / 0.2);
+  --app-shadow-toast: 0 0.75rem 2rem oklch(4% 0.002 25 / 0.42);
+  --app-shadow-drawer: -0.75rem 0 2rem oklch(4% 0.002 25 / 0.38);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-next-video-theme]) {
+    --app-color-paper: oklch(13.5% 0.006 25);
+    --app-color-surface: oklch(17% 0.006 25);
+    --app-color-surface-muted: oklch(21% 0.006 25);
+    --app-color-ink: oklch(94% 0.004 25);
+    --app-color-ink-2: oklch(83% 0.004 25);
+    --app-color-muted: oklch(68% 0.004 25);
+    --app-color-rule: oklch(29% 0.006 25);
+    --app-color-rule-strong: oklch(40% 0.008 25);
+    --app-color-accent: oklch(94% 0.004 25);
+    --app-color-accent-hover: oklch(83% 0.004 25);
+    --app-color-accent-soft: oklch(24% 0.04 25);
+    --app-color-accent-ink: oklch(13.5% 0.006 25);
+    --app-color-focus: oklch(64% 0.2 25);
+    --app-color-signal: oklch(64% 0.2 25);
+    --app-color-signal-hover: oklch(70% 0.18 25);
+    --app-color-overlay: oklch(4% 0.002 25 / 0.68);
+    --app-shadow-menu: 0 0.75rem 2.5rem oklch(4% 0.002 25 / 0.35);
+    --app-shadow-document: 0 0.25rem 1.5rem oklch(4% 0.002 25 / 0.2);
+    --app-shadow-toast: 0 0.75rem 2rem oklch(4% 0.002 25 / 0.42);
+    --app-shadow-drawer: -0.75rem 0 2rem oklch(4% 0.002 25 / 0.38);
+  }
+}

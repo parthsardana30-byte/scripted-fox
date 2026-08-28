@@ -1,0 +1,339 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Plan Ledger · design-system: design.md · designed-as-app · pre-emit critique: P5 H5 E5 S5 R5 V5 · tone: direct creator pricing · anchor hue: warm playback red · contrast: pass (40–41) · nav: N9 · footer: Ft2 · slop: pass (42–45) · honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive: pass (49) · icons: pass (30) · mobile: pass (34, 49, 50–57) */
+.pricing-shell {
+  --color-paper: var(--landing-paper);
+  --color-paper-2: var(--landing-surface-muted);
+  --color-paper-3: var(--landing-rule);
+  --color-surface: var(--landing-surface);
+  --color-ink: var(--landing-ink);
+  --color-ink-2: var(--landing-ink-2);
+  --color-muted: var(--landing-muted);
+  --color-rule: var(--landing-rule);
+  --color-rule-strong: var(--landing-rule-strong);
+  --color-accent: var(--landing-accent);
+  --color-accent-hover: var(--landing-accent-hover);
+  --color-accent-soft: var(--landing-accent-soft);
+  --color-accent-ink: var(--landing-surface);
+  background: var(--landing-paper);
+}
+
+.pricing-shell .pricing-page {
+  min-height: calc(100dvh - var(--nav-height));
+}
+
+.pricing-shell .pricing-hero {
+  max-width: var(--page-max);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+  align-items: end;
+  gap: var(--space-2xl);
+  padding-block: clamp(2.5rem, 5vw, 4.5rem) var(--space-xl);
+  text-align: start;
+}
+
+.pricing-shell .pricing-hero__lead {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.pricing-shell .pricing-kicker {
+  margin: 0;
+  color: var(--landing-accent);
+  font-family: var(--landing-font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.pricing-shell .pricing-hero h1 {
+  min-width: 0;
+  max-width: 14ch;
+  margin: 0;
+  font-family: var(--landing-font-display);
+  font-size: clamp(2.75rem, 5vw, 4.75rem);
+  font-stretch: condensed;
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+}
+
+.pricing-shell .pricing-hero > p:last-child {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--landing-muted);
+  font-size: var(--text-md);
+}
+
+.pricing-shell .pricing-section {
+  padding-block-end: var(--space-3xl);
+}
+
+.pricing-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-block-end: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  border: var(--rule-hair) solid var(--landing-rule);
+  border-inline-start: 0.25rem solid var(--landing-accent);
+  border-radius: var(--app-radius-control);
+  background: var(--landing-surface);
+}
+
+.pricing-context strong,
+.pricing-context p {
+  margin: 0;
+}
+
+.pricing-context p {
+  margin-block-start: var(--space-3xs);
+  color: var(--landing-muted);
+  font-size: var(--text-sm);
+}
+
+.pricing-context a {
+  flex: 0 0 auto;
+  color: var(--landing-ink);
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+.pricing-billing-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-block-end: var(--space-md);
+}
+
+.pricing-period {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  width: fit-content;
+  padding: var(--space-2xs);
+  border: var(--rule-hair) solid var(--landing-rule);
+  border-radius: 999px;
+  background: var(--landing-surface);
+}
+
+.pricing-period button {
+  min-height: 2.5rem;
+  padding-inline: var(--space-md);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--landing-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pricing-period button[aria-pressed="true"] {
+  background: var(--landing-ink);
+  color: var(--landing-paper);
+}
+
+.pricing-period button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.pricing-period button:active {
+  transform: translateY(1px);
+}
+
+.pricing-period button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pricing-saving {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  margin: 0;
+  color: var(--landing-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.pricing-saving strong {
+  color: var(--landing-accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pricing-period button:not([aria-pressed="true"]):hover {
+    background: var(--landing-surface-muted);
+    color: var(--landing-ink);
+  }
+}
+
+.pricing-shell .pricing-catalogue {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  border: 0;
+}
+
+.pricing-shell .pricing-plan {
+  grid-template-rows: auto auto auto 1fr;
+  padding: var(--space-xl);
+  border: var(--rule-hair) solid var(--landing-rule);
+  border-radius: var(--app-radius-panel);
+  background: var(--landing-surface);
+}
+
+.pricing-shell .pricing-plan + .pricing-plan {
+  border-inline-start: var(--rule-hair) solid var(--landing-rule);
+}
+
+.pricing-shell .pricing-plan--highlighted {
+  box-shadow: inset 0 0.2rem 0 var(--landing-accent);
+}
+
+.pricing-shell .pricing-plan__eyebrow h2,
+.pricing-shell .pricing-plan__price strong {
+  font-family: var(--landing-font-display);
+  font-stretch: condensed;
+}
+
+.pricing-shell .pricing-plan__eyebrow h2 {
+  font-size: var(--text-lg);
+}
+
+.pricing-shell .pricing-plan__eyebrow span {
+  color: var(--landing-accent);
+}
+
+.pricing-shell .pricing-plan__intro > p {
+  min-height: 4.5em;
+  color: var(--landing-muted);
+}
+
+.pricing-shell .pricing-plan__price {
+  min-height: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.pricing-shell .pricing-plan__price strong {
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.pricing-shell .pricing-plan__price small {
+  color: var(--landing-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.pricing-shell .pricing-plan > .button {
+  min-height: 2.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pricing-shell .pricing-plan--highlighted > .button {
+  background: var(--landing-ink);
+  color: var(--landing-paper);
+}
+
+.pricing-shell .pricing-plan__features {
+  border-color: var(--landing-rule);
+}
+
+.pricing-shell .pricing-plan__features > p {
+  color: var(--landing-muted);
+  font-family: var(--landing-font-utility);
+  letter-spacing: 0.04em;
+}
+
+.pricing-shell .pricing-plan__features li {
+  color: var(--landing-ink-2);
+}
+
+.pricing-shell .pricing-plan__features svg {
+  color: var(--landing-accent);
+}
+
+.pricing-status {
+  max-width: 62rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  margin: var(--space-xl) auto 0;
+  padding: var(--space-md) var(--space-lg);
+  border-block: var(--rule-hair) solid var(--landing-rule);
+  color: var(--landing-ink-2);
+}
+
+.pricing-status strong {
+  flex: 0 0 auto;
+}
+
+.pricing-status p {
+  max-width: 62ch;
+  color: var(--landing-muted);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 60rem) {
+  .pricing-shell .pricing-hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .pricing-shell .pricing-catalogue {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-shell .pricing-plan__intro > p {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .pricing-shell .pricing-hero {
+    padding-block-start: var(--space-2xl);
+  }
+
+  .pricing-shell .pricing-plan {
+    padding: var(--space-lg);
+  }
+
+  .pricing-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .pricing-context {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pricing-billing-choice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .pricing-period button {
+    flex: 1 1 auto;
+  }
+
+  .pricing-period {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-shell *,
+  .pricing-shell *::before,
+  .pricing-shell *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
