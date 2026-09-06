@@ -28,7 +28,7 @@ export function SettingsView({ initialValues }: { initialValues: SettingsValues 
   return <div className="dashboard-page">
     <PageHeader title="Settings" description="Set the defaults used for recommendations and new scripts." />
     <section className="settings-section">
-      <div><h2>Appearance</h2><p>Choose how Next Video looks on this device.</p></div>
+      <div><h2>Appearance</h2><p>Choose how Scripted Fox looks on this device.</p></div>
       <div className="settings-fields">
         <div className="settings-appearance">
           <div><strong>Colour theme</strong><small>Switch between the light and dark workspace.</small></div>

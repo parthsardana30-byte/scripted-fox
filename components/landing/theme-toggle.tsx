@@ -5,22 +5,14 @@ import { useEffect, useState } from "react";
 
 type LandingTheme = "light" | "dark";
 
-const STORAGE_KEY = "next-video:theme";
-const LEGACY_STORAGE_KEY = "next-video:landing-theme";
-
 export function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
   const [theme, setTheme] = useState<LandingTheme>("light");
 
   useEffect(() => {
-    const stored = (window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY)) as LandingTheme | null;
-    const prefersDark = typeof window.matchMedia === "function"
-      && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial = stored === "light" || stored === "dark"
-      ? stored
-      : prefersDark ? "dark" : "light";
-
-    document.documentElement.dataset.nextVideoTheme = initial;
-    const frame = window.requestAnimationFrame(() => setTheme(initial));
+    document.documentElement.dataset.nextVideoTheme = "light";
+    window.localStorage.removeItem("next-video:theme");
+    window.localStorage.removeItem("next-video:landing-theme");
+    const frame = window.requestAnimationFrame(() => setTheme("light"));
 
     return () => window.cancelAnimationFrame(frame);
   }, []);
@@ -29,7 +21,6 @@ export function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
     const current = document.documentElement.dataset.nextVideoTheme === "dark" ? "dark" : "light";
     const next = current === "dark" ? "light" : "dark";
     document.documentElement.dataset.nextVideoTheme = next;
-    window.localStorage.setItem(STORAGE_KEY, next);
     setTheme(next);
   };
 

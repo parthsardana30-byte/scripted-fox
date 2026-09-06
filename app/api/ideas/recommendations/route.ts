@@ -4,10 +4,10 @@ import { z } from "zod";
 
 import { AiConfigurationError, AiProviderError } from "@/lib/ai/groq";
 import { generateIdeaRecommendations } from "@/lib/ai/ideas";
+import { inferCreatorNiche } from "@/lib/ai/niche";
 import { AuthenticationRequiredError, requireAuthenticatedUser } from "@/lib/auth/session";
-import { serverEnvironment } from "@/lib/env/server";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 import { getOrRefreshPublicTrends, YouTubeTrendsError } from "@/lib/youtube/trends";
 import type { Json } from "@/types/database";
 
@@ -18,9 +18,29 @@ const requestSchema = z.object({
 });
 
 const channelSnapshotSchema = z.object({
+  channel: z.object({ title: z.string() }).optional(),
   summary: z.object({ views: z.number(), watchTimeMinutes: z.number(), averageViewDurationSeconds: z.number() }),
   topVideos: z.array(z.object({ title: z.string(), views: z.number() })).max(50),
 });
+const cachedRecommendationsSchema = z.object({
+  recommendations: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    angle: z.string(),
+    format: z.string(),
+    reason: z.string(),
+    evidence: z.array(z.object({
+      label: z.string(),
+      value: z.string(),
+      source: z.enum(["YouTube trend", "Your channel"]),
+    })),
+  })).length(5),
+  niche: z.string(),
+  trendSnapshotAt: z.string(),
+});
+
+const RECOMMENDATION_CACHE_HOURS = 6;
+const HOURLY_GENERATION_LIMIT = 20;
 
 function objectValue(value: Json | undefined) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -35,8 +55,14 @@ async function loadContext(userId: string) {
   const defaults = objectValue(preferences?.default_script_preferences);
   const channel = channelSnapshotSchema.safeParse(snapshot?.metrics);
   const topVideo = channel.success ? [...channel.data.topVideos].sort((a, b) => b.views - a.views)[0] : null;
+  const savedNiche = typeof defaults.channelNiche === "string" && defaults.channelNiche.trim() ? defaults.channelNiche.trim() : null;
+  const inferredNiche = savedNiche || !channel.success ? null : await inferCreatorNiche({
+    channelTitle: channel.data.channel?.title,
+    recentTitles: channel.data.topVideos.map((video) => video.title),
+  }).catch(() => null);
   return {
-    niche: typeof defaults.channelNiche === "string" && defaults.channelNiche.trim() ? defaults.channelNiche : "content creation",
+    userId,
+    niche: savedNiche ?? inferredNiche ?? "content creation",
     goal: typeof defaults.channelGoal === "string" ? defaults.channelGoal : "growth",
     languages: preferences?.content_languages ?? ["en"],
     markets: preferences?.target_markets ?? ["IN", "GLOBAL"],
@@ -46,12 +72,30 @@ async function loadContext(userId: string) {
   };
 }
 
+async function cachedRecommendations(userId: string, niche: string) {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - RECOMMENDATION_CACHE_HOURS * 60 * 60_000).toISOString();
+  const { data } = await supabase.from("usage_events")
+    .select("metadata")
+    .eq("user_id", userId)
+    .eq("operation", "ai_idea_recommendations")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  for (const event of data ?? []) {
+    const parsed = cachedRecommendationsSchema.safeParse(event.metadata);
+    if (parsed.success && parsed.data.niche === niche) return parsed.data;
+  }
+  return null;
+}
+
 async function rateLimitReached(userId: string) {
   const supabase = await createClient();
   const since = new Date(Date.now() - 60 * 60_000).toISOString();
   const { count } = await supabase.from("usage_events").select("id", { count: "exact", head: true })
     .eq("user_id", userId).eq("operation", "ai_idea_recommendations").gte("created_at", since);
-  return (count ?? 0) >= 6;
+  return (count ?? 0) >= HOURLY_GENERATION_LIMIT;
 }
 
 export async function POST(request: Request) {
@@ -61,10 +105,16 @@ export async function POST(request: Request) {
 
   try {
     const user = await requireAuthenticatedUser();
-    if (await rateLimitReached(user.id)) return Response.json({ error: "Idea generation limit reached. Try again later." }, { status: 429 });
     const parsed = requestSchema.safeParse(await request.json());
     if (!parsed.success) return Response.json({ error: "The recommendation request is invalid." }, { status: 400 });
     const context = await loadContext(user.id);
+    if (parsed.data.excludeTitles.length === 0) {
+      const cached = await cachedRecommendations(user.id, context.niche);
+      if (cached) {
+        return Response.json({ ideas: cached.recommendations, niche: cached.niche, capturedAt: cached.trendSnapshotAt, refreshedTrends: false }, { headers: { "Cache-Control": "private, no-store" } });
+      }
+    }
+    if (await rateLimitReached(user.id)) return Response.json({ error: "Idea generation limit reached. Try again later." }, { status: 429 });
     const trends = await getOrRefreshPublicTrends(context);
     if (trends.evidence.videos.length < 3) return Response.json({ error: "Not enough current trend evidence is available yet." }, { status: 503 });
     const trendSignals = trends.evidence.videos.slice(0, 14);
@@ -92,14 +142,14 @@ export async function POST(request: Request) {
     await supabase.from("usage_events").insert({
       user_id: user.id,
       operation: "ai_idea_recommendations",
-      provider: serverEnvironment.AI_PROVIDER ?? null,
+      provider: generated.completion.provider,
       model: generated.completion.model,
       input_units: generated.completion.inputTokens,
       output_units: generated.completion.outputTokens,
       cost_microunits: null,
-      metadata: { trend_snapshot_at: trends.evidence.capturedAt },
+      metadata: { trend_snapshot_at: trends.evidence.capturedAt, trendSnapshotAt: trends.evidence.capturedAt, niche: context.niche, recommendations: ideas },
     });
-    return Response.json({ ideas, capturedAt: trends.evidence.capturedAt, refreshedTrends: trends.refreshed }, { headers: { "Cache-Control": "private, no-store" } });
+    return Response.json({ ideas, niche: context.niche, capturedAt: trends.evidence.capturedAt, refreshedTrends: trends.refreshed }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) return Response.json({ error: "Sign in to generate recommendations." }, { status: 401 });
     if (error instanceof AiConfigurationError) return Response.json({ error: "AI is not configured yet." }, { status: 503 });

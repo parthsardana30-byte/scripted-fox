@@ -2,6 +2,7 @@ export type PublicVideoSignal = {
   id: string;
   title: string;
   channelTitle: string;
+  channelSubscribers?: number | null;
   publishedAt: string;
   views: number;
   likes: number;

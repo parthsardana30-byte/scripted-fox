@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createGroqCompletion, type GroqCompletion } from "@/lib/ai/groq";
+import { createAiCompletion, type AiCompletion } from "@/lib/ai/groq";
 import { scriptWritingSystemPrompt } from "@/lib/ai/prompts/script-writing-prompt";
 import { scriptDraftSchema, type ScriptDraft } from "@/lib/ai/types";
 
@@ -74,8 +74,8 @@ export async function generateScriptDraft(input: {
   title: string;
   brief: string;
   context: CreatorContext;
-}): Promise<{ draft: ScriptDraft; completion: GroqCompletion }> {
-  const completion = await createGroqCompletion({
+}): Promise<{ draft: ScriptDraft; completion: AiCompletion }> {
+  const completion = await createAiCompletion({
     system: scriptWritingSystemPrompt("generate"),
     user: `Create a complete YouTube script package.\n\nTopic/title: ${input.title}\nAdditional direction: ${input.brief || "Use your best editorial judgment."}\n\nCreator context:\n${contextText(input.context)}\n\nMake the hook earn attention quickly, build a clear progression, include concrete examples where appropriate, and finish without a generic subscribe request.`,
     responseFormat: draftJsonSchema,
@@ -91,7 +91,7 @@ export async function assistWithScript(input: {
   draft: ScriptDraft;
   context: CreatorContext;
 }) {
-  const completion = await createGroqCompletion({
+  const completion = await createAiCompletion({
     system: scriptWritingSystemPrompt("edit"),
     user: `Request: ${input.instruction}\n\nCreator context:\n${contextText(input.context)}\n\nCurrent draft JSON:\n${JSON.stringify(input.draft)}`,
     responseFormat: editedDraftJsonSchema,

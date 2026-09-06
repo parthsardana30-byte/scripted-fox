@@ -1,10 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { z } from "zod";
 
+import { auth } from "@/lib/auth";
 import { requireAuthenticatedUser } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 
 const creatorProfileSchema = z.object({
   displayName: z.string().trim().min(2).max(80),
@@ -32,9 +34,10 @@ export async function updateCreatorProfile(formData: FormData) {
     && !Array.isArray(current.default_script_preferences)
     ? current.default_script_preferences
     : {};
-  const [{ error: profileError }, { error: authError }, { error: preferencesError }] = await Promise.all([
+  const [{ error: profileError }, authResult, { error: preferencesError }] = await Promise.all([
     supabase.from("profiles").update({ display_name: parsed.data.displayName }).eq("id", user.id),
-    supabase.auth.updateUser({ data: { full_name: parsed.data.displayName } }),
+    auth.api.updateUser({ body: { name: parsed.data.displayName }, headers: await headers() })
+      .then(() => ({ error: null })).catch(() => ({ error: new Error("Profile update failed") })),
     supabase.from("user_preferences").update({
       default_script_preferences: {
         ...currentScriptPreferences,
@@ -44,5 +47,5 @@ export async function updateCreatorProfile(formData: FormData) {
     }).eq("user_id", user.id),
   ]);
 
-  redirect(`/dashboard/account?profile=${profileError || authError || preferencesError ? "error" : "saved"}`);
+  redirect(`/dashboard/account?profile=${profileError || authResult.error || preferencesError ? "error" : "saved"}`);
 }

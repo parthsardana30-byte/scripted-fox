@@ -1,6 +1,6 @@
-# Design — Next Video
+# Design — Scripted Fox
 
-Creator Playback is the locked visual system for the complete Next Video product:
+Creator Playback is the locked visual system for the complete Scripted Fox product:
 landing, authentication, dashboard, editor, ideas, projects, analytics, account,
 settings, pricing, and upgrade flows. It uses familiar creator-tool cues without
 copying YouTube branding or interface trade dress.

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
 import { requireAuthenticatedUser } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 
 export type SettingsActionState = {
   status: "idle" | "success" | "error";

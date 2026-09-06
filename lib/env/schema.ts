@@ -16,8 +16,6 @@ function isLocalUrl(value: string) {
 export const publicEnvironmentSchema = z
   .object({
     NEXT_PUBLIC_DEPLOYMENT_ENV: deploymentEnvironmentSchema,
-    NEXT_PUBLIC_SUPABASE_URL: z.url(),
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
     NEXT_PUBLIC_SITE_URL: z.url(),
   })
   .superRefine((environment, context) => {
@@ -43,8 +41,10 @@ export const publicEnvironmentSchema = z
 export const serverEnvironmentSchema = z
   .object({
     NEXT_PUBLIC_DEPLOYMENT_ENV: deploymentEnvironmentSchema,
-    SUPABASE_SECRET_KEY: z.string().startsWith("sb_secret_"),
-    SUPABASE_DB_URL: z.string().min(1),
+    DATABASE_URL: z.string().startsWith("postgresql://"),
+    BETTER_AUTH_SECRET: z.string().min(32),
+    GOOGLE_AUTH_CLIENT_ID: optionalString,
+    GOOGLE_AUTH_CLIENT_SECRET: optionalString,
     GOOGLE_CLIENT_ID: optionalString,
     GOOGLE_CLIENT_SECRET: optionalString,
     GOOGLE_YOUTUBE_REDIRECT_URI: optionalUrl,
@@ -53,6 +53,13 @@ export const serverEnvironmentSchema = z
     AI_PROVIDER: optionalString,
     AI_API_KEY: optionalString,
     AI_MODEL: optionalString,
+    GEMINI_API_KEY: optionalString,
+    GEMINI_MODEL: optionalString,
+    XAI_API_KEY: optionalString,
+    XAI_MODEL: optionalString,
+    GROK_API_KEY: optionalString,
+    GROK_MODEL: optionalString,
+    BILLING_TEST_USER_IDS: optionalString,
     BILLING_PROVIDER: z.enum(["payu"]).optional(),
     PAYU_ENVIRONMENT: z.enum(["test", "production"]).optional(),
     PAYU_MERCHANT_KEY: optionalString,

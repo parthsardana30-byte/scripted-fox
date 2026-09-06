@@ -7,7 +7,7 @@ import "./dashboard.css";
 import "./creator-playback.css";
 
 export const metadata: Metadata = {
-  title: { default: "Dashboard · Next Video", template: "%s · Next Video" },
+  title: { default: "Dashboard · Scripted Fox", template: "%s · Scripted Fox" },
   description: "Plan, write, and improve your next YouTube video.",
 };
 

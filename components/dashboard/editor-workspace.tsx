@@ -113,6 +113,8 @@ export function EditorWorkspace({
   versionChangeLimit = 10,
   returnPath = "/dashboard/editor",
   initialPrompt = "",
+  initialAiOpen = true,
+  autoGenerateInitialPrompt = false,
 }: {
   projectTitle?: string;
   projectKey?: string;
@@ -122,12 +124,14 @@ export function EditorWorkspace({
   versionChangeLimit?: number;
   returnPath?: string;
   initialPrompt?: string;
+  initialAiOpen?: boolean;
+  autoGenerateInitialPrompt?: boolean;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(projectTitle);
   const [author, setAuthor] = useState("");
   const [draft, setDraft] = useState<ScriptDraft>(() => emptyDraft(projectTitle));
-  const [aiOpen, setAiOpen] = useState(true);
+  const [aiOpen, setAiOpen] = useState(initialAiOpen);
   const [exportOpen, setExportOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
@@ -146,6 +150,7 @@ export function EditorWorkspace({
   const chatEndRef = useRef<HTMLDivElement>(null);
   const versionMenuRef = useRef<HTMLDivElement>(null);
   const historyHydrated = useRef(false);
+  const initialGenerationStarted = useRef(false);
   const historyStorageKey = `next-video:versions:${encodeURIComponent(projectKey)}`;
 
   const nextMessageId = () => `message-${messageSequence.current++}`;
@@ -254,10 +259,10 @@ export function EditorWorkspace({
     const message = versionChangeLimit >= 20
       ? "This script has used all 20 version changes. Restore or edit the current version manually to continue."
       : versionChangeLimit >= 10
-        ? "This script has used all 10 Pro version changes. Elite keeps up to 20 changes per script."
+        ? "This script has used all 10 Plus version changes. Pro keeps up to 20 changes per script."
         : versionChangeLimit > 0
           ? `This script has used the ${versionChangeLimit} version change available on this plan.`
-        : "AI script writing is available during the free trial and on Pro or Elite.";
+        : "AI script writing is available on Plus and Pro.";
     addMessage("assistant", message);
   };
 
@@ -428,6 +433,14 @@ export function EditorWorkspace({
     await runAiAction(instruction);
   };
 
+  useEffect(() => {
+    if (!autoGenerateInitialPrompt || !initialPrompt || initialGenerationStarted.current) return;
+    initialGenerationStarted.current = true;
+    void generateFullScript(initialPrompt);
+    // The questionnaire should trigger exactly one first draft.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoGenerateInitialPrompt, initialPrompt]);
+
   const downloadText = (extension: string) => {
     const file = new Blob([scriptText], { type: "text/plain" });
     const url = URL.createObjectURL(file);
@@ -461,7 +474,7 @@ export function EditorWorkspace({
                   </button>;
                 })}
               </div>
-              {versionLimitReached && <Link href={scriptWriterPricingHref}>{versionChangeLimit === 0 ? "View Pro and Elite" : versionChangeLimit < 20 ? "Get 20 changes with Elite" : "View plan details"}</Link>}
+              {versionLimitReached && <Link href={scriptWriterPricingHref}>{versionChangeLimit === 0 ? "View Plus and Pro" : versionChangeLimit < 20 ? "Get 20 changes with Pro" : "View plan details"}</Link>}
             </div>}
           </div>
         </div>

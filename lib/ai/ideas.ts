@@ -2,7 +2,7 @@ import "server-only";
 
 import { z } from "zod";
 
-import { AiProviderError, createGroqCompletion, type GroqCompletion } from "@/lib/ai/groq";
+import { AiProviderError, createAiCompletion, type AiCompletion } from "@/lib/ai/groq";
 
 const generatedIdeasSchema = z.object({
   ideas: z.array(z.object({
@@ -11,7 +11,7 @@ const generatedIdeasSchema = z.object({
     format: z.string().min(3).max(80),
     reason: z.string().min(10).max(420),
     trendVideoId: z.string().min(1).max(40),
-  })).min(3).max(3),
+  })).min(5).max(5),
 });
 
 const generatedIdeasJsonSchema = {
@@ -26,8 +26,8 @@ const generatedIdeasJsonSchema = {
       properties: {
         ideas: {
           type: "array",
-          minItems: 3,
-          maxItems: 3,
+          minItems: 5,
+          maxItems: 5,
           items: {
             type: "object",
             additionalProperties: false,
@@ -54,12 +54,12 @@ export async function generateIdeaRecommendations(input: {
   trendSignals: Array<{ id: string; title: string; market: string; score: number; viewsPerDay: number }>;
   channelSummary: string | null;
   excludedTitles: string[];
-}): Promise<{ ideas: z.infer<typeof generatedIdeasSchema>["ideas"]; completion: GroqCompletion }> {
-  const completion = await createGroqCompletion({
+}): Promise<{ ideas: z.infer<typeof generatedIdeasSchema>["ideas"]; completion: AiCompletion }> {
+  const completion = await createAiCompletion({
     system: "You are a YouTube content strategist. Recommend original ideas inspired by supplied evidence, never copies of an existing video's title or premise. Use only the supplied channel and trend facts. Do not invent percentages, searches, competition levels, or audience behavior. Return only the requested JSON.",
-    user: `Create exactly three strong next-video ideas.\n\nCreator niche: ${input.niche}\nCreator goal: ${input.goal}\nLanguages: ${input.languages.join(", ")}\nMarkets: ${input.markets.join(", ")}\nChannel evidence: ${input.channelSummary ?? "No reliable private channel performance is available yet."}\nTitles to avoid: ${input.excludedTitles.join(" | ") || "None"}\n\nVerified public YouTube signals:\n${input.trendSignals.map((signal) => `- ID ${signal.id}: “${signal.title}” · ${signal.market} · ${Math.round(signal.viewsPerDay)} views/day · score ${signal.score}/100`).join("\n")}\n\nFor every idea, choose one supplied trend video ID that most directly supports it. Make the title specific and natural, the angle clearly different from the source video, and the reason understandable to a creator.`,
+    user: `Create exactly five strong next-video ideas.\n\nCreator niche: ${input.niche}\nCreator goal: ${input.goal}\nLanguages: ${input.languages.join(", ")}\nMarkets: ${input.markets.join(", ")}\nChannel evidence: ${input.channelSummary ?? "No reliable private channel performance is available yet."}\nTitles to avoid: ${input.excludedTitles.join(" | ") || "None"}\n\nVerified public YouTube signals:\n${input.trendSignals.map((signal) => `- ID ${signal.id}: “${signal.title}” · ${signal.market} · ${Math.round(signal.viewsPerDay)} views/day · score ${signal.score}/100`).join("\n")}\n\nFor every idea, choose one supplied trend video ID that most directly supports it. Make the title specific and natural, the angle clearly different from the source video, and the reason understandable to a creator.`,
     responseFormat: generatedIdeasJsonSchema,
-    maxCompletionTokens: 2_000,
+    maxCompletionTokens: 3_000,
   });
   let parsed: ReturnType<typeof generatedIdeasSchema.safeParse>;
   try {

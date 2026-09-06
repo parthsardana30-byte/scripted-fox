@@ -1,6 +1,16 @@
 export const planCodes = ["free", "pro", "elite"] as const;
 export type PlanCode = (typeof planCodes)[number];
 
+export const planDisplayNames: Record<PlanCode, string> = {
+  free: "Basic",
+  pro: "Plus",
+  elite: "Pro",
+};
+
+export function getPlanDisplayName(plan: PlanCode) {
+  return planDisplayNames[plan];
+}
+
 export const billingFeatures = [
   "ai_script_writer",
   "channel_aware_ideas",
@@ -32,15 +42,15 @@ export const scriptVersionChangeLimits: Record<PlanCode, number> = {
 export const plans: PlanDefinition[] = [
   {
     code: "free",
-    name: "Free trial",
+    name: planDisplayNames.free,
     monthlyPriceInr: null,
     annualMonthlyPriceInr: null,
-    description: "Use the Pro workspace for one week before choosing a paid plan.",
-    features: ["7 days of Pro access", "AI script writer", "10 AI version changes per script"],
+    description: "Explore the Plus workspace free for one week before choosing a paid plan.",
+    features: ["7 days of Plus access", "AI script writer", "10 AI version changes per script"],
   },
   {
     code: "pro",
-    name: "Pro",
+    name: planDisplayNames.pro,
     monthlyPriceInr: 50,
     annualMonthlyPriceInr: 40,
     description: "Write and refine scripts with a focused version history.",
@@ -49,11 +59,11 @@ export const plans: PlanDefinition[] = [
   },
   {
     code: "elite",
-    name: "Elite",
+    name: planDisplayNames.elite,
     monthlyPriceInr: 150,
     annualMonthlyPriceInr: 120,
     description: "Keep a longer history for scripts that need more iteration.",
-    features: ["Everything in Pro", "20 AI version changes per script", "Restore any saved version"],
+    features: ["Everything in Plus", "20 AI version changes per script", "Restore any saved version"],
   },
 ];
 

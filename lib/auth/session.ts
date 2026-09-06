@@ -1,8 +1,10 @@
 import "server-only";
 
 import { cache } from "react";
+import { headers } from "next/headers";
 
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/lib/auth";
+import { databasePool } from "@/lib/db/pool";
 
 export class AuthenticationRequiredError extends Error {
   constructor() {
@@ -12,11 +14,23 @@ export class AuthenticationRequiredError extends Error {
 }
 
 export const getAuthenticatedUser = cache(async () => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error || !data.user) return null;
-  return data.user;
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) return null;
+  const providers = await databasePool.query(
+    `SELECT "providerId" FROM account WHERE "userId" = $1`,
+    [session.user.id],
+  );
+  return {
+    id: session.user.id,
+    email: session.user.email,
+    created_at: session.user.createdAt.toISOString(),
+    user_metadata: {
+      full_name: session.user.name,
+      name: session.user.name,
+      avatar_url: session.user.image,
+    },
+    app_metadata: { providers: providers.rows.map((row) => row.providerId) },
+  };
 });
 
 export async function requireAuthenticatedUser() {

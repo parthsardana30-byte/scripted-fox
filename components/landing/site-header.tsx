@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clapperboard } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -14,13 +14,12 @@ export function SiteHeader({
     return (
       <header className="site-header site-header--creator">
         <div className="site-header__inner">
-          <Link className="wordmark creator-wordmark" href="/" aria-label="Next Video home">
-            <span className="creator-wordmark__mark" aria-hidden="true"><Clapperboard size={18} /></span>
-            Next Video
+          <Link className="wordmark creator-wordmark" href="/" aria-label="Scripted Fox home">
+            <BrandLogo />
           </Link>
           <nav className="site-header__nav" aria-label="Main navigation">
-            <Link href="#how-it-works">How it works</Link>
-            <Link href="#video-plan">Video plan</Link>
+            <Link href="/how-it-works">How it works</Link>
+            <Link href="/video-plan">Video plan</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
           <div className="site-header__actions">
@@ -48,8 +47,8 @@ export function SiteHeader({
   return (
     <header className="site-header">
       <div className="site-header__inner">
-        <Link className="wordmark" href="/" aria-label="Next Video home">
-          Next Video
+        <Link className="wordmark" href="/" aria-label="Scripted Fox home">
+          <BrandLogo />
         </Link>
         <nav className="site-header__nav" aria-label="Main navigation">
           <Link href="/pricing">Pricing</Link>

@@ -1,6 +1,6 @@
-# ScriptWriter (Next Video)
+# Scripted Fox
 
-ScriptWriter is a modern, product-led application designed for YouTube creators who want a clearer path to their next upload. It provides a complete media workbench environment to move smoothly from channel signals to ideation, and finally to a record-ready script.
+Scripted Fox is a modern, product-led application designed for YouTube creators who want a clearer path to their next upload. It provides a complete media workbench environment to move smoothly from channel signals to ideation, and finally to a record-ready script.
 
 ## Features
 

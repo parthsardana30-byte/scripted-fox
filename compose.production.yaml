@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: scripted-fox-postgres
+    env_file:
+      - .env.production
+    environment:
+      POSTGRES_DB: scriptedfox
+      POSTGRES_USER: scriptedfox
+    volumes:
+      - scripted_fox_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scriptedfox -d scriptedfox"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - database
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_DEPLOYMENT_ENV: production
+        NEXT_PUBLIC_SITE_URL: https://scriptedfox.com
+    container_name: scripted-fox
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_DEPLOYMENT_ENV: production
+      NEXT_PUBLIC_SITE_URL: https://scriptedfox.com
+      GOOGLE_SITE_VERIFICATION: gFz28Z6DYpGLl0Oz1CwT6xEaB9SKhvVvp5_hUPTkyXU
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      proxy:
+        aliases:
+          - scripted-fox
+      database:
+    restart: unless-stopped
+
+networks:
+  database:
+    internal: true
+  proxy:
+    external: true
+    name: cashfree-subscription-bot_default
+
+volumes:
+  scripted_fox_postgres:

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { scriptDraftSchema, type ScriptDraft } from "@/lib/ai/types";
 import { dashboardSnapshot } from "@/lib/dashboard-mocks";
-import { dashboardService } from "@/lib/dashboard-services";
 import { pricingHref } from "@/lib/billing/plans";
 import type { IdeaRecommendation } from "@/types/dashboard";
 import { PageHeader } from "./page-header";
@@ -13,16 +12,17 @@ import { PageHeader } from "./page-header";
 type IdeasTab = "Recommended" | "Saved";
 type RecommendationSource = "loading" | "live" | "demo" | "error";
 
-export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: boolean }) {
+export function IdeasView({ canUseScriptWriter = true, demoMode = false, initialNiche = null, embedded = false }: { canUseScriptWriter?: boolean; demoMode?: boolean; initialNiche?: string | null; embedded?: boolean }) {
   const router = useRouter();
   const [tab, setTab] = useState<IdeasTab>("Recommended");
-  const [ideas, setIdeas] = useState(dashboardSnapshot.recommendations.slice(0, 3));
+  const [ideas, setIdeas] = useState(process.env.NODE_ENV === "test" || demoMode ? dashboardSnapshot.recommendations.slice(0, 5) : []);
+  const [niche, setNiche] = useState(initialNiche);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [dismissed, setDismissed] = useState<{ idea: IdeaRecommendation; wasSaved: boolean } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [generatingIds, setGeneratingIds] = useState<string[]>([]);
   const [generationError, setGenerationError] = useState<string | null>(null);
-  const [source, setSource] = useState<RecommendationSource>(process.env.NODE_ENV === "test" ? "demo" : "loading");
+  const [source, setSource] = useState<RecommendationSource>(process.env.NODE_ENV === "test" || demoMode ? "demo" : "loading");
   const dismissTimer = useRef<number | undefined>(undefined);
 
   const fetchRecommendations = useCallback(async (excludeTitles: string[], append: boolean) => {
@@ -31,8 +31,9 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ excludeTitles }),
     });
-    const payload = await response.json() as { ideas?: IdeaRecommendation[]; error?: string };
+    const payload = await response.json() as { ideas?: IdeaRecommendation[]; niche?: string; error?: string };
     if (!response.ok || !payload.ideas) throw new Error(payload.error || "Recommendations are unavailable.");
+    if (payload.niche) setNiche(payload.niche);
     setIdeas((current) => append
       ? [...current, ...payload.ideas!.filter((idea) => !current.some((item) => item.id === idea.id))]
       : payload.ideas!);
@@ -41,12 +42,12 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
 
   useEffect(() => () => window.clearTimeout(dismissTimer.current), []);
   useEffect(() => {
-    if (process.env.NODE_ENV === "test") return;
+    if (process.env.NODE_ENV === "test" || demoMode) return;
     const timer = window.setTimeout(() => {
       void fetchRecommendations([], false).catch(() => setSource("error"));
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [fetchRecommendations]);
+  }, [demoMode, fetchRecommendations]);
 
   const startUndoTimer = () => {
     window.clearTimeout(dismissTimer.current);
@@ -71,11 +72,14 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
 
   const loadMore = async () => {
     setLoadingMore(true);
+    if (demoMode) {
+      setIdeas([...dashboardSnapshot.recommendations].reverse().slice(0, 5));
+      setLoadingMore(false);
+      return;
+    }
     try {
-      await fetchRecommendations(ideas.map((idea) => idea.title), true);
+      await fetchRecommendations(ideas.map((idea) => idea.title), false);
     } catch {
-      const nextIdeas = await dashboardService.getMoreIdeas();
-      setIdeas((current) => [...current, ...nextIdeas.filter((idea) => !current.some((item) => item.id === idea.id))]);
       setSource("error");
     } finally {
       setLoadingMore(false);
@@ -85,7 +89,11 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
   const generate = async (idea: IdeaRecommendation) => {
     if (generatingIds.includes(idea.id)) return;
     if (!canUseScriptWriter) {
-      router.push(pricingHref("ai_script_writer", "/dashboard/ideas"));
+      router.push(pricingHref("ai_script_writer", returnPath));
+      return;
+    }
+    if (demoMode) {
+      router.push(`/ui-preview?view=script&topic=${encodeURIComponent(idea.title)}`);
       return;
     }
     setGeneratingIds((ids) => [...ids, idea.id]);
@@ -102,7 +110,7 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
       });
       const payload = await response.json() as { draft?: ScriptDraft; error?: string };
       if (response.status === 402) {
-        router.push(pricingHref("ai_script_writer", "/dashboard/ideas"));
+        router.push(pricingHref("ai_script_writer", returnPath));
         return;
       }
       if (!response.ok) throw new Error(payload.error || "The script could not be generated.");
@@ -118,16 +126,17 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
   };
 
   const visibleIdeas = tab === "Saved" ? ideas.filter((idea) => savedIds.includes(idea.id)) : ideas;
+  const returnPath = embedded ? "/dashboard/editor" : "/dashboard/ideas";
 
   return (
-    <div className="dashboard-page dashboard-ideas">
-      <PageHeader eyebrow="Channel-aware planning" title="Ideas worth making next" description="A short list based on your channel patterns and current YouTube interest—not a wall of generic prompts." actions={<span className="demo-data-label">{source === "live" ? "Live YouTube signals" : source === "loading" ? "Checking current signals…" : source === "error" ? "Using fallback ideas" : "Demo channel data"}</span>} />
+    <div className={embedded ? "dashboard-ideas dashboard-ideas--embedded" : "dashboard-page dashboard-ideas"}>
+      <PageHeader eyebrow="Five niche-matched picks, every day" title={<>Daily <span className="daily-topics__accent">Topics</span></>} />
 
       <div className="dashboard-subtabs" role="tablist" aria-label="Idea lists">
         {(["Recommended", "Saved"] as IdeasTab[]).map((item) => <button key={item} role="tab" type="button" aria-selected={tab === item} onClick={() => setTab(item)}>{item}</button>)}
       </div>
 
-      {visibleIdeas.length > 0 ? <div className="idea-list">
+      {source === "loading" ? <div className="trending-grid" aria-label="Finding niche topics">{Array.from({ length: 5 }).map((_, index) => <div className="trending-card trending-card--loading" key={index} />)}</div> : visibleIdeas.length > 0 ? <div className="idea-list">
         {visibleIdeas.map((idea, index) => {
           const saved = savedIds.includes(idea.id);
           const isGenerating = generatingIds.includes(idea.id);
@@ -149,9 +158,9 @@ export function IdeasView({ canUseScriptWriter = true }: { canUseScriptWriter?: 
             </div>
           </article>;
         })}
-      </div> : <div className="dashboard-empty"><Lightbulb size={24} aria-hidden="true" /><h2>{tab === "Saved" ? "No saved ideas yet" : "You’re caught up"}</h2><p>{tab === "Saved" ? "Save a recommendation and it will stay here without adding another sidebar page." : "Ask for more ideas when you are ready."}</p>{tab === "Saved" && <button className="button button--secondary button--small" type="button" onClick={() => setTab("Recommended")}>Browse recommendations</button>}</div>}
+      </div> : <div className="dashboard-empty"><Lightbulb size={24} aria-hidden="true" /><h2>{tab === "Saved" ? "No saved ideas yet" : source === "error" ? "Your niche topics need another scan" : "You’re caught up"}</h2><p>{tab === "Saved" ? "Save a recommendation and it will stay here without adding another sidebar page." : source === "error" ? "We won’t show generic filler. Retry to generate five topics matched to your niche and current YouTube signals." : "Ask for more ideas when you are ready."}</p>{tab === "Saved" ? <button className="button button--secondary button--small" type="button" onClick={() => setTab("Recommended")}>Browse recommendations</button> : source === "error" ? <button className="button button--primary button--small" type="button" onClick={loadMore}>Retry niche scan</button> : null}</div>}
 
-      {tab === "Recommended" && <div className="more-ideas"><p>Want a wider set of directions?</p><button className="button button--secondary" type="button" onClick={loadMore} disabled={loadingMore || source === "loading"}>{loadingMore ? <><RefreshCw className="spin" size={17} aria-hidden="true" /> Finding ideas…</> : <>More ideas <ArrowRight size={17} aria-hidden="true" /></>}</button></div>}
+      {tab === "Recommended" && <div className="more-ideas"><p>Your five daily picks refresh as your niche and channel signals change.</p><button className="button button--secondary" type="button" onClick={loadMore} disabled={loadingMore || source === "loading"}>{loadingMore ? <><RefreshCw className="spin" size={17} aria-hidden="true" /> Refreshing…</> : <>Refresh topics <ArrowRight size={17} aria-hidden="true" /></>}</button></div>}
 
       {dismissed && <div className="dashboard-toast" role="status" onMouseEnter={() => window.clearTimeout(dismissTimer.current)} onMouseLeave={startUndoTimer} onFocus={() => window.clearTimeout(dismissTimer.current)} onBlur={startUndoTimer}><span>“{dismissed.idea.title}” removed</span><button type="button" onClick={undoDismiss}><RotateCcw size={15} aria-hidden="true" /> Undo</button></div>}
       {generationError && <div className="dashboard-toast" role="alert"><span>{generationError}</span><button type="button" onClick={() => setGenerationError(null)}>Dismiss</button></div>}

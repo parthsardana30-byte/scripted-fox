@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getAuthenticatedUser } from "@/lib/auth/session";
+import { publicEnvironment } from "@/lib/env/public";
 import { exchangeYouTubeAuthorizationCode, getConnectedYouTubeChannel } from "@/lib/youtube/google";
 import { saveYouTubeConnection } from "@/lib/youtube/repository";
 
@@ -16,7 +17,7 @@ const callbackSchema = z.object({
 
 const stateCookieSchema = z.object({
   state: z.string().min(1),
-  userId: z.uuid(),
+  userId: z.string().min(1),
 });
 
 function equalState(received: string, expected: string) {
@@ -26,7 +27,7 @@ function equalState(received: string, expected: string) {
 }
 
 function finish(request: NextRequest, path: string) {
-  const response = NextResponse.redirect(new URL(path, request.url));
+  const response = NextResponse.redirect(new URL(path, publicEnvironment.NEXT_PUBLIC_SITE_URL));
   const expiredCookie = {
     httpOnly: true,
     maxAge: 0,

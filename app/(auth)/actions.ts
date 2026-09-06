@@ -1,12 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { z } from "zod";
 
-import { publicEnvironment } from "@/lib/env/public";
-import { signupErrorMessage } from "@/lib/auth/errors";
+import { auth } from "@/lib/auth";
 import { safeInternalRedirect } from "@/lib/security/redirects";
-import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionState = {
   status: "idle" | "error" | "success";
@@ -17,10 +16,6 @@ export type AuthActionState = {
 const emailSchema = z.email("Enter a valid email address").max(254).transform((value) => value.trim().toLowerCase());
 const passwordSchema = z.string().min(8, "Use at least 8 characters").max(72, "Use no more than 72 characters");
 const nextPathSchema = z.string().max(500).optional();
-
-function callbackUrl(path: string) {
-  return new URL(path, publicEnvironment.NEXT_PUBLIC_SITE_URL).toString();
-}
 
 export async function signInWithEmail(
   _state: AuthActionState,
@@ -40,13 +35,14 @@ export async function signInWithEmail(
     return { status: "error", fieldErrors: parsed.error.flatten().fieldErrors };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
-  });
-
-  if (error) return { status: "error", message: "Email or password is incorrect." };
+  try {
+    await auth.api.signInEmail({
+      body: { email: parsed.data.email, password: parsed.data.password },
+      headers: await headers(),
+    });
+  } catch {
+    return { status: "error", message: "Email or password is incorrect." };
+  }
   redirect(safeInternalRedirect(parsed.data.next));
 }
 
@@ -70,30 +66,21 @@ export async function signUpWithEmail(
     return { status: "error", fieldErrors: parsed.error.flatten().fieldErrors };
   }
 
-  const next = safeInternalRedirect(parsed.data.next);
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    options: {
-      data: { full_name: parsed.data.displayName },
-      emailRedirectTo: callbackUrl(`/auth/callback?next=${encodeURIComponent(next)}`),
-    },
-  });
-
-  if (error) {
-    console.error("Supabase signup failed", {
-      code: error.code,
-      status: error.status,
+  try {
+    await auth.api.signUpEmail({
+      body: { name: parsed.data.displayName, email: parsed.data.email, password: parsed.data.password },
+      headers: await headers(),
     });
-    return { status: "error", message: signupErrorMessage(error) };
+  } catch (error) {
+    const code = error && typeof error === "object" && "body" in error
+      ? String((error as { body?: { code?: string } }).body?.code ?? "")
+      : "";
+    if (code.includes("USER_ALREADY_EXISTS")) {
+      return { status: "error", message: "An account already exists for this email. Sign in instead." };
+    }
+    return { status: "error", message: "We could not create your account right now. Please try again shortly." };
   }
-  if (data.session) redirect(next);
-
-  return {
-    status: "success",
-    message: "Check your email to verify your account, then return here to sign in.",
-  };
+  redirect(safeInternalRedirect(parsed.data.next));
 }
 
 export async function sendPasswordReset(
@@ -103,13 +90,7 @@ export async function sendPasswordReset(
   const parsed = z.object({ email: emailSchema }).safeParse({ email: formData.get("email") });
   if (!parsed.success) return { status: "error", fieldErrors: parsed.error.flatten().fieldErrors };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: callbackUrl("/auth/callback?next=/reset-password"),
-  });
-
-  if (error) return { status: "error", message: "Reset instructions could not be sent. Please try again shortly." };
-  return { status: "success", message: "If an account exists for that email, reset instructions are on the way." };
+  return { status: "error", message: "Password reset email is being configured. Contact support for account recovery." };
 }
 
 export async function updatePassword(
@@ -119,16 +100,10 @@ export async function updatePassword(
   const parsed = z.object({ password: passwordSchema }).safeParse({ password: formData.get("password") });
   if (!parsed.success) return { status: "error", fieldErrors: parsed.error.flatten().fieldErrors };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return { status: "error", message: "Your password could not be updated. Request a new reset link and try again." };
-
-  await supabase.auth.signOut();
-  redirect("/sign-in?password=updated");
+  return { status: "error", message: "This reset link is no longer valid. Request account recovery from support." };
 }
 
 export async function signOut() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  await auth.api.signOut({ headers: await headers() });
   redirect("/sign-in");
 }

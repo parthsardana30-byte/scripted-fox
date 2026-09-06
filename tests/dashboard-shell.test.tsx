@@ -9,7 +9,7 @@ describe("DashboardShell", () => {
   it("marks the current page and can collapse the desktop navigation", async () => {
     const user = userEvent.setup();
     const { container } = render(<DashboardShell><h1>Ideas</h1></DashboardShell>);
-    expect(screen.getByRole("link", { name: "Ideas" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Daily Topics" })).toHaveAttribute("aria-current", "page");
     await user.click(screen.getByRole("button", { name: "Collapse navigation" }));
     expect(container.firstChild).toHaveClass("dashboard-app--collapsed");
     expect(screen.getByRole("button", { name: "Expand navigation" })).toBeInTheDocument();

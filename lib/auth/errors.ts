@@ -5,8 +5,7 @@ type AuthErrorDetails = {
 
 const signupMessages: Record<string, string> = {
   email_address_invalid: "Use a real email address that can receive your verification link.",
-  email_address_not_authorized:
-    "This project cannot send verification emails to that address yet. Use the Supabase project owner email or configure custom SMTP.",
+  email_address_not_authorized: "This address cannot receive verification mail until SMTP is configured.",
   email_exists: "An account already exists for this email. Sign in instead.",
   user_already_exists: "An account already exists for this email. Sign in instead.",
   over_email_send_rate_limit: "Too many verification emails were requested. Wait a few minutes, then try again.",

@@ -2,7 +2,7 @@ import "server-only";
 
 import { z } from "zod";
 
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/db/client";
 import { requireYouTubeEnvironment } from "@/lib/youtube/config";
 import { decryptRefreshToken } from "@/lib/youtube/crypto";
 import {

@@ -6,7 +6,8 @@ import { updateCreatorProfile } from "@/app/dashboard/account/actions";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { requireAuthenticatedUser } from "@/lib/auth/session";
 import { getBillingAccess } from "@/lib/billing/access";
-import { createClient } from "@/lib/supabase/server";
+import { getPlanDisplayName } from "@/lib/billing/plans";
+import { createClient } from "@/lib/db/client";
 
 export default async function AccountPage({
   searchParams,
@@ -90,7 +91,7 @@ export default async function AccountPage({
     <section className="settings-section">
       <div><h2>Plan and billing</h2><p>Review your access without adding another item to the sidebar.</p></div>
       <div className="account-plan">
-        <div><span>Current plan</span><strong>{access.plan === "free" ? "Free" : access.plan[0].toUpperCase() + access.plan.slice(1)}</strong><p>{access.status === "trialing" ? "Trial access is active." : access.plan === "free" ? "No payment method or subscription is attached." : `Status: ${access.status}`}</p></div>
+        <div><span>Current plan</span><strong>{getPlanDisplayName(access.plan)}</strong><p>{access.status === "trialing" ? "Trial access is active." : access.plan === "free" ? "No payment method or subscription is attached." : `Status: ${access.status}`}</p></div>
         <Link className="button button--secondary button--small" href="/dashboard/upgrade">View plans</Link>
       </div>
     </section>

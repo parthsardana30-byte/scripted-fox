@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/db/client";
 import { encryptRefreshToken } from "@/lib/youtube/crypto";
 import { requireYouTubeEnvironment, YOUTUBE_SCOPES } from "@/lib/youtube/config";
 import type { YouTubeChannel, YouTubeTokenResponse } from "@/lib/youtube/google";

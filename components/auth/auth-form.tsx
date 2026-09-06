@@ -16,7 +16,7 @@ type AuthMode = "sign-in" | "sign-up" | "forgot" | "reset";
 const initialAuthActionState: AuthActionState = { status: "idle" };
 
 const copy = {
-  "sign-in": { eyebrow: "Welcome back", title: "Sign in", description: "Continue to your Next Video workspace.", submit: "Sign in with email" },
+  "sign-in": { eyebrow: "Welcome back", title: "Sign in", description: "Continue to your Scripted Fox workspace.", submit: "Sign in with email" },
   "sign-up": { eyebrow: "Get started", title: "Create your account", description: "You can connect your YouTube channel later.", submit: "Create account" },
   forgot: { eyebrow: "Password recovery", title: "Reset your password", description: "Enter your email and we’ll send reset instructions.", submit: "Send reset link" },
   reset: { eyebrow: "Choose a new password", title: "Set a new password", description: "Use at least eight characters and avoid a password you use elsewhere.", submit: "Save new password" },
@@ -42,7 +42,7 @@ export function AuthForm({ mode, nextPath = "/dashboard" }: { mode: AuthMode; ne
       {state.message && <p className="auth-form-error" role="alert">{state.message}</p>}
       <button className="button button--primary auth-submit" type="submit" disabled={pending}>{pending ? "Please wait…" : details.submit}<ArrowRight size={17} aria-hidden="true" /></button>
     </form>
-    <p className="auth-switch">{mode === "sign-in" ? <>New to Next Video? <Link href={`/sign-up${nextQuery}`}>Create an account</Link></> : mode === "sign-up" ? <>Already have an account? <Link href={`/sign-in${nextQuery}`}>Sign in</Link></> : mode === "forgot" ? <Link href="/sign-in">Return to sign in</Link> : null}</p>
+    <p className="auth-switch">{mode === "sign-in" ? <>New to Scripted Fox? <Link href={`/sign-up${nextQuery}`}>Create an account</Link></> : mode === "sign-up" ? <>Already have an account? <Link href={`/sign-in${nextQuery}`}>Sign in</Link></> : mode === "forgot" ? <Link href="/sign-in">Return to sign in</Link> : null}</p>
     <p className="auth-legal">By continuing, you agree to the Terms and Privacy Policy.</p>
   </div>;
 }

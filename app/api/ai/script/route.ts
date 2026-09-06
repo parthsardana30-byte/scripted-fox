@@ -4,9 +4,8 @@ import { AuthenticationRequiredError, requireAuthenticatedUser } from "@/lib/aut
 import { AiConfigurationError, AiProviderError } from "@/lib/ai/groq";
 import { assistWithScript, generateScriptDraft } from "@/lib/ai/script";
 import { aiRequestSchema } from "@/lib/ai/types";
-import { serverEnvironment } from "@/lib/env/server";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 import { getBillingAccess, hasBillingFeature } from "@/lib/billing/access";
 import { getCachedPublicTrends, trendSummaryForTitle } from "@/lib/youtube/trends";
 import type { Json } from "@/types/database";
@@ -53,6 +52,7 @@ async function loadCreatorContext(userId: string, title: string) {
     : null;
 
   const trendPreferences = {
+    userId,
     niche: typeof defaults.channelNiche === "string" ? defaults.channelNiche : "content creation",
     languages: preferences?.content_languages ?? ["en"],
     markets: preferences?.target_markets ?? ["IN", "GLOBAL"],
@@ -85,15 +85,15 @@ async function enforceRateLimit(userId: string) {
   return (count ?? 0) < REQUESTS_PER_MINUTE;
 }
 
-async function recordUsage(userId: string, mode: "generate" | "assist", inputTokens: number | null, outputTokens: number | null) {
+async function recordUsage(userId: string, mode: "generate" | "assist", completion: { provider: string; model: string; inputTokens: number | null; outputTokens: number | null }) {
   const supabase = await createClient();
   await supabase.from("usage_events").insert({
     user_id: userId,
     operation: `ai_script_${mode}`,
-    provider: serverEnvironment.AI_PROVIDER ?? null,
-    model: serverEnvironment.AI_MODEL ?? null,
-    input_units: inputTokens,
-    output_units: outputTokens,
+    provider: completion.provider,
+    model: completion.model,
+    input_units: completion.inputTokens,
+    output_units: completion.outputTokens,
     cost_microunits: null,
     metadata: { source: "script_editor" },
   });
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     const user = await requireAuthenticatedUser();
     const access = await getBillingAccess(user.id);
     if (!hasBillingFeature(access, "ai_script_writer")) {
-      return Response.json({ error: "Start a free trial or choose Pro or Elite to use AI script writing." }, { status: 402 });
+      return Response.json({ error: "Choose Plus or Pro to use AI script writing." }, { status: 402 });
     }
     if (!(await enforceRateLimit(user.id))) {
       return Response.json({ error: "You’re generating too quickly. Wait a minute and try again." }, { status: 429 });
@@ -132,12 +132,12 @@ export async function POST(request: Request) {
 
     if (parsed.data.mode === "generate") {
       const { draft, completion } = await generateScriptDraft({ ...parsed.data, context });
-      await recordUsage(user.id, "generate", completion.inputTokens, completion.outputTokens);
+      await recordUsage(user.id, "generate", completion);
       return Response.json({ draft });
     }
 
     const result = await assistWithScript({ ...parsed.data, context });
-    await recordUsage(user.id, "assist", result.completion.inputTokens, result.completion.outputTokens);
+    await recordUsage(user.id, "assist", result.completion);
     return Response.json({ draft: result.draft, message: result.message });
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) {

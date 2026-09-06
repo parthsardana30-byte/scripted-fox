@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 import { isPlanCode, planIncludesFeature, type BillingFeature, type PlanCode } from "@/lib/billing/plans";
 import { publicEnvironment } from "@/lib/env/public";
 
@@ -47,12 +47,15 @@ export async function getBillingAccess(userId: string): Promise<BillingAccess> {
 
   const trialExpired = data.status === "trialing"
     && (!data.trial_ends_at || new Date(data.trial_ends_at).getTime() <= Date.now());
-  const paidAccessIsValid = data.status === "active" || (data.status === "trialing" && !trialExpired);
+  const paidPeriodExpired = data.status === "active"
+    && (!data.current_period_end || new Date(data.current_period_end).getTime() <= Date.now());
+  const paidAccessIsValid = (data.status === "active" && !paidPeriodExpired)
+    || (data.status === "trialing" && !trialExpired);
   const storedPlan = isPlanCode(data.plan_code) ? data.plan_code : "free";
 
   return {
     plan: paidAccessIsValid ? storedPlan : "free",
-    status: trialExpired ? "free" : data.status,
+    status: trialExpired || paidPeriodExpired ? "free" : data.status,
     trialEndsAt: data.trial_ends_at,
     currentPeriodEnd: data.current_period_end,
   };

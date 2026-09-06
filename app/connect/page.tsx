@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DisconnectYouTubeButton } from "@/components/youtube/disconnect-button";
 import { getAuthenticatedUser } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 
 const messages: Record<string, string> = {
   connected: "Your YouTube channel is connected.",
@@ -45,7 +45,7 @@ export default async function ConnectPage({
         <h1>{connection ? connection.channel_title ?? "YouTube connected" : "Connect your YouTube channel"}</h1>
         <p>{connection
           ? "Your channel is available for personalized ideas and analytics."
-          : "Grant read-only access after signing in. Connecting YouTube stays optional and does not let Next Video edit or publish videos."}</p>
+          : "Grant read-only access after signing in. Connecting YouTube stays optional and does not let Scripted Fox edit or publish videos."}</p>
         {notice && <p role={query.error ? "alert" : "status"}>{notice}</p>}
 
         {!connection && <ul className="dialog-points">

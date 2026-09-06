@@ -23,5 +23,5 @@ function getServerGreeting() {
 export function DashboardGreeting({ userName }: { userName: string }) {
   const greeting = useSyncExternalStore(subscribe, getClientGreeting, getServerGreeting);
 
-  return <h1>{greeting}, {userName}</h1>;
+  return <h1>{greeting}, <span className="dashboard-greeting__name">{userName}</span></h1>;
 }

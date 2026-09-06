@@ -1,13 +1,108 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, CreditCard, LockKeyhole } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { type FormEvent, useMemo, useState } from "react";
 
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { plans, upgradeHref, type PlanCode } from "@/lib/billing/plans";
 
-export function PricingCatalogue({ currentPlan, signedIn = false, returnTo }: { currentPlan?: PlanCode; signedIn?: boolean; returnTo?: string }) {
+type CheckoutResponse = {
+  action?: string;
+  fields?: Record<string, string>;
+  error?: string;
+};
+
+type PricingCatalogueProps = {
+  currentPlan?: PlanCode;
+  signedIn?: boolean;
+  returnTo?: string;
+  testMode?: boolean;
+  payuConfigured?: boolean;
+};
+
+export function PricingCatalogue({
+  currentPlan,
+  signedIn = false,
+  returnTo,
+  testMode = false,
+  payuConfigured = false,
+}: PricingCatalogueProps) {
+  const router = useRouter();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
+  const [selectingPlan, setSelectingPlan] = useState<PlanCode | null>(null);
+  const [pendingPlan, setPendingPlan] = useState<PlanCode | null>(null);
+  const [phone, setPhone] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const checkoutPlan = useMemo(() => plans.find((plan) => plan.code === pendingPlan), [pendingPlan]);
+  const checkoutAmount = checkoutPlan
+    ? billingPeriod === "annual"
+      ? (checkoutPlan.annualMonthlyPriceInr ?? 0) * 12
+      : checkoutPlan.monthlyPriceInr ?? 0
+    : 0;
+
+  const selectTestPlan = async (plan: PlanCode) => {
+    setSelectingPlan(plan);
+    setFeedback("");
+    try {
+      const response = await fetch("/api/billing/select-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, billingPeriod }),
+      });
+      const result = await response.json() as { error?: string; label?: string };
+      if (!response.ok || !result.label) throw new Error(result.error ?? "The plan could not be updated.");
+      setFeedback(result.label + " is active for testing. No payment was charged.");
+      router.refresh();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "The plan could not be updated.");
+    } finally {
+      setSelectingPlan(null);
+    }
+  };
+
+  const startPayuCheckout = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!pendingPlan || pendingPlan === "free") return;
+    setSelectingPlan(pendingPlan);
+    setFeedback("");
+
+    try {
+      const response = await fetch("/api/billing/payu/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: pendingPlan, billingPeriod, phone }),
+      });
+      const result = await response.json() as CheckoutResponse;
+      if (!response.ok || !result.action || !result.fields) {
+        throw new Error(result.error ?? "PayU checkout could not be started.");
+      }
+
+      const checkoutUrl = new URL(result.action);
+      if (!["test.payu.in", "secure.payu.in"].includes(checkoutUrl.hostname)) {
+        throw new Error("The PayU checkout address could not be verified.");
+      }
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = checkoutUrl.toString();
+      form.style.display = "none";
+      Object.entries(result.fields).forEach(([name, value]) => {
+        const field = document.createElement("input");
+        field.type = "hidden";
+        field.name = name;
+        field.value = value;
+        form.appendChild(field);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "PayU checkout could not be started.");
+      setSelectingPlan(null);
+      setPendingPlan(null);
+    }
+  };
 
   return <>
     <div className="pricing-billing-choice">
@@ -19,37 +114,94 @@ export function PricingCatalogue({ currentPlan, signedIn = false, returnTo }: { 
     </div>
     <div className="pricing-catalogue" aria-label="Plans">
       {plans.map((plan) => {
-      const isCurrent = currentPlan === plan.code;
-      const destination = isCurrent && signedIn
-        ? returnTo ?? "/dashboard"
-        : plan.code === "free"
-          ? signedIn ? "/dashboard" : "/sign-up?next=/dashboard"
-          : signedIn ? upgradeHref(undefined, plan.code) : `/sign-up?next=${encodeURIComponent(upgradeHref(undefined, plan.code))}`;
-      const monthlyRate = billingPeriod === "annual" ? plan.annualMonthlyPriceInr : plan.monthlyPriceInr;
-      const annualTotal = plan.annualMonthlyPriceInr === null ? null : plan.annualMonthlyPriceInr * 12;
-      return <article className={`pricing-plan${plan.highlighted ? " pricing-plan--highlighted" : ""}`} key={plan.code}>
-        <div className="pricing-plan__intro">
-          <div className="pricing-plan__eyebrow">
-            <h2>{plan.name}</h2>
-            {isCurrent ? <span>Current plan</span> : plan.highlighted ? <span>Main plan</span> : null}
+        const isCurrent = currentPlan === plan.code;
+        const destination = isCurrent && signedIn
+          ? returnTo ?? "/dashboard"
+          : plan.code === "free"
+            ? signedIn ? "/dashboard" : "/sign-up?next=/dashboard"
+            : signedIn ? upgradeHref(undefined, plan.code) : "/sign-up?next=" + encodeURIComponent(upgradeHref(undefined, plan.code));
+        const monthlyRate = billingPeriod === "annual" ? plan.annualMonthlyPriceInr : plan.monthlyPriceInr;
+        const annualTotal = plan.annualMonthlyPriceInr === null ? null : plan.annualMonthlyPriceInr * 12;
+        const buttonClass = "button " + (plan.highlighted ? "button--primary" : "button--secondary");
+
+        const priceLabel = monthlyRate === null ? "FREE" : "₹" + monthlyRate;
+
+        return <article
+          className={"pricing-plan pricing-plan--" + plan.code + (plan.highlighted ? " pricing-plan--highlighted" : "")}
+          data-price={priceLabel}
+          key={plan.code}
+        >
+          <div className="pricing-plan__intro">
+            <div className="pricing-plan__eyebrow">
+              <h2>{plan.name}</h2>
+              {isCurrent ? <span>Current plan</span> : plan.highlighted ? <span>Most popular</span> : null}
+            </div>
+            <p>{plan.description}</p>
           </div>
-          <p>{plan.description}</p>
-        </div>
-        <div className="pricing-plan__price">
-          {monthlyRate === null ? <><strong>7 days free</strong><small>No payment during the trial</small></> : <>
-            <strong><span>₹{monthlyRate}</span> / month</strong>
-            <small>{billingPeriod === "annual" ? `₹${annualTotal?.toLocaleString("en-IN")} billed annually` : "Billed monthly"}</small>
-          </>}
-        </div>
-        <Link className={`button ${plan.highlighted ? "button--primary" : "button--secondary"}`} href={destination} aria-current={isCurrent ? "page" : undefined}>
-          {isCurrent ? returnTo ? "Return to script" : "Go to workspace" : plan.code === "free" ? "Start free trial" : `Select ${plan.name}`}
-        </Link>
-        <div className="pricing-plan__features">
-          <p>{plan.code === "free" ? "Trial outline" : `${plan.name} outline`}</p>
-          <ul>{plan.features.map((feature) => <li key={feature}><Check size={16} aria-hidden="true" /><span>{feature}</span></li>)}</ul>
-        </div>
-      </article>;
+          <div className="pricing-plan__price">
+            {monthlyRate === null ? <><strong><span className="pricing-plan__amount">7 days</span><span className="pricing-plan__period"> free</span></strong><small>No card or payment during the trial</small></> : <>
+              <strong><span className="pricing-plan__currency">₹</span><span className="pricing-plan__amount">{monthlyRate}</span><span className="pricing-plan__period"> / month</span></strong>
+              <small>{billingPeriod === "annual" ? "₹" + annualTotal?.toLocaleString("en-IN") + " paid for 12 months" : "One payment for one month"}</small>
+            </>}
+          </div>
+          {signedIn && testMode && !payuConfigured && !isCurrent
+            ? <button className={buttonClass} type="button" disabled={selectingPlan !== null} onClick={() => void selectTestPlan(plan.code)}>
+                {selectingPlan === plan.code ? "Switching…" : "Select " + plan.name}
+              </button>
+            : signedIn && payuConfigured && !isCurrent && plan.code !== "free"
+              ? <button className={buttonClass} type="button" disabled={selectingPlan !== null} onClick={() => { setPendingPlan(plan.code); setFeedback(""); }}>
+                  {"Pay with PayU · " + plan.name}
+                </button>
+              : signedIn && !payuConfigured && !testMode && !isCurrent && plan.code !== "free"
+                ? <button className={buttonClass} type="button" onClick={() => setFeedback("PayU merchant credentials are still required before checkout can open.")}>
+                    {"Select " + plan.name}
+                  </button>
+                : <Link className={buttonClass} href={destination} aria-current={isCurrent ? "page" : undefined}>
+                    {isCurrent ? returnTo ? "Return to script" : "Go to workspace" : plan.code === "free" ? "Start with Basic" : "Select " + plan.name}
+                  </Link>}
+          <div className="pricing-plan__features">
+            <p>{plan.name + " outline"}</p>
+            <ul>{plan.features.map((feature) => <li key={feature}><Check size={16} aria-hidden="true" /><span>{feature}</span></li>)}</ul>
+          </div>
+        </article>;
       })}
     </div>
+    {feedback ? <p className="pricing-plan-feedback" role="status" aria-live="polite">{feedback}</p> : null}
+    <Dialog open={Boolean(pendingPlan)} onOpenChange={(open) => { if (!open && selectingPlan === null) setPendingPlan(null); }}>
+      {checkoutPlan ? <DialogContent className="pricing-checkout-dialog">
+        <span className="pricing-checkout-dialog__icon"><CreditCard size={24} aria-hidden="true" /></span>
+        <DialogTitle>Continue securely with PayU</DialogTitle>
+        <DialogDescription>
+          {checkoutPlan.name + " · " + (billingPeriod === "annual" ? "12 months" : "1 month") + " access"}
+        </DialogDescription>
+        <form onSubmit={(event) => void startPayuCheckout(event)}>
+          <label htmlFor="payu-phone">Mobile number</label>
+          <div className="pricing-checkout-dialog__phone">
+            <span>+91</span>
+            <input
+              id="payu-phone"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              maxLength={10}
+              pattern="[6-9][0-9]{9}"
+              placeholder="10-digit number"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))}
+              required
+            />
+          </div>
+          <div className="pricing-checkout-dialog__total">
+            <span>Total</span>
+            <strong>{"₹" + checkoutAmount.toLocaleString("en-IN")}</strong>
+          </div>
+          <button className="button button--primary" type="submit" disabled={selectingPlan !== null || !/^[6-9][0-9]{9}$/.test(phone)}>
+            {selectingPlan ? "Opening PayU…" : "Continue to payment"}
+          </button>
+        </form>
+        <p className="pricing-checkout-dialog__secure"><LockKeyhole size={15} aria-hidden="true" /> Payment details are entered only on PayU&apos;s secure checkout.</p>
+      </DialogContent> : null}
+    </Dialog>
   </>;
 }

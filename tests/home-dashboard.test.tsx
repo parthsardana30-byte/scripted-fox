@@ -17,8 +17,9 @@ describe("HomeDashboard setup checklist", () => {
   });
 
   it("removes the setup panel when every setup step is finished", () => {
-    render(<HomeDashboard setup={{ accountCreated: true, channelConnected: true, preferencesSet: true }} />);
+    render(<HomeDashboard setup={{ accountCreated: true, channelConnected: true, preferencesSet: true }} channelName="Scripted Fox TV" />);
 
+    expect(screen.getByRole("link", { name: "Connected YouTube channel: Scripted Fox TV" })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Setup complete" })).not.toBeInTheDocument();
     expect(screen.queryByText("3 of 3")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Connect channel" })).not.toBeInTheDocument();

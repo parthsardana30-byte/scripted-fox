@@ -1,6 +1,6 @@
 import { SettingsView } from "@/components/dashboard/settings-view";
 import { requireAuthenticatedUser } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/db/client";
 
 export default async function SettingsPage() {
   const user = await requireAuthenticatedUser();
