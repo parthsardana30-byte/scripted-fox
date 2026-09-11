@@ -4,6 +4,7 @@ import { inferCreatorNiche } from "@/lib/ai/niche";
 import { AuthenticationRequiredError, requireAuthenticatedUser } from "@/lib/auth/session";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
 import { createClient } from "@/lib/db/client";
+import { selectDiverseTrends } from "@/lib/youtube/trend-scoring";
 import { getOrRefreshPublicTrends, refreshPublicTrends, YouTubeTrendsError } from "@/lib/youtube/trends";
 import type { Json } from "@/types/database";
 
@@ -12,6 +13,7 @@ export const runtime = "nodejs";
 const trendChannelSnapshotSchema = z.object({
   channel: z.object({ title: z.string() }).optional(),
   topVideos: z.array(z.object({ title: z.string() })).max(50),
+  recentVideos: z.array(z.object({ title: z.string() })).max(50).default([]),
 });
 
 function objectValue(value: Json | undefined) {
@@ -41,7 +43,10 @@ async function creatorTrendPreferences(userId: string) {
     ? null
     : await inferCreatorNiche({
         channelTitle: channel.data.channel?.title,
-        recentTitles: channel.data.topVideos.map((video) => video.title),
+        recentTitles: [...new Set([
+          ...(channel.data.recentVideos ?? []).map((video) => video.title),
+          ...channel.data.topVideos.map((video) => video.title),
+        ])],
       }).catch(() => null);
 
   return {
@@ -63,12 +68,12 @@ async function recentlyRefreshed(userId: string) {
   return (count ?? 0) > 0;
 }
 
-async function recordRefresh(userId: string, rankedBy: "gemini" | "momentum") {
+async function recordRefresh(userId: string, rankedBy: "gemini" | "grok" | "groq" | "momentum") {
   const supabase = await createClient();
   await supabase.from("usage_events").insert({
     user_id: userId,
     operation: "youtube_trends_refresh",
-    provider: rankedBy === "gemini" ? "gemini" : "google",
+    provider: rankedBy === "momentum" ? "google" : rankedBy,
     model: null,
     input_units: null,
     output_units: null,
@@ -77,14 +82,41 @@ async function recordRefresh(userId: string, rankedBy: "gemini" | "momentum") {
   });
 }
 
-function responsePayload(result: { evidence: Awaited<ReturnType<typeof refreshPublicTrends>>; refreshed: boolean }) {
+async function recentTrendIds(userId: string) {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - 3 * 86_400_000).toISOString();
+  const { data } = await supabase.from("usage_events").select("metadata")
+    .eq("user_id", userId).eq("operation", "youtube_trends_impression").gte("created_at", since).limit(6);
+  const ids = new Set<string>();
+  for (const event of data ?? []) {
+    const metadata = objectValue(event.metadata);
+    if (Array.isArray(metadata.videoIds)) metadata.videoIds.forEach((id) => { if (typeof id === "string") ids.add(id); });
+  }
+  return ids;
+}
+
+async function recordTrendImpression(userId: string, videoIds: string[]) {
+  const supabase = await createClient();
+  const day = new Date().toISOString().slice(0, 10);
+  const dayStart = `${day}T00:00:00.000Z`;
+  const { count } = await supabase.from("usage_events").select("id", { count: "exact", head: true })
+    .eq("user_id", userId).eq("operation", "youtube_trends_impression").gte("created_at", dayStart);
+  if ((count ?? 0) > 0) return;
+  await supabase.from("usage_events").insert({
+    user_id: userId, operation: "youtube_trends_impression", provider: "google", model: null,
+    input_units: null, output_units: null, cost_microunits: null, metadata: { day, videoIds },
+  });
+}
+
+function responsePayload(result: { evidence: Awaited<ReturnType<typeof refreshPublicTrends>>; refreshed: boolean }, recentlyShownIds = new Set<string>()) {
+  const selectedSignals = selectDiverseTrends(result.evidence.videos, 12, recentlyShownIds);
   return {
     refreshed: result.refreshed,
     capturedAt: result.evidence.capturedAt,
     niche: result.evidence.niche,
     markets: result.evidence.markets,
     languages: result.evidence.languages,
-    signals: result.evidence.videos.slice(0, 12).map((video) => ({
+    signals: selectedSignals.map((video) => ({
       id: video.id,
       title: video.title,
       channelTitle: video.channelTitle,
@@ -110,7 +142,9 @@ export async function GET() {
     const user = await requireAuthenticatedUser();
     const preferences = { ...await creatorTrendPreferences(user.id), userId: user.id };
     const result = await getOrRefreshPublicTrends(preferences);
-    return Response.json(responsePayload(result), {
+    const payload = responsePayload(result, await recentTrendIds(user.id));
+    await recordTrendImpression(user.id, payload.signals.map((signal) => signal.id));
+    return Response.json(payload, {
       headers: { "Cache-Control": "private, no-store" },
     });
   } catch (error) {
@@ -135,7 +169,9 @@ export async function POST(request: Request) {
     const evidence = await refreshPublicTrends(preferences);
     const result = { evidence, refreshed: true };
     await recordRefresh(user.id, evidence.aiAnalysis?.provider ?? "momentum");
-    return Response.json(responsePayload(result), { headers: { "Cache-Control": "private, no-store" } });
+    const payload = responsePayload(result, await recentTrendIds(user.id));
+    await recordTrendImpression(user.id, payload.signals.map((signal) => signal.id));
+    return Response.json(payload, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     if (error instanceof AuthenticationRequiredError) return Response.json({ error: "Sign in to refresh trends." }, { status: 401 });
     if (error instanceof YouTubeTrendsError) {

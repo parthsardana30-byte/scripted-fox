@@ -1,2 +1,2 @@
-import { AuthForm } from "@/components/auth/auth-form";
-export default function ForgotPasswordPage() { return <AuthForm mode="forgot" />; }
+import { redirect } from "next/navigation";
+export default function ForgotPasswordPage() { redirect("/sign-in?recovery=1"); }

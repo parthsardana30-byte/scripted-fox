@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, CreditCard, LockKeyhole } from "lucide-react";
+import { Check, CreditCard, LockKeyhole, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { Confetti } from "@/components/ui/confetti";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { plans, upgradeHref, type PlanCode } from "@/lib/billing/plans";
 
@@ -20,6 +21,7 @@ type PricingCatalogueProps = {
   returnTo?: string;
   testMode?: boolean;
   payuConfigured?: boolean;
+  celebrationPlan?: PlanCode;
 };
 
 export function PricingCatalogue({
@@ -28,6 +30,7 @@ export function PricingCatalogue({
   returnTo,
   testMode = false,
   payuConfigured = false,
+  celebrationPlan,
 }: PricingCatalogueProps) {
   const router = useRouter();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
@@ -35,7 +38,12 @@ export function PricingCatalogue({
   const [pendingPlan, setPendingPlan] = useState<PlanCode | null>(null);
   const [phone, setPhone] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [celebratedPlan, setCelebratedPlan] = useState<PlanCode | null>(null);
+  const [dismissedCelebrationPlan, setDismissedCelebrationPlan] = useState<PlanCode | null>(null);
   const checkoutPlan = useMemo(() => plans.find((plan) => plan.code === pendingPlan), [pendingPlan]);
+  const visibleCelebrationPlan = celebratedPlan
+    ?? (celebrationPlan && celebrationPlan !== dismissedCelebrationPlan ? celebrationPlan : null);
+  const celebration = useMemo(() => plans.find((plan) => plan.code === visibleCelebrationPlan), [visibleCelebrationPlan]);
   const checkoutAmount = checkoutPlan
     ? billingPeriod === "annual"
       ? (checkoutPlan.annualMonthlyPriceInr ?? 0) * 12
@@ -54,6 +62,7 @@ export function PricingCatalogue({
       const result = await response.json() as { error?: string; label?: string };
       if (!response.ok || !result.label) throw new Error(result.error ?? "The plan could not be updated.");
       setFeedback(result.label + " is active for testing. No payment was charged.");
+      setCelebratedPlan(plan);
       router.refresh();
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "The plan could not be updated.");
@@ -139,7 +148,7 @@ export function PricingCatalogue({
             <p>{plan.description}</p>
           </div>
           <div className="pricing-plan__price">
-            {monthlyRate === null ? <><strong><span className="pricing-plan__amount">7 days</span><span className="pricing-plan__period"> free</span></strong><small>No card or payment during the trial</small></> : <>
+            {monthlyRate === null ? <><strong><span className="pricing-plan__amount">7 days</span><span className="pricing-plan__period"> free</span></strong><small>No payment card required</small></> : <>
               <strong><span className="pricing-plan__currency">₹</span><span className="pricing-plan__amount">{monthlyRate}</span><span className="pricing-plan__period"> / month</span></strong>
               <small>{billingPeriod === "annual" ? "₹" + annualTotal?.toLocaleString("en-IN") + " paid for 12 months" : "One payment for one month"}</small>
             </>}
@@ -157,17 +166,20 @@ export function PricingCatalogue({
                     {"Select " + plan.name}
                   </button>
                 : <Link className={buttonClass} href={destination} aria-current={isCurrent ? "page" : undefined}>
-                    {isCurrent ? returnTo ? "Return to script" : "Go to workspace" : plan.code === "free" ? "Start with Basic" : "Select " + plan.name}
+                    {isCurrent ? returnTo ? "Return to script" : "Go to workspace" : plan.code === "free" ? "Start free trial" : "Select " + plan.name}
                   </Link>}
           <div className="pricing-plan__features">
             <p>{plan.name + " outline"}</p>
-            <ul>{plan.features.map((feature) => <li key={feature}><Check size={16} aria-hidden="true" /><span>{feature}</span></li>)}</ul>
+            <ul>{plan.features.map((feature) => <li key={feature.label}>
+              {feature.included ? <Check size={16} aria-hidden="true" /> : <X size={16} aria-hidden="true" />}
+              <span>{feature.label}</span>
+            </li>)}</ul>
           </div>
         </article>;
       })}
     </div>
     {feedback ? <p className="pricing-plan-feedback" role="status" aria-live="polite">{feedback}</p> : null}
-    <Dialog open={Boolean(pendingPlan)} onOpenChange={(open) => { if (!open && selectingPlan === null) setPendingPlan(null); }}>
+    <Dialog open={Boolean(pendingPlan)} onOpenChange={(open) => { if (!open) setPendingPlan(null); }}>
       {checkoutPlan ? <DialogContent className="pricing-checkout-dialog">
         <span className="pricing-checkout-dialog__icon"><CreditCard size={24} aria-hidden="true" /></span>
         <DialogTitle>Continue securely with PayU</DialogTitle>
@@ -201,6 +213,40 @@ export function PricingCatalogue({
           </button>
         </form>
         <p className="pricing-checkout-dialog__secure"><LockKeyhole size={15} aria-hidden="true" /> Payment details are entered only on PayU&apos;s secure checkout.</p>
+      </DialogContent> : null}
+    </Dialog>
+    <Dialog open={Boolean(visibleCelebrationPlan)} onOpenChange={(open) => {
+      if (!open) {
+        setCelebratedPlan(null);
+        if (celebrationPlan) setDismissedCelebrationPlan(celebrationPlan);
+      }
+    }}>
+      {celebration ? <DialogContent className="pricing-success-dialog">
+        <Confetti
+          aria-hidden="true"
+          className="pricing-success-dialog__confetti"
+          options={{
+            particleCount: 110,
+            spread: 78,
+            startVelocity: 36,
+            gravity: 0.9,
+            scalar: 0.82,
+            origin: { x: 0.5, y: 0.58 },
+            colors: ["#ef233c", "#ff6074", "#fff7f8", "#171214"],
+          }}
+        />
+        <span className="pricing-success-dialog__icon"><Sparkles size={26} aria-hidden="true" /></span>
+        <p className="pricing-success-dialog__eyebrow">Plan updated</p>
+        <DialogTitle>{"Congrats, you’re on " + celebration.name + "!"}</DialogTitle>
+        <DialogDescription>
+          {"Your ScriptedFox workspace now has everything included with " + celebration.name + "."}
+        </DialogDescription>
+        <button className="button button--primary" type="button" onClick={() => {
+          setCelebratedPlan(null);
+          if (celebrationPlan) setDismissedCelebrationPlan(celebrationPlan);
+        }}>
+          {"Start creating with " + celebration.name}
+        </button>
       </DialogContent> : null}
     </Dialog>
   </>;

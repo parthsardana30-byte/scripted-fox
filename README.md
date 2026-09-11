@@ -7,7 +7,7 @@ Scripted Fox is a modern, product-led application designed for YouTube creators 
 - **Media Workbench**: A task-specific canvas designed for content creation, featuring a focused document workspace and a persistent conversational AI assistant.
 - **Creator Tooling**: Integrated workflows for managing ideas, projects, and analytics.
 - **Theme Support**: Seamless light and dark modes sharing a unified semantic design system. 
-- **Authentication**: Secure Google Sign-In via Supabase, keeping channel connections separate.
+- **Authentication**: Better Auth with email/password and Google Sign-In, keeping channel connections separate.
 - **Billing**: Multi-tier pricing (Free Trial, Pro, Elite) integrated with PayU (in development).
 
 ## Tech Stack
@@ -18,7 +18,7 @@ This project is built using modern web technologies to ensure a high-performance
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) (v4) leveraging a custom design system ("Creator Playback").
 - **UI Components**: Radix UI primitives, React Hook Form, and Zod for validation. Icons provided by [Lucide](https://lucide.dev/).
 - **Animation**: `motion` for fluid state transitions and micro-interactions.
-- **Backend & Database**: [Supabase](https://supabase.com/) for PostgreSQL database, authentication, and SSR integrations.
+- **Backend & Database**: Better Auth backed by a Supabase-hosted PostgreSQL database. Supabase Auth is not used.
 - **Testing**: [Vitest](https://vitest.dev/) for unit testing and [Playwright](https://playwright.dev/) for end-to-end testing.
 
 ## Getting Started
@@ -47,18 +47,27 @@ This project is built using modern web technologies to ensure a high-performance
    cp .env.development.example .env.development.local
    ```
    
-   **For Collaborators:**
-   Since `.env.development.local` is git-ignored for security, you have two options to get the app running:
-   - **Option A (Recommended):** Ask the repository owner to securely share their `.env.development.local` file with you. This will connect your local frontend to the existing development database.
-   - **Option B:** Set up your own backend infrastructure. You will need to create:
-     - A new [Supabase](https://supabase.com/) project (for Auth and Database). Run the SQL scripts in the `supabase/migrations/` folder to set up your tables.
-     - A Google Cloud OAuth Client (for YouTube integration).
-     - (Optional) A PayU test account for billing.
-     - (Optional) An AI provider API key (e.g., Groq) for script generation features.
-   
-   Once you have the values, fill them into your `.env.development.local` file.
+   **For collaborators:** each developer keeps a private `.env.development.local`.
+   Use a Supabase PostgreSQL connection string as `DATABASE_URL` and a local
+   `BETTER_AUTH_SECRET` of at least 32 characters. Do not add Supabase URL,
+   publishable-key, service-role, or Supabase Auth variables: the application
+   connects directly to PostgreSQL and Better Auth owns application identities.
 
-4. Start the development server:
+   Developers may use separate development databases and secrets. If they use
+   one shared development database, coordinate migrations and securely share the
+   matching environment credentials outside Git.
+
+   Email/password signup also requires `RESEND_API_KEY` and a verified
+   `AUTH_EMAIL_FROM` sender. Without them, Google signup remains available but
+   email signup is disabled instead of creating an unverified session.
+
+4. Create the Better Auth and application tables:
+
+   ```bash
+   pnpm db:migrate
+   ```
+
+5. Start the development server:
    ```bash
    pnpm dev
    ```
@@ -71,7 +80,7 @@ The application follows a strictly defined design system outlined in `design.md`
 Key architectural concepts include:
 - **Design Philosophy**: Minimalist, low-noise interface keeping the creator's work at the center. Primary actions use neutral ink colors while "warm red" is reserved exclusively for playback/recording signals.
 - **Typography**: Manrope Variable for primary display and body copy; Cascadia Mono for utility and data points.
-- **State Management**: Heavily leverages Next.js App Router conventions with Supabase SSR for data fetching and mutations.
+- **Data access**: Server-only PostgreSQL access through `pg`; authentication and sessions are managed by Better Auth.
 
 ## Testing
 
@@ -87,4 +96,4 @@ pnpm test:e2e
 
 ## Deployment
 
-Refer to `ENVIRONMENTS.md` for the complete production promotion checklist, which includes provisioning production Supabase environments, setting up company-owned OAuth clients, and configuring production billing endpoints.
+Refer to `ENVIRONMENTS.md` for the environment workflow, database migrations, OAuth clients, and production promotion checklist.

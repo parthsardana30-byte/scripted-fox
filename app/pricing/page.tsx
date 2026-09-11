@@ -40,13 +40,13 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           <p className="pricing-kicker">Simple plans</p>
           <h1>Try the workspace. Upgrade when you need more.</h1>
         </div>
-        <p>Start with Basic. Continue with Plus for focused script writing, or choose Pro when you need a longer version history.</p>
+        <p>Try ScriptedFox free for 7 days, choose Pro for a complete writing workflow, or unlock deeper research and publishing tools with Gold.</p>
       </section>
       <section className="section-shell pricing-section">
         {feature ? <div className="pricing-context" role="status">
           <div>
             <strong>{featureLabels[feature]}</strong>
-            <p>{feature === "ai_script_writer" ? "Choose Plus or Pro to generate and revise scripts with AI." : "Choose a plan that includes this premium feature."}</p>
+            <p>{feature === "ai_script_writer" ? "Choose Pro or Gold to generate and revise scripts with AI." : "Choose a plan that includes this premium feature."}</p>
           </div>
           {returnTo ? <Link href={returnTo}>Return to your script</Link> : null}
         </div> : null}

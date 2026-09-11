@@ -5,47 +5,63 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   FileText,
+  Lightbulb,
   Menu,
+  MessagesSquare,
+  MoonStar,
   Plus,
   Settings,
   TrendingUp,
-  UserRound,
   X,
 } from "lucide-react";
 import { useState } from "react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { DashboardGooeyNav } from "@/components/dashboard/dashboard-gooey-nav";
 import { ThemeToggle } from "@/components/landing/theme-toggle";
+import { getPlanDisplayName, type PlanCode } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 const primaryNavigation = [
   { href: "/dashboard", label: "Overview", icon: BarChart3, exact: true },
   { href: "/dashboard/trending", label: "Trending Hub", icon: TrendingUp },
   { href: "/dashboard/editor", label: "Script Hub", icon: FileText },
+  { href: "/dashboard/ideas", label: "Recommendations", icon: Lightbulb },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 const utilityNavigation = [
-  { href: "/dashboard/account", label: "Account", icon: UserRound },
+  { href: "/help", label: "Help & Support", icon: MessagesSquare },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export function DashboardShell({ children, previewMode = false, activePreview = "overview", defaultCollapsed = true }: { children: React.ReactNode; previewMode?: boolean; activePreview?: string; defaultCollapsed?: boolean }) {
+export function DashboardShell({ children, previewMode = false, activePreview = "overview", defaultCollapsed = true, plan = "free" }: { children: React.ReactNode; previewMode?: boolean; activePreview?: string; defaultCollapsed?: boolean; plan?: PlanCode }) {
   const pathname = usePathname();
+  const isHelpPage = pathname === "/help" || pathname.startsWith("/help/");
+  const isFullScriptEditor = pathname.startsWith("/dashboard/editor/");
+  const usesScrollableWorkspace = previewMode
+    || pathname === "/help"
+    || pathname === "/connect"
+    || (pathname.startsWith("/dashboard") && !isFullScriptEditor);
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const previewView = (href: string) => href === "/dashboard" ? "overview"
     : href === "/dashboard/trending" ? "trending"
       : href === "/dashboard/editor" ? "script"
         : href === "/dashboard/ideas" ? "topics"
           : href === "/dashboard/analytics" ? "analytics"
-            : href === "/dashboard/account" ? "account" : "settings";
+            : href === "/help" ? "help"
+              : "settings";
   const destination = (href: string) => previewMode
     ? `/ui-preview${previewView(href) === "overview" ? "" : `?view=${previewView(href)}`}`
     : href;
   const isActive = (href: string, exact?: boolean) => previewMode
     ? activePreview === previewView(href)
     : exact ? pathname === href : pathname.startsWith(href);
+  const planUi = plan === "elite"
+    ? { key: "pro", label: getPlanDisplayName(plan) }
+    : plan === "pro"
+      ? { key: "plus", label: getPlanDisplayName(plan) }
+      : { key: "basic", label: getPlanDisplayName(plan) };
 
   return (
     <div className={cn("dashboard-app", collapsed && "dashboard-app--collapsed")}>
@@ -55,7 +71,10 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
           <Menu size={20} aria-hidden="true" />
         </button>
         <Link className="dashboard-wordmark" href={destination("/dashboard")} prefetch aria-label="Scripted Fox dashboard"><BrandLogo /></Link>
-        <Link className="dashboard-mobile-new" href={destination("/dashboard/editor")} prefetch aria-label="Open Script Hub"><Plus size={19} aria-hidden="true" /></Link>
+        <div className="dashboard-mobile-actions">
+          <span className="dashboard-mobile-theme"><ThemeToggle /></span>
+          <Link className="dashboard-mobile-new" href={destination("/dashboard/editor")} prefetch aria-label="Open Script Hub"><Plus size={19} aria-hidden="true" /></Link>
+        </div>
       </header>
 
       {mobileOpen && <button className="dashboard-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
@@ -92,19 +111,24 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
           <div className="dashboard-nav-label"><strong>Demo session</strong><small>Parth · Plus</small></div>
         </div>}
 
-        <nav className="dashboard-nav" aria-label="Main">
-          {primaryNavigation.map(({ href, label, icon: Icon, exact }) => (
-            <Link key={href} className={cn("dashboard-nav__link", isActive(href, exact) && "dashboard-nav__link--active")} href={destination(href)} prefetch aria-current={isActive(href, exact) ? "page" : undefined} title={collapsed ? label : undefined} onClick={() => setMobileOpen(false)}>
-            <span className="dashboard-nav-icon"><Icon size={18} aria-hidden="true" /></span>
-              <span className="dashboard-nav-label">{label}</span>
-            </Link>
-          ))}
-        </nav>
+        <DashboardGooeyNav
+          items={primaryNavigation.map(({ href, label, icon, exact }) => ({
+            href: destination(href),
+            label,
+            icon,
+            active: isActive(href, exact),
+          }))}
+          collapsed={collapsed}
+          onNavigate={() => setMobileOpen(false)}
+          particleCount={8}
+          particleDistances={[90, 10]}
+          particleR={100}
+          animationTime={600}
+          timeVariance={300}
+          colors={[1, 2, 3, 1, 2, 3, 1, 4]}
+        />
 
         <nav className="dashboard-nav dashboard-nav--utility" aria-label="Account">
-          <div className="dashboard-theme-switch">
-            <ThemeToggle showLabel />
-          </div>
           {utilityNavigation.map(({ href, label, icon: Icon }) => (
             <Link key={href} className={cn("dashboard-nav__link", isActive(href) && "dashboard-nav__link--active")} href={destination(href)} prefetch aria-current={isActive(href) ? "page" : undefined} title={collapsed ? label : undefined} onClick={() => setMobileOpen(false)}>
               <span className="dashboard-nav-icon"><Icon size={18} aria-hidden="true" /></span>
@@ -114,7 +138,18 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
         </nav>
       </aside>
 
-      <main className="dashboard-main" id="dashboard-content" tabIndex={-1}>{children}</main>
+      <main className={cn("dashboard-main", usesScrollableWorkspace && "dashboard-main--scroll-frame", isHelpPage && "dashboard-main--support")} id="dashboard-content" tabIndex={-1}>
+        <div className="dashboard-global-tools" aria-label="Dashboard tools">
+          <div className="dashboard-global-controls">
+            <Link className={`dashboard-plan-badge dashboard-plan-badge--${planUi.key}`} href={destination("/dashboard/upgrade")} aria-label={`Current plan: ${planUi.label}`}>
+              <span className="dashboard-plan-badge__dark-icon" aria-hidden="true"><MoonStar size={18} /></span>
+              <strong>{planUi.label}</strong>
+            </Link>
+            <span className="dashboard-global-theme"><ThemeToggle /></span>
+          </div>
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

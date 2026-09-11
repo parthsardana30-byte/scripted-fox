@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Bookmark, BookmarkCheck, Lightbulb, RefreshCw, RotateCcw, Sparkles, ThumbsDown, TrendingUp, UsersRound } from "lucide-react";
+import { Bookmark, BookmarkCheck, Lightbulb, RefreshCw, RotateCcw, Sparkles, ThumbsDown, TrendingUp, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { scriptDraftSchema, type ScriptDraft } from "@/lib/ai/types";
@@ -12,11 +12,10 @@ import { PageHeader } from "./page-header";
 type IdeasTab = "Recommended" | "Saved";
 type RecommendationSource = "loading" | "live" | "demo" | "error";
 
-export function IdeasView({ canUseScriptWriter = true, demoMode = false, initialNiche = null, embedded = false }: { canUseScriptWriter?: boolean; demoMode?: boolean; initialNiche?: string | null; embedded?: boolean }) {
+export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedded = false }: { canUseScriptWriter?: boolean; demoMode?: boolean; embedded?: boolean }) {
   const router = useRouter();
   const [tab, setTab] = useState<IdeasTab>("Recommended");
   const [ideas, setIdeas] = useState(process.env.NODE_ENV === "test" || demoMode ? dashboardSnapshot.recommendations.slice(0, 5) : []);
-  const [niche, setNiche] = useState(initialNiche);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [dismissed, setDismissed] = useState<{ idea: IdeaRecommendation; wasSaved: boolean } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -31,9 +30,9 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, initial
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ excludeTitles }),
     });
-    const payload = await response.json() as { ideas?: IdeaRecommendation[]; niche?: string; error?: string };
+    const payload = await response.json() as { ideas?: IdeaRecommendation[]; savedIds?: string[]; error?: string };
     if (!response.ok || !payload.ideas) throw new Error(payload.error || "Recommendations are unavailable.");
-    if (payload.niche) setNiche(payload.niche);
+    if (!append) setSavedIds(payload.savedIds ?? []);
     setIdeas((current) => append
       ? [...current, ...payload.ideas!.filter((idea) => !current.some((item) => item.id === idea.id))]
       : payload.ideas!);
@@ -54,10 +53,20 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, initial
     dismissTimer.current = window.setTimeout(() => setDismissed(null), 6000);
   };
 
+  const persistIdeaStatus = (id: string, status: "recommended" | "saved" | "dismissed" | "used") => {
+    if (demoMode || process.env.NODE_ENV === "test") return;
+    void fetch("/api/ideas/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    });
+  };
+
   const dismissIdea = (idea: IdeaRecommendation) => {
     setIdeas((items) => items.filter((item) => item.id !== idea.id));
     setSavedIds((items) => items.filter((id) => id !== idea.id));
     setDismissed({ idea, wasSaved: savedIds.includes(idea.id) });
+    persistIdeaStatus(idea.id, "dismissed");
     startUndoTimer();
   };
 
@@ -65,6 +74,7 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, initial
     if (dismissed) {
       setIdeas((items) => [dismissed.idea, ...items]);
       if (dismissed.wasSaved) setSavedIds((items) => [...items, dismissed.idea.id]);
+      persistIdeaStatus(dismissed.idea.id, dismissed.wasSaved ? "saved" : "recommended");
     }
     window.clearTimeout(dismissTimer.current);
     setDismissed(null);
@@ -116,6 +126,7 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, initial
       if (!response.ok) throw new Error(payload.error || "The script could not be generated.");
       const parsedDraft = scriptDraftSchema.safeParse(payload.draft);
       if (!parsedDraft.success) throw new Error("The generated script was incomplete.");
+      persistIdeaStatus(idea.id, "used");
       window.sessionStorage.setItem("next-video:draft", JSON.stringify(parsedDraft.data));
       router.push("/dashboard/editor/new-script");
     } catch (error) {
@@ -130,7 +141,7 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, initial
 
   return (
     <div className={embedded ? "dashboard-ideas dashboard-ideas--embedded" : "dashboard-page dashboard-ideas"}>
-      <PageHeader eyebrow="Five niche-matched picks, every day" title={<>Daily <span className="daily-topics__accent">Topics</span></>} />
+      <PageHeader title={<>Daily <span className="daily-topics__accent">Topics</span></>} description="Choose what you want to create next." actions={tab === "Recommended" ? <button className={`trending-refresh${loadingMore ? " is-scanning" : ""}`} type="button" onClick={loadMore} disabled={loadingMore || source === "loading"} aria-label={loadingMore ? "Refreshing topics" : "Refresh topics"}><span className="trending-refresh__radar" aria-hidden="true"><RefreshCw size={22} /></span><span className="trending-refresh__label">REFRESH</span></button> : undefined} />
 
       <div className="dashboard-subtabs" role="tablist" aria-label="Idea lists">
         {(["Recommended", "Saved"] as IdeasTab[]).map((item) => <button key={item} role="tab" type="button" aria-selected={tab === item} onClick={() => setTab(item)}>{item}</button>)}
@@ -153,14 +164,12 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, initial
             </div>
             <div className="idea-row__actions">
               <button className="button button--primary button--small" type="button" onClick={() => generate(idea)} disabled={isGenerating}>{isGenerating ? <><RefreshCw className="spin" size={15} aria-hidden="true" /> Preparing…</> : <><Sparkles size={15} aria-hidden="true" /> Generate script</>}</button>
-              <button className="button button--secondary button--small" type="button" onClick={() => setSavedIds((items) => saved ? items.filter((id) => id !== idea.id) : [...items, idea.id])} aria-pressed={saved}>{saved ? <BookmarkCheck size={15} aria-hidden="true" /> : <Bookmark size={15} aria-hidden="true" />}{saved ? "Saved" : "Save for later"}</button>
+              <button className="button button--secondary button--small" type="button" onClick={() => { setSavedIds((items) => saved ? items.filter((id) => id !== idea.id) : [...items, idea.id]); persistIdeaStatus(idea.id, saved ? "recommended" : "saved"); }} aria-pressed={saved}>{saved ? <BookmarkCheck size={15} aria-hidden="true" /> : <Bookmark size={15} aria-hidden="true" />}{saved ? "Saved" : "Save for later"}</button>
               <button className="idea-row__dismiss" type="button" onClick={() => dismissIdea(idea)}><ThumbsDown size={14} aria-hidden="true" /> Not interested</button>
             </div>
           </article>;
         })}
       </div> : <div className="dashboard-empty"><Lightbulb size={24} aria-hidden="true" /><h2>{tab === "Saved" ? "No saved ideas yet" : source === "error" ? "Your niche topics need another scan" : "You’re caught up"}</h2><p>{tab === "Saved" ? "Save a recommendation and it will stay here without adding another sidebar page." : source === "error" ? "We won’t show generic filler. Retry to generate five topics matched to your niche and current YouTube signals." : "Ask for more ideas when you are ready."}</p>{tab === "Saved" ? <button className="button button--secondary button--small" type="button" onClick={() => setTab("Recommended")}>Browse recommendations</button> : source === "error" ? <button className="button button--primary button--small" type="button" onClick={loadMore}>Retry niche scan</button> : null}</div>}
-
-      {tab === "Recommended" && <div className="more-ideas"><p>Your five daily picks refresh as your niche and channel signals change.</p><button className="button button--secondary" type="button" onClick={loadMore} disabled={loadingMore || source === "loading"}>{loadingMore ? <><RefreshCw className="spin" size={17} aria-hidden="true" /> Refreshing…</> : <>Refresh topics <ArrowRight size={17} aria-hidden="true" /></>}</button></div>}
 
       {dismissed && <div className="dashboard-toast" role="status" onMouseEnter={() => window.clearTimeout(dismissTimer.current)} onMouseLeave={startUndoTimer} onFocus={() => window.clearTimeout(dismissTimer.current)} onBlur={startUndoTimer}><span>“{dismissed.idea.title}” removed</span><button type="button" onClick={undoDismiss}><RotateCcw size={15} aria-hidden="true" /> Undo</button></div>}
       {generationError && <div className="dashboard-toast" role="alert"><span>{generationError}</span><button type="button" onClick={() => setGenerationError(null)}>Dismiss</button></div>}

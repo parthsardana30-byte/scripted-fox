@@ -23,14 +23,10 @@ export default async function EditorPage({ searchParams }: { searchParams: Promi
     : {};
   const topicPrompt = typeof query.topic === "string" ? query.topic.trim().slice(0, 500) : "";
   const initialPrompt = topicPrompt || decodeLandingIntent(cookieStore.get(LANDING_INTENT_COOKIE)?.value);
-  const initialNiche = typeof scriptPreferences.channelNiche === "string" && scriptPreferences.channelNiche.trim()
-    ? scriptPreferences.channelNiche.trim()
-    : null;
   return <ScriptHub
     canUseAdvancedExports={hasBillingFeature(access, "advanced_exports")}
     canUseScriptWriter={hasBillingFeature(access, "ai_script_writer")}
     versionChangeLimit={getScriptVersionChangeLimit(access.plan)}
-    initialNiche={initialNiche}
     initialPrompt={initialPrompt}
     initialSetupComplete={scriptPreferences.scriptHubSetupComplete === true}
     initialValues={{

@@ -1,13 +1,13 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, FilePenLine, Languages, Lightbulb, SlidersHorizontal, Zap } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { saveScriptHubSetup, type ScriptSetupState } from "@/app/dashboard/editor/actions";
 import { EditorWorkspace } from "@/components/dashboard/editor-workspace";
-import { IdeasView } from "@/components/dashboard/ideas-view";
 
-type ScriptMode = "own" | "ai" | "topics";
+type ScriptMode = "own" | "ai";
 export type ScriptSetupValues = {
   language: string;
   market: string;
@@ -27,7 +27,6 @@ export function ScriptHub({
   canUseAdvancedExports,
   canUseScriptWriter,
   versionChangeLimit,
-  initialNiche,
 }: {
   initialSetupComplete: boolean;
   initialValues: ScriptSetupValues;
@@ -35,7 +34,6 @@ export function ScriptHub({
   canUseAdvancedExports: boolean;
   canUseScriptWriter: boolean;
   versionChangeLimit: number;
-  initialNiche: string | null;
 }) {
   const [mode, setMode] = useState<ScriptMode | null>(initialPrompt ? "ai" : null);
   const [showSetup, setShowSetup] = useState(Boolean(initialPrompt) && !initialSetupComplete);
@@ -48,13 +46,6 @@ export function ScriptHub({
     setMode(nextMode);
     setShowSetup(nextMode === "own" || !setupComplete);
   };
-  if (mode === "topics") {
-    return <div className="dashboard-page script-hub script-hub--topics">
-      <button className="script-hub__back" type="button" onClick={() => setMode(null)}><ArrowLeft size={17} aria-hidden="true" /> Back to Script Hub</button>
-      <IdeasView canUseScriptWriter={canUseScriptWriter} initialNiche={initialNiche} embedded />
-    </div>;
-  }
-
   if (mode && setupComplete && !setupVisible) {
     return <EditorWorkspace
       canUseAdvancedExports={canUseAdvancedExports}
@@ -102,8 +93,8 @@ export function ScriptHub({
 
   return <div className="dashboard-page script-hub">
     <header className="script-hub__hero">
-      <p><span>Script</span><span> Hub</span></p>
-      <h1>How do you want to create today?</h1>
+      <h1><span>Script</span><span> Hub</span></h1>
+      <p>Choose how you want to start.</p>
     </header>
     <div className="script-hub__choices">
       <button className="script-choice script-choice--own" type="button" onClick={() => chooseMode("own")}>
@@ -111,11 +102,11 @@ export function ScriptHub({
         <strong>Create your own script</strong>
         <ArrowRight className="script-choice__arrow" size={28} aria-hidden="true" />
       </button>
-      <button className="script-choice script-choice--ai" type="button" onClick={() => chooseMode("topics")}>
+      <Link className="script-choice script-choice--ai" href="/dashboard/ideas">
         <span className="script-choice__icon"><Lightbulb size={31} strokeWidth={2.1} aria-hidden="true" /></span>
         <strong>Get a script</strong>
         <ArrowRight className="script-choice__arrow" size={28} aria-hidden="true" />
-      </button>
+      </Link>
     </div>
   </div>;
 }

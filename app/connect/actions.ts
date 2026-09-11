@@ -10,5 +10,5 @@ export async function disconnectYouTubeAction() {
   const user = await requireAuthenticatedUser();
   await disconnectYouTube(user.id);
   revalidatePath("/dashboard");
-  redirect("/connect?status=disconnected");
+  redirect("/dashboard?youtube=disconnected");
 }

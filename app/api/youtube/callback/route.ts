@@ -6,7 +6,7 @@ import { z } from "zod";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { publicEnvironment } from "@/lib/env/public";
 import { exchangeYouTubeAuthorizationCode, getConnectedYouTubeChannel } from "@/lib/youtube/google";
-import { saveYouTubeConnection } from "@/lib/youtube/repository";
+import { saveYouTubeConnection, YouTubeChannelAlreadyConnectedError } from "@/lib/youtube/repository";
 
 export const runtime = "nodejs";
 
@@ -26,7 +26,7 @@ function equalState(received: string, expected: string) {
   return receivedBuffer.length === expectedBuffer.length && timingSafeEqual(receivedBuffer, expectedBuffer);
 }
 
-function finish(request: NextRequest, path: string) {
+function finish(request: NextRequest, path: string, accountHint?: string) {
   const response = NextResponse.redirect(new URL(path, publicEnvironment.NEXT_PUBLIC_SITE_URL));
   const expiredCookie = {
     httpOnly: true,
@@ -37,6 +37,13 @@ function finish(request: NextRequest, path: string) {
   };
   response.cookies.set("youtube_oauth_state", "", expiredCookie);
   response.cookies.set("youtube_oauth_verifier", "", expiredCookie);
+  response.cookies.set("youtube_connection_account_hint", accountHint ? encodeURIComponent(accountHint) : "", {
+    httpOnly: true,
+    maxAge: accountHint ? 5 * 60 : 0,
+    path: "/dashboard",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
   return response;
 }
 
@@ -77,12 +84,15 @@ export async function GET(request: NextRequest) {
     const channel = await getConnectedYouTubeChannel(tokens.access_token);
     await saveYouTubeConnection(user.id, channel, tokens);
     revalidatePath("/dashboard");
-    return finish(request, "/connect?status=connected");
+    return finish(request, "/dashboard");
   } catch (error) {
     console.error("YouTube connection failed", {
       name: error instanceof Error ? error.name : "UnknownError",
       message: error instanceof Error ? error.message : "Unknown failure",
     });
+    if (error instanceof YouTubeChannelAlreadyConnectedError) {
+      return finish(request, "/dashboard?youtube=channel_in_use", error.accountHint);
+    }
     const noChannel = error instanceof Error && error.message.includes("does not have an accessible YouTube channel");
     return finish(request, noChannel ? "/connect?error=no_channel" : "/connect?error=connection_failed");
   }

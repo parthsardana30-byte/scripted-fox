@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { AuthenticationRequiredError, requireAuthenticatedUser } from "@/lib/auth/session";
 import { AiConfigurationError, AiProviderError } from "@/lib/ai/groq";
+import { inferCreatorNiche } from "@/lib/ai/niche";
 import { assistWithScript, generateScriptDraft } from "@/lib/ai/script";
 import { aiRequestSchema } from "@/lib/ai/types";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
@@ -16,6 +17,7 @@ const MAX_REQUEST_BYTES = 32_000;
 const REQUESTS_PER_MINUTE = 10;
 
 const snapshotContextSchema = z.object({
+  channel: z.object({ title: z.string() }).optional(),
   summary: z.object({
     views: z.number().nonnegative(),
     watchTimeMinutes: z.number().nonnegative(),
@@ -23,6 +25,7 @@ const snapshotContextSchema = z.object({
     subscribersGained: z.number().nonnegative(),
   }),
   topVideos: z.array(z.object({ title: z.string(), views: z.number().nonnegative() })).max(50),
+  recentVideos: z.array(z.object({ title: z.string() })).max(50).default([]),
 });
 
 function objectValue(value: Json | undefined) {
@@ -50,23 +53,36 @@ async function loadCreatorContext(userId: string, title: string) {
   const topVideo = analytics.success
     ? [...analytics.data.topVideos].sort((a, b) => b.views - a.views)[0]
     : null;
+  const savedNiche = typeof defaults.channelNiche === "string" && defaults.channelNiche.trim()
+    ? defaults.channelNiche.trim()
+    : null;
+  const inferredNiche = savedNiche || !analytics.success
+    ? null
+    : await inferCreatorNiche({
+        channelTitle: analytics.data.channel?.title,
+        recentTitles: [...new Set([
+          ...(analytics.data.recentVideos ?? []).map((video) => video.title),
+          ...analytics.data.topVideos.map((video) => video.title),
+        ])],
+      }).catch(() => null);
 
   const trendPreferences = {
     userId,
-    niche: typeof defaults.channelNiche === "string" ? defaults.channelNiche : "content creation",
+    niche: savedNiche ?? inferredNiche ?? "content creation",
     languages: preferences?.content_languages ?? ["en"],
     markets: preferences?.target_markets ?? ["IN", "GLOBAL"],
   };
   const trends = await getCachedPublicTrends(trendPreferences);
 
   return {
+    niche: trendPreferences.niche,
     languages: trendPreferences.languages,
     markets: trendPreferences.markets,
     tone: typeof defaults.tone === "string" ? defaults.tone : "clear",
     videoLength: typeof defaults.videoLength === "string" ? defaults.videoLength : "7-10 minutes",
     openingStyle: typeof defaults.openingStyle === "string" ? defaults.openingStyle : "value-first",
     analyticsSummary: analytics.success
-      ? `Last 28 days: ${analytics.data.summary.views} views, ${Math.round(analytics.data.summary.watchTimeMinutes)} watch minutes, ${Math.round(analytics.data.summary.averageViewDurationSeconds)}s average view duration, ${analytics.data.summary.subscribersGained} subscribers gained${topVideo ? `; strongest recent video: “${topVideo.title}” with ${topVideo.views} views` : ""}.`
+      ? `Established upload topics: ${(analytics.data.recentVideos ?? []).slice(0, 8).map((video) => `“${video.title}”`).join(", ") || "not enough upload history"}. Last 28 days: ${analytics.data.summary.views} views, ${Math.round(analytics.data.summary.watchTimeMinutes)} watch minutes, ${Math.round(analytics.data.summary.averageViewDurationSeconds)}s average view duration, ${analytics.data.summary.subscribersGained} subscribers gained${topVideo ? `; strongest recent video: “${topVideo.title}” with ${topVideo.views} views` : ""}.`
       : null,
     trendSummary: trends ? trendSummaryForTitle(trends.evidence, title) : null,
   };

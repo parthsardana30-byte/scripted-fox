@@ -14,7 +14,7 @@ import {
 import type { Json } from "@/types/database";
 
 const CACHE_HOURS = 6;
-const SNAPSHOT_SCHEMA = "youtube_channel_analytics_v1";
+const SNAPSHOT_SCHEMA = "youtube_channel_analytics_v2";
 
 const analyticsSnapshotSchema = z.object({
   schema: z.literal(SNAPSHOT_SCHEMA),
@@ -47,6 +47,12 @@ const analyticsSnapshotSchema = z.object({
     averageViewPercentage: z.number(),
     subscribersGained: z.number(),
   })),
+  recentVideos: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    publishedAt: z.string().nullable(),
+  })).optional(),
   capturedAt: z.string(),
 });
 
@@ -128,6 +134,7 @@ async function syncAnalytics(connection: Connection): Promise<AnalyticsSnapshot>
     },
     period,
     ...analytics,
+    recentVideos: channel.recentVideos,
     capturedAt: capturedAt.toISOString(),
   };
   const expiresAt = new Date(capturedAt.getTime() + CACHE_HOURS * 60 * 60 * 1000);
@@ -170,7 +177,7 @@ async function syncAnalytics(connection: Connection): Promise<AnalyticsSnapshot>
   return snapshot;
 }
 
-export async function getChannelAnalytics(userId: string): Promise<ChannelAnalyticsState> {
+export async function getChannelAnalytics(userId: string, options: { forceRefresh?: boolean } = {}): Promise<ChannelAnalyticsState> {
   const admin = createAdminClient();
   const { data: connection } = await admin
     .from("youtube_connections")
@@ -184,7 +191,7 @@ export async function getChannelAnalytics(userId: string): Promise<ChannelAnalyt
   }
 
   const cached = await latestSnapshot(userId, connection.id);
-  if (cached?.fresh) return { kind: "ready", snapshot: cached.snapshot, isStale: false };
+  if (cached?.fresh && !options.forceRefresh) return { kind: "ready", snapshot: cached.snapshot, isStale: false };
 
   try {
     const snapshot = await syncAnalytics(connection);

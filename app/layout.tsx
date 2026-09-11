@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://scriptedfox.com");
 
@@ -41,8 +46,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       lang="en"
       data-scroll-behavior="smooth"
       data-next-video-theme="light"
+      suppressHydrationWarning className={cn("font-sans", geist.variable)}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Script id="scripted-fox-theme" strategy="beforeInteractive">
+          {`(function(){try{var t=localStorage.getItem("scripted-fox:theme");if(t==="dark"||t==="light")document.documentElement.dataset.nextVideoTheme=t}catch(e){}})()`}
+        </Script>
+      </body>
     </html>
   );
 }

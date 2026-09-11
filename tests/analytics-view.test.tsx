@@ -1,8 +1,10 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { AnalyticsView } from "@/components/dashboard/analytics-view";
 import type { ChannelAnalyticsState } from "@/lib/youtube/analytics";
+
+afterEach(cleanup);
 
 describe("AnalyticsView", () => {
   it("shows no channel figures before YouTube is connected", () => {
@@ -19,7 +21,7 @@ describe("AnalyticsView", () => {
       kind: "ready",
       isStale: false,
       snapshot: {
-        schema: "youtube_channel_analytics_v1",
+        schema: "youtube_channel_analytics_v2",
         channel: {
           id: "channel-1",
           title: "Creator channel",
@@ -50,10 +52,12 @@ describe("AnalyticsView", () => {
 
     render(<AnalyticsView state={state} />);
 
-    expect(screen.getByText(/Creator channel/)).toBeVisible();
+    expect(screen.getByText("See what’s working across your channel.")).toBeVisible();
+    expect(screen.queryByText(/Creator channel/)).not.toBeInTheDocument();
     expect(screen.getByText("A real channel video")).toBeVisible();
     expect(screen.queryByText("6 gained · 2 lost")).not.toBeInTheDocument();
     expect(screen.getByText("8 gained · 2 lost")).toBeVisible();
     expect(screen.queryByText("Demo channel data")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sync channel analytics" })).toHaveAttribute("href", "/dashboard/analytics?sync=1");
   });
 });

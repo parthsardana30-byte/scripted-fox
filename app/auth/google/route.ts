@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   }
   try {
     const result = await auth.api.signInSocial({
-      body: { provider: "google", callbackURL: next },
+      body: { provider: "google", callbackURL: next, errorCallbackURL: "/sign-in" },
       headers: request.headers,
     });
     if (!result.url) throw new Error("Google login URL was not returned.");

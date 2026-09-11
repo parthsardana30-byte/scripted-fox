@@ -1,6 +1,9 @@
 export type PublicVideoSignal = {
   id: string;
   title: string;
+  description?: string;
+  tags?: string[];
+  discoveryQuery?: string;
   channelTitle: string;
   channelSubscribers?: number | null;
   publishedAt: string;
@@ -16,6 +19,7 @@ export type ScoredTrendVideo = PublicVideoSignal & {
   viewsPerDay: number;
   engagementRate: number;
   freshness: number;
+  audienceBreakout: number;
   score: number;
 };
 
@@ -34,18 +38,23 @@ export function scoreTrendVideos(videos: PublicVideoSignal[], now = new Date()):
     const viewsPerDay = video.views / ageDays;
     const engagementRate = video.views > 0 ? (video.likes + video.comments) / video.views : 0;
     const freshness = clamp(1 - ageDays / 30);
-    return { ...video, viewsPerDay, engagementRate, freshness };
+    const audienceBreakout = video.channelSubscribers && video.channelSubscribers > 0
+      ? video.views / video.channelSubscribers
+      : 0;
+    return { ...video, viewsPerDay, engagementRate, freshness, audienceBreakout };
   });
   const maximumVelocity = Math.max(0, ...prepared.map((video) => video.viewsPerDay));
   const maximumEngagement = Math.max(0, ...prepared.map((video) => video.engagementRate));
+  const maximumBreakout = Math.max(0, ...prepared.map((video) => video.audienceBreakout));
 
   return prepared
     .map((video) => ({
       ...video,
       score: Math.round(100 * (
-        normalizeLog(video.viewsPerDay, maximumVelocity) * 0.55
-        + normalizeLog(video.engagementRate, maximumEngagement) * 0.25
-        + video.freshness * 0.2
+        normalizeLog(video.viewsPerDay, maximumVelocity) * 0.43
+        + normalizeLog(video.engagementRate, maximumEngagement) * 0.2
+        + video.freshness * 0.17
+        + normalizeLog(video.audienceBreakout, maximumBreakout) * 0.2
       )),
     }))
     .sort((a, b) => b.score - a.score || b.viewsPerDay - a.viewsPerDay);
@@ -78,4 +87,52 @@ export function relevanceScore(title: string, candidate: string) {
   let overlap = 0;
   requested.forEach((token) => { if (available.has(token)) overlap += 1; });
   return overlap / requested.size;
+}
+
+type DiversifiableTrend = {
+  id: string;
+  title: string;
+  channelTitle: string;
+  score: number;
+  outlook?: "rising-now" | "breakout-candidate" | "steady";
+};
+
+function titleSimilarity(left: string, right: string) {
+  const leftTokens = topicTokens(left);
+  const rightTokens = topicTokens(right);
+  if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
+  let intersection = 0;
+  leftTokens.forEach((token) => { if (rightTokens.has(token)) intersection += 1; });
+  return intersection / new Set([...leftTokens, ...rightTokens]).size;
+}
+
+export function selectDiverseTrends<T extends DiversifiableTrend>(videos: T[], limit: number, recentlyShownIds: Set<string> = new Set()) {
+  const ordered = [...videos].sort((left, right) => {
+    const leftSeen = recentlyShownIds.has(left.id) && left.outlook !== "rising-now" ? 1 : 0;
+    const rightSeen = recentlyShownIds.has(right.id) && right.outlook !== "rising-now" ? 1 : 0;
+    return leftSeen - rightSeen || right.score - left.score;
+  });
+  const buckets = [
+    ordered.filter((video) => video.outlook === "rising-now"),
+    ordered.filter((video) => video.outlook === "breakout-candidate"),
+    ordered.filter((video) => video.outlook !== "rising-now" && video.outlook !== "breakout-candidate"),
+  ];
+  const selected: T[] = [];
+  const channelCounts = new Map<string, number>();
+  const tryAdd = (video: T) => {
+    if (selected.some((item) => item.id === video.id)) return;
+    if ((channelCounts.get(video.channelTitle) ?? 0) >= 2) return;
+    if (selected.some((item) => titleSimilarity(item.title, video.title) >= .72)) return;
+    selected.push(video);
+    channelCounts.set(video.channelTitle, (channelCounts.get(video.channelTitle) ?? 0) + 1);
+  };
+  const targets = [4, 3, Math.max(0, limit - 7)];
+  buckets.forEach((bucket, index) => {
+    for (const video of bucket) {
+      if (selected.length >= limit || selected.filter((item) => buckets[index].some((candidate) => candidate.id === item.id)).length >= targets[index]) break;
+      tryAdd(video);
+    }
+  });
+  ordered.forEach((video) => { if (selected.length < limit) tryAdd(video); });
+  return selected;
 }

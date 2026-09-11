@@ -5,6 +5,7 @@ import { scriptWritingSystemPrompt } from "@/lib/ai/prompts/script-writing-promp
 import { scriptDraftSchema, type ScriptDraft } from "@/lib/ai/types";
 
 type CreatorContext = {
+  niche: string;
   languages: string[];
   markets: string[];
   tone: string;
@@ -60,6 +61,7 @@ const editedDraftJsonSchema = {
 
 function contextText(context: CreatorContext) {
   return [
+    `Creator niche: ${context.niche}`,
     `Language: ${context.languages.join(", ") || "English"}`,
     `Target market: ${context.markets.join(", ") || "Global"}`,
     `Tone: ${context.tone}`,

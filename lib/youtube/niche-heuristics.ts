@@ -1,4 +1,7 @@
 const nicheRules = [
+  { niche: "Piano covers", terms: ["piano cover", "piano covers", "piano rendition", "piano instrumental"] },
+  { niche: "Guitar covers", terms: ["guitar cover", "guitar covers", "acoustic cover"] },
+  { niche: "Song covers", terms: ["song cover", "vocal cover", "cover song"] },
   { niche: "PUBG gaming", terms: ["pubg", "bgmi", "battlegrounds mobile"] },
   { niche: "Roblox gaming", terms: ["roblox"] },
   { niche: "Minecraft gaming", terms: ["minecraft", "mooshroom"] },
@@ -6,7 +9,7 @@ const nicheRules = [
   { niche: "GTA gaming", terms: ["gta", "grand theft auto"] },
   { niche: "Gaming", terms: ["gameplay", "gaming", "gamer", "esports", "rank push", "clutch", "teammate", "camper"] },
   { niche: "AI tools", terms: ["artificial intelligence", "chatgpt", "gemini ai", "claude ai", "ai tool", "ai tools"] },
-  { niche: "Music", terms: ["music video", "official audio", "song cover", "piano cover", "guitar cover", "remix"] },
+  { niche: "Music", terms: ["music video", "official audio", "original song", "remix"] },
   { niche: "Technology", terms: ["tech review", "smartphone", "laptop", "android", "iphone", "gadget"] },
   { niche: "Cooking", terms: ["recipe", "cooking", "kitchen", "baking"] },
 ] as const;

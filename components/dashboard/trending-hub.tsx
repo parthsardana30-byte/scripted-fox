@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Eye, Radar, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowUpRight, Eye, RefreshCw, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { PageHeader } from "./page-header";
 
 export type TrendSignal = { id: string; title: string; channelTitle: string; publishedAt: string; market: string; views: number; viewsPerDay: number; recentViewsPerDay?: number; acceleration?: number; engagementRate: number; score: number; nicheRelevance?: number | null; outlook?: "rising-now" | "breakout-candidate" | "steady"; reason?: string };
-type TrendsPayload = { signals?: TrendSignal[]; niche?: string; rankedBy?: "gemini" | "momentum"; error?: string };
+type TrendsPayload = { signals?: TrendSignal[]; rankedBy?: "gemini" | "grok" | "groq" | "momentum"; error?: string };
 
 function compactNumber(value: number) {
   return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(value);
@@ -43,7 +43,7 @@ export function TrendingHub({ demoSignals }: { demoSignals?: TrendSignal[] }) {
 
   return (
     <div className="dashboard-page trending-hub">
-      <PageHeader eyebrow="Niche opportunity radar" title={<>Trending <span className="trending-title-accent">Hub</span></>} actions={<button className={`trending-refresh${refreshing ? " is-scanning" : ""}`} type="button" disabled={refreshing || Boolean(demoSignals)} onClick={() => void loadTrends(true)} aria-label={refreshing ? "Scanning fresh trends" : "Scan fresh trends"}><span className="trending-refresh__radar" aria-hidden="true"><Radar size={22} /></span><span className="trending-refresh__label">SCAN</span></button>} />
+      <PageHeader title={<>Trending <span className="trending-title-accent">Hub</span></>} description="See what’s gaining momentum in your niche." actions={<button className={`trending-refresh${refreshing ? " is-scanning" : ""}`} type="button" disabled={refreshing || Boolean(demoSignals)} onClick={() => void loadTrends(true)} aria-label={refreshing ? "Scanning fresh trends" : "Scan fresh trends"}><span className="trending-refresh__radar" aria-hidden="true"><RefreshCw size={22} /></span><span className="trending-refresh__label">SCAN</span></button>} />
       {loading ? <div className="trending-grid" aria-label="Loading trends">{Array.from({ length: 6 }).map((_, index) => <div className="trending-card trending-card--loading" key={index} />)}</div>
         : error ? <div className="trending-empty"><TrendingUp size={28} aria-hidden="true" /><h2>Trend feed needs a moment</h2><p>{error}</p><button className="button button--secondary button--small" type="button" onClick={() => void loadTrends()}>Try again</button></div>
         : signals.length === 0 ? <div className="trending-empty"><TrendingUp size={28} aria-hidden="true" /><h2>Your trend feed is ready to scan</h2><p>Refresh once to collect the newest public YouTube signals for your niche.</p><button className="button button--primary button--small" type="button" onClick={() => void loadTrends(true)}>Find trending videos</button></div>

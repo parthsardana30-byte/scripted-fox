@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { BellRing, FileText, Lightbulb, type LucideIcon } from "lucide-react";
+import { BellRing, FileText, Lightbulb, Magnet, Sparkles, type LucideIcon } from "lucide-react";
 
 type DemoStage = {
   label: string;
@@ -20,6 +20,18 @@ const stages: DemoStage[] = [
     icon: Lightbulb,
   },
   {
+    label: "Angle",
+    question: "Need a sharper angle?",
+    answer: "We found the tension viewers will click for.",
+    icon: Sparkles,
+  },
+  {
+    label: "Hook",
+    question: "Need them to keep watching?",
+    answer: "Your opening promise is locked in.",
+    icon: Magnet,
+  },
+  {
     label: "Script",
     question: "Don’t know what to say?",
     answer: "We’ve got the full script.",
@@ -34,7 +46,11 @@ const stages: DemoStage[] = [
   },
 ];
 
-export function ScriptReadyDemo() {
+type ScriptReadyDemoProps = {
+  contextLabel?: string;
+};
+
+export function ScriptReadyDemo({ contextLabel = "Scripted Fox flow" }: ScriptReadyDemoProps) {
   const [activeStage, setActiveStage] = useState(0);
   const reduceMotion = useReducedMotion();
 
@@ -58,7 +74,7 @@ export function ScriptReadyDemo() {
       aria-label="From no topic to a ready YouTube script"
     >
       <div className="script-ready-demo__topline">
-        <span>Scripted Fox flow</span>
+        <span>{contextLabel}</span>
         <div className="script-ready-demo__steps" aria-label="Demo steps">
           {stages.map((item, index) => (
             <button

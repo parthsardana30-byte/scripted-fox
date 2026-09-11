@@ -1,27 +1,36 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type LandingTheme = "light" | "dark";
+const THEME_STORAGE_KEY = "scripted-fox:theme";
+const THEME_CHANGE_EVENT = "scripted-fox:theme-change";
+
+function currentTheme(): LandingTheme {
+  return document.documentElement.dataset.nextVideoTheme === "dark" ? "dark" : "light";
+}
 
 export function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
-  const [theme, setTheme] = useState<LandingTheme>("light");
-
-  useEffect(() => {
-    document.documentElement.dataset.nextVideoTheme = "light";
-    window.localStorage.removeItem("next-video:theme");
-    window.localStorage.removeItem("next-video:landing-theme");
-    const frame = window.requestAnimationFrame(() => setTheme("light"));
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
+  const theme = useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener(THEME_CHANGE_EVENT, onChange);
+      window.addEventListener("storage", onChange);
+      return () => {
+        window.removeEventListener(THEME_CHANGE_EVENT, onChange);
+        window.removeEventListener("storage", onChange);
+      };
+    },
+    currentTheme,
+    () => "light",
+  );
 
   const toggleTheme = () => {
-    const current = document.documentElement.dataset.nextVideoTheme === "dark" ? "dark" : "light";
+    const current = currentTheme();
     const next = current === "dark" ? "light" : "dark";
     document.documentElement.dataset.nextVideoTheme = next;
-    setTheme(next);
+    window.localStorage.setItem(THEME_STORAGE_KEY, next);
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   };
 
   return (
@@ -29,8 +38,9 @@ export function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
       className="theme-toggle landing-theme-toggle"
       type="button"
       onClick={toggleTheme}
-      aria-label="Switch light or dark theme"
-      title="Switch light or dark theme"
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      suppressHydrationWarning
     >
       <Moon className="landing-theme-toggle__moon" aria-hidden="true" size={18} />
       <Sun className="landing-theme-toggle__sun" aria-hidden="true" size={18} />

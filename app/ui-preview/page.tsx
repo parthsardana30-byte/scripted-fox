@@ -4,6 +4,8 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { EditorWorkspace } from "@/components/dashboard/editor-workspace";
 import { HomeDashboard } from "@/components/dashboard/home-dashboard";
 import { IdeasView } from "@/components/dashboard/ideas-view";
+import { NicheConfirmationDialog } from "@/components/dashboard/niche-confirmation-dialog";
+import { SettingsView } from "@/components/dashboard/settings-view";
 import { TrendingHub, type TrendSignal } from "@/components/dashboard/trending-hub";
 import type { ChannelAnalyticsState } from "@/lib/youtube/analytics";
 
@@ -23,7 +25,7 @@ const demoAnalytics: ChannelAnalyticsState = {
   kind: "ready",
   isStale: false,
   snapshot: {
-    schema: "youtube_channel_analytics_v1",
+    schema: "youtube_channel_analytics_v2",
     channel: { id: "demo-channel", title: "Parth Creates", thumbnailUrl: null, lifetime: { views: 2840000, subscribers: 48600, subscribersHidden: false, videos: 86 } },
     period: { start: "2026-08-03", end: "2026-08-30" },
     summary: { views: 219140, watchTimeMinutes: 524160, averageViewDurationSeconds: 286, subscribersGained: 1480, subscribersLost: 220 },
@@ -41,12 +43,28 @@ export default async function UiPreviewPage({ searchParams }: { searchParams: Pr
   if (process.env.NODE_ENV === "production") notFound();
   const params = await searchParams;
   const requestedView = params.view ?? "overview";
-  const activeView = ["overview", "trending", "script", "topics", "analytics"].includes(requestedView) ? requestedView : "overview";
+  const activeView = ["overview", "trending", "script", "topics", "analytics", "settings"].includes(requestedView) ? requestedView : "overview";
 
   const content = activeView === "trending" ? <TrendingHub demoSignals={demoTrends} />
     : activeView === "script" ? <EditorWorkspace canUseAdvancedExports canUseScriptWriter versionChangeLimit={10} returnPath="/ui-preview?view=script" initialPrompt={params.topic ?? ""} />
       : activeView === "topics" ? <IdeasView canUseScriptWriter demoMode />
-        : activeView === "analytics" ? <AnalyticsView state={demoAnalytics} />
+        : activeView === "analytics" ? <AnalyticsView state={demoAnalytics} syncHref="/ui-preview?view=analytics" />
+          : activeView === "settings" ? <SettingsView
+              account={{
+                displayName: "Parth",
+                email: "parth@example.com",
+                memberSince: "31 Aug 2026",
+                signInMethod: "Google",
+                hasPassword: false,
+                hasGoogle: true,
+                channelNiche: "Creator Education",
+                channelGoal: "growth",
+                connection: { active: true, title: "Parth Creates", status: "Status: connected" },
+                plan: { name: "Plus", description: "Trial access is active." },
+              }}
+              channel={{ name: "Parth Creates", niche: "Creator Education" }}
+              initialValues={{ language: "en", secondaryLanguage: "none", market: "IN", tone: "clear", videoLength: "7-10", openingStyle: "value-first" }}
+            />
           : <HomeDashboard
             demoMode
             setup={{ accountCreated: true, channelConnected: true, preferencesSet: false }}
@@ -66,8 +84,14 @@ export default async function UiPreviewPage({ searchParams }: { searchParams: Pr
           />;
 
   return (
-    <DashboardShell previewMode activePreview={activeView} defaultCollapsed>
+    <DashboardShell previewMode activePreview={activeView} defaultCollapsed plan="pro">
       {content}
+      {requestedView === "niche" ? (
+        <NicheConfirmationDialog
+          channelName="Parth Creates"
+          suggestedNiche="Piano covers"
+        />
+      ) : null}
     </DashboardShell>
   );
 }

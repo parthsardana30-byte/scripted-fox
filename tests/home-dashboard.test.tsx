@@ -5,20 +5,20 @@ import { HomeDashboard } from "@/components/dashboard/home-dashboard";
 
 afterEach(cleanup);
 
-describe("HomeDashboard setup checklist", () => {
-  it("shows incomplete setup from the supplied account state", () => {
+describe("HomeDashboard connection state", () => {
+  it("shows one focused YouTube action without restoring the old setup checklist", () => {
     render(<HomeDashboard setup={{ accountCreated: true, channelConnected: false, preferencesSet: false }} userName="Aryan" />);
 
     expect(screen.getByRole("heading", { name: /Aryan/ })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Finish setup" })).toBeVisible();
-    expect(screen.getByText("1 of 3")).toBeVisible();
-    expect(screen.getByRole("link", { name: "Connect channel" })).toHaveAttribute("href", "/connect");
-    expect(screen.getByRole("link", { name: "Set preferences" })).toHaveAttribute("href", "/dashboard/settings");
+    expect(screen.getByRole("link", { name: "Connect YouTube" })).toHaveAttribute("href", "/connect");
+    expect(screen.queryByRole("heading", { name: "Finish setup" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Set preferences" })).not.toBeInTheDocument();
   });
 
   it("removes the setup panel when every setup step is finished", () => {
     render(<HomeDashboard setup={{ accountCreated: true, channelConnected: true, preferencesSet: true }} channelName="Scripted Fox TV" />);
 
+    expect(screen.queryByRole("link", { name: /Current plan:/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Connected YouTube channel: Scripted Fox TV" })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Setup complete" })).not.toBeInTheDocument();
     expect(screen.queryByText("3 of 3")).not.toBeInTheDocument();

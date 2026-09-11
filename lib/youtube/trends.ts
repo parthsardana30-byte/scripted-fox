@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { serverEnvironment } from "@/lib/env/server";
 import { createAdminClient } from "@/lib/db/client";
-import { rankTrendSignalsWithGemini } from "@/lib/ai/trend-ranking";
+import { rankTrendSignalsWithAi } from "@/lib/ai/trend-ranking";
 import { requireYouTubeEnvironment } from "@/lib/youtube/config";
 import { decryptRefreshToken } from "@/lib/youtube/crypto";
 import { refreshYouTubeAccessToken } from "@/lib/youtube/google";
@@ -15,7 +15,8 @@ const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 const CACHE_HOURS = 6;
 const WINDOW_DAYS = 14;
 const MAX_SIGNALS = 18;
-const SNAPSHOT_SCHEMA = "youtube_public_trends_v2";
+const MAX_SEARCH_CANDIDATES = 42;
+const SNAPSHOT_SCHEMA = "youtube_public_trends_v3";
 
 const searchResponseSchema = z.object({
   items: z.array(z.object({
@@ -28,6 +29,8 @@ const videosResponseSchema = z.object({
     id: z.string().min(1),
     snippet: z.object({
       title: z.string(),
+      description: z.string().default(""),
+      tags: z.array(z.string()).default([]),
       channelTitle: z.string(),
       channelId: z.string(),
       publishedAt: z.string(),
@@ -59,6 +62,9 @@ export const trendSnapshotEvidenceSchema = z.object({
   videos: z.array(z.object({
     id: z.string(),
     title: z.string(),
+    description: z.string().max(500).optional(),
+    tags: z.array(z.string().max(80)).max(12).optional(),
+    discoveryQuery: z.string().max(100).optional(),
     channelTitle: z.string(),
     channelSubscribers: z.number().nonnegative().nullable().optional(),
     publishedAt: z.string(),
@@ -71,6 +77,7 @@ export const trendSnapshotEvidenceSchema = z.object({
     viewsPerDay: z.number().nonnegative(),
     engagementRate: z.number().nonnegative(),
     freshness: z.number().min(0).max(1),
+    audienceBreakout: z.number().nonnegative().optional(),
     score: z.number().min(0).max(100),
     momentumScore: z.number().min(0).max(100).optional(),
     recentViewsPerDay: z.number().nonnegative().optional(),
@@ -80,7 +87,7 @@ export const trendSnapshotEvidenceSchema = z.object({
     reason: z.string().max(180).optional(),
   })).max(MAX_SIGNALS),
   capturedAt: z.string(),
-  aiAnalysis: z.object({ provider: z.literal("gemini"), model: z.string() }).optional(),
+  aiAnalysis: z.object({ provider: z.enum(["gemini", "grok", "groq"]), model: z.string() }).optional(),
 });
 
 export type TrendSnapshotEvidence = z.infer<typeof trendSnapshotEvidenceSchema>;
@@ -156,30 +163,52 @@ async function youtubeRequest<T>(path: string, parameters: Record<string, string
   return parsed.data;
 }
 
-function collectionTargets(markets: string[]) {
+function normalizedLanguages(languages: string[]) {
+  const expanded = languages.flatMap((language) => language.toLocaleLowerCase() === "hinglish" ? ["hi", "en"] : [language.toLocaleLowerCase()]);
+  const supported = [...new Set(expanded.filter((language) => /^[a-z]{2,3}$/.test(language)))];
+  return supported.length > 0 ? supported : ["en"];
+}
+
+function collectionTargets(markets: string[], languages: string[]) {
   const wantsIndia = markets.length === 0 || markets.includes("IN");
   const wantsGlobal = markets.length === 0 || markets.includes("GLOBAL");
+  const selectedLanguages = normalizedLanguages(languages);
   const targets = [
-    ...(wantsIndia ? [{ market: "IN", language: "en" }] : []),
-    ...(wantsIndia ? [{ market: "IN", language: "hi" }] : []),
-    ...(wantsGlobal ? [{ market: "GLOBAL", language: "en" }] : []),
-  ];
+    ...(wantsIndia ? selectedLanguages.map((language) => ({ market: "IN", language })) : []),
+    ...(wantsGlobal ? selectedLanguages.map((language) => ({ market: "GLOBAL", language })) : []),
+  ].slice(0, 4);
   return targets.length > 0 ? targets : [{ market: "IN", language: "en" }];
+}
+
+export function estimatedTrendScanQuota(markets: string[], languages: string[]) {
+  // search.list costs 100 quota units; detail, channel and popular-chart
+  // requests cost one unit each. Keep this estimate slightly conservative.
+  return collectionTargets(markets, languages).length * trendQueryPortfolio("niche").length * 100 + 4;
+}
+
+export function trendQueryPortfolio(niche: string) {
+  const normalized = normalizedNiche(niche);
+  return [
+    { query: normalized, order: "viewCount" as const },
+    { query: `${normalized} latest`, order: "date" as const },
+    { query: `${normalized} shorts`, order: "date" as const },
+  ];
 }
 
 async function collectPublicSignals(input: TrendLookupInput) {
   const niche = normalizedNiche(input.niche);
   const credential = await requireDataCredential(input.userId);
-  const targets = collectionTargets(input.markets);
+  const targets = collectionTargets(input.markets, input.languages);
   const publishedAfter = new Date(Date.now() - WINDOW_DAYS * 86_400_000).toISOString();
-  const discoveries = new Map<string, { market: string; language: string; discovery: "popular" | "search" }>();
+  const discoveries = new Map<string, { market: string; language: string; discovery: "popular" | "search"; discoveryQuery?: string }>();
 
-  const searches = await Promise.all(targets.map(async (target) => {
+  const searchPlans = targets.flatMap((target) => trendQueryPortfolio(niche).map((plan) => ({ ...target, ...plan })));
+  const searchResults = await Promise.all(searchPlans.map(async (target) => {
     const parameters: Record<string, string> = {
       part: "snippet",
       type: "video",
-      q: niche,
-      order: "viewCount",
+      q: target.query,
+      order: target.order,
       publishedAfter,
       relevanceLanguage: target.language,
       safeSearch: "moderate",
@@ -187,8 +216,45 @@ async function collectPublicSignals(input: TrendLookupInput) {
     };
     if (target.market !== "GLOBAL") parameters.regionCode = target.market;
     const result = await youtubeRequest("search", parameters, searchResponseSchema, credential);
-    result.items.forEach((item) => discoveries.set(item.id.videoId, { ...target, discovery: "search" }));
-    return { ...target, query: niche };
+    return {
+      market: target.market,
+      language: target.language,
+      query: target.query,
+      videoIds: result.items.map((item) => item.id.videoId),
+    };
+  }));
+
+  // Round-robin the query result sets so one high-volume market or query cannot
+  // consume the 50-ID detail request before the other configured targets appear.
+  for (let resultIndex = 0; resultIndex < 12 && discoveries.size < MAX_SEARCH_CANDIDATES; resultIndex += 1) {
+    for (const result of searchResults) {
+      const videoId = result.videoIds[resultIndex];
+      if (!videoId || discoveries.has(videoId)) continue;
+      discoveries.set(videoId, {
+        market: result.market,
+        language: result.language,
+        discovery: "search",
+        discoveryQuery: result.query,
+      });
+      if (discoveries.size >= MAX_SEARCH_CANDIDATES) break;
+    }
+  }
+  const searches = searchResults.map(({ videoIds, ...query }) => {
+    void videoIds;
+    return query;
+  });
+
+  const chartTargets = [...new Set(targets.filter((target) => target.market !== "GLOBAL").map((target) => target.market))];
+  await Promise.all(chartTargets.map(async (market) => {
+    const result = await youtubeRequest("videos", {
+      part: "snippet,statistics",
+      chart: "mostPopular",
+      regionCode: market,
+      maxResults: "25",
+    }, videosResponseSchema, credential);
+    result.items.forEach((video) => {
+      if (!discoveries.has(video.id)) discoveries.set(video.id, { market, language: targets.find((target) => target.market === market)?.language ?? "en", discovery: "popular" });
+    });
   }));
 
 
@@ -207,11 +273,15 @@ async function collectPublicSignals(input: TrendLookupInput) {
     channel.id,
     channel.statistics.hiddenSubscriberCount ? null : count(channel.statistics.subscriberCount),
   ]));
-  const signals: PublicVideoSignal[] = details.items.map((video) => {
+  const signals: PublicVideoSignal[] = details.items
+    .filter((video) => new Date(video.snippet.publishedAt).getTime() >= new Date(publishedAfter).getTime())
+    .map((video) => {
     const discovery = discoveries.get(video.id) ?? { market: "IN", language: "en", discovery: "popular" as const };
     return {
       id: video.id,
       title: video.snippet.title,
+      description: video.snippet.description.slice(0, 500),
+      tags: video.snippet.tags.slice(0, 12).map((tag) => tag.slice(0, 80)),
       channelTitle: video.snippet.channelTitle,
       channelSubscribers: channelSubscriberCounts.get(video.snippet.channelId) ?? null,
       publishedAt: video.snippet.publishedAt,
@@ -221,10 +291,22 @@ async function collectPublicSignals(input: TrendLookupInput) {
       ...discovery,
     };
   });
-  return { niche, targets, searches, videos: scoreTrendVideos(signals).slice(0, MAX_SIGNALS) };
+  const videos = scoreTrendVideos(signals)
+    .map((video) => ({
+      video,
+      relevance: relevanceScore(niche, [video.title, video.description, ...(video.tags ?? [])].join(" ")),
+    }))
+    .filter(({ relevance }) => relevance >= .34)
+    .sort((left, right) => (
+      right.video.score * .72 + right.relevance * 100 * .28
+      - (left.video.score * .72 + left.relevance * 100 * .28)
+    ))
+    .slice(0, MAX_SIGNALS)
+    .map(({ video }) => video);
+  return { niche, targets, searches, videos };
 }
 
-function acceleratedSignals(videos: ScoredTrendVideo[], previous: TrendSnapshotEvidence | null, now: Date) {
+function acceleratedSignals(videos: ScoredTrendVideo[], previous: TrendSnapshotEvidence | null, now: Date, niche: string) {
   const previousById = new Map((previous?.videos ?? []).map((video) => [video.id, video]));
   const elapsedDays = previous
     ? Math.max(1 / 24, (now.getTime() - new Date(previous.capturedAt).getTime()) / 86_400_000)
@@ -251,7 +333,12 @@ function acceleratedSignals(videos: ScoredTrendVideo[], previous: TrendSnapshotE
       momentumScore,
       recentViewsPerDay,
       acceleration,
-      nicheRelevance: 50,
+      nicheRelevance: Math.round(relevanceScore(
+        niche,
+        [video.title, video.description, ...(video.tags ?? [])]
+          .filter((value): value is string => Boolean(value))
+          .join(" "),
+      ) * 100),
       outlook,
       reason: outlook === "rising-now"
         ? "Views are arriving faster than this video's lifetime pace."
@@ -264,8 +351,10 @@ function acceleratedSignals(videos: ScoredTrendVideo[], previous: TrendSnapshotE
 }
 
 async function rankSignals(input: { niche: string; markets: string[]; languages: string[] }, signals: ReturnType<typeof acceleratedSignals>) {
+  const deterministicallyRelevant = signals.filter((signal) => signal.nicheRelevance >= 34);
+  if (deterministicallyRelevant.length === 0) return { videos: [], aiAnalysis: undefined };
   try {
-    const ranked = await rankTrendSignalsWithGemini({ niche: input.niche, markets: input.markets, languages: input.languages, signals });
+    const ranked = await rankTrendSignalsWithAi({ niche: input.niche, markets: input.markets, languages: input.languages, signals: deterministicallyRelevant });
     const byId = new Map(ranked.rankings.map((ranking) => [ranking.id, ranking]));
     return {
       videos: signals.map((signal) => {
@@ -278,12 +367,15 @@ async function rankSignals(input: { niche: string; markets: string[]; languages:
           outlook: ai.outlook,
           reason: ai.reason,
         };
-      }).filter((signal) => signal.nicheRelevance >= 45)
+      }).filter((signal) => signal.nicheRelevance >= 60)
         .sort((a, b) => b.score - a.score || b.nicheRelevance - a.nicheRelevance || b.recentViewsPerDay - a.recentViewsPerDay),
-      aiAnalysis: { provider: "gemini" as const, model: ranked.completion.model },
+      aiAnalysis: { provider: ranked.completion.provider, model: ranked.completion.model },
     };
   } catch {
-    return { videos: signals.sort((a, b) => b.score - a.score || b.recentViewsPerDay - a.recentViewsPerDay), aiAnalysis: undefined };
+    return {
+      videos: deterministicallyRelevant.sort((a, b) => b.score - a.score || b.nicheRelevance - a.nicheRelevance || b.recentViewsPerDay - a.recentViewsPerDay),
+      aiAnalysis: undefined,
+    };
   }
 }
 
@@ -310,7 +402,10 @@ export async function refreshPublicTrends(input: TrendLookupInput) {
   const now = new Date();
   const previous = await getCachedPublicTrends(input);
   const collected = await collectPublicSignals(input);
-  const ranked = await rankSignals({ ...input, niche: collected.niche }, acceleratedSignals(collected.videos, previous?.evidence ?? null, now));
+  const ranked = await rankSignals(
+    { ...input, niche: collected.niche },
+    acceleratedSignals(collected.videos, previous?.evidence ?? null, now, collected.niche),
+  );
   const key = lookupKey(input);
   const evidence: TrendSnapshotEvidence = {
     schema: SNAPSHOT_SCHEMA,

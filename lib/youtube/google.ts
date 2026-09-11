@@ -25,6 +25,20 @@ const channelResponseSchema = z.object({
       hiddenSubscriberCount: z.boolean().optional(),
       videoCount: z.string().optional(),
     }),
+    contentDetails: z.object({
+      relatedPlaylists: z.object({ uploads: z.string().min(1) }),
+    }).optional(),
+  })).default([]),
+});
+
+const playlistItemsResponseSchema = z.object({
+  items: z.array(z.object({
+    snippet: z.object({
+      title: z.string(),
+      description: z.string().default(""),
+      publishedAt: z.string().optional(),
+      resourceId: z.object({ videoId: z.string().min(1) }),
+    }),
   })).default([]),
 });
 
@@ -51,6 +65,7 @@ export type YouTubeChannel = {
     subscribersHidden: boolean;
     videos: number | null;
   };
+  recentVideos: Array<{ id: string; title: string; description: string; publishedAt: string | null }>;
 };
 
 export type YouTubeAnalyticsPeriod = {
@@ -156,7 +171,7 @@ export async function refreshYouTubeAccessToken(refreshToken: string) {
 
 export async function getConnectedYouTubeChannel(accessToken: string): Promise<YouTubeChannel> {
   const url = new URL("https://www.googleapis.com/youtube/v3/channels");
-  url.searchParams.set("part", "snippet,statistics");
+  url.searchParams.set("part", "snippet,statistics,contentDetails");
   url.searchParams.set("mine", "true");
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -193,6 +208,10 @@ export async function getConnectedYouTubeChannel(accessToken: string): Promise<Y
     ?? channel.snippet.thumbnails?.medium?.url
     ?? channel.snippet.thumbnails?.default?.url
     ?? null;
+  const uploadsPlaylistId = channel.contentDetails?.relatedPlaylists.uploads;
+  const recentVideos = uploadsPlaylistId
+    ? await getRecentChannelVideos(accessToken, uploadsPlaylistId).catch(() => [])
+    : [];
 
   return {
     id: channel.id,
@@ -204,7 +223,28 @@ export async function getConnectedYouTubeChannel(accessToken: string): Promise<Y
       subscribersHidden: channel.statistics.hiddenSubscriberCount ?? false,
       videos: safeCount(channel.statistics.videoCount),
     },
+    recentVideos,
   };
+}
+
+async function getRecentChannelVideos(accessToken: string, uploadsPlaylistId: string) {
+  const url = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
+  url.searchParams.set("part", "snippet");
+  url.searchParams.set("playlistId", uploadsPlaylistId);
+  url.searchParams.set("maxResults", "25");
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new YouTubeApiError("Recent YouTube uploads could not be read.", "unavailable");
+  const payload = playlistItemsResponseSchema.parse(await response.json());
+  return payload.items.map(({ snippet }) => ({
+    id: snippet.resourceId.videoId,
+    title: snippet.title,
+    description: snippet.description.slice(0, 500),
+    publishedAt: snippet.publishedAt ?? null,
+  }));
 }
 
 function numberValue(value: string | number | undefined) {

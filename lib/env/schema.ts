@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const deploymentEnvironmentSchema = z.enum(["development", "production"]);
 const optionalString = z.preprocess((value) => value === "" ? undefined : value, z.string().min(1).optional());
+const optionalSecret = z.preprocess((value) => value === "" ? undefined : value, z.string().min(32).optional());
 const optionalUrl = z.preprocess((value) => value === "" ? undefined : value, z.url().optional());
 const optionalEncryptionKey = z.preprocess(
   (value) => value === "" ? undefined : value,
@@ -45,11 +46,14 @@ export const serverEnvironmentSchema = z
     BETTER_AUTH_SECRET: z.string().min(32),
     GOOGLE_AUTH_CLIENT_ID: optionalString,
     GOOGLE_AUTH_CLIENT_SECRET: optionalString,
+    RESEND_API_KEY: optionalString,
+    AUTH_EMAIL_FROM: optionalString,
     GOOGLE_CLIENT_ID: optionalString,
     GOOGLE_CLIENT_SECRET: optionalString,
     GOOGLE_YOUTUBE_REDIRECT_URI: optionalUrl,
     YOUTUBE_TOKEN_ENCRYPTION_KEY: optionalEncryptionKey,
     YOUTUBE_DATA_API_KEY: optionalString,
+    CRON_SECRET: optionalSecret,
     AI_PROVIDER: optionalString,
     AI_API_KEY: optionalString,
     AI_MODEL: optionalString,

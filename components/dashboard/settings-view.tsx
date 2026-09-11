@@ -1,10 +1,11 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Languages, Radio, Save, SlidersHorizontal, UserRound } from "lucide-react";
 import { useActionState } from "react";
 
 import { saveSettings, type SettingsActionState } from "@/app/dashboard/settings/actions";
-import { ThemeToggle } from "@/components/landing/theme-toggle";
+import { NicheConfirmationDialog } from "./niche-confirmation-dialog";
+import { ManageAccountDialog, type ManagedAccount } from "./manage-account-dialog";
 import { PageHeader } from "./page-header";
 
 type SettingsValues = {
@@ -13,32 +14,43 @@ type SettingsValues = {
   market: string;
   tone: string;
   videoLength: string;
-  detailLevel: string;
   openingStyle: string;
-  exportFormat: string;
-  includeTitle: boolean;
-  openAssistant: boolean;
 };
 
 const initialState: SettingsActionState = { status: "idle" };
 
-export function SettingsView({ initialValues }: { initialValues: SettingsValues }) {
+export function SettingsView({ initialValues, channel = null, account }: {
+  initialValues: SettingsValues;
+  channel?: { name: string; niche: string } | null;
+  account: ManagedAccount;
+}) {
   const [state, formAction, pending] = useActionState(saveSettings, initialState);
 
-  return <div className="dashboard-page">
-    <PageHeader title="Settings" description="Set the defaults used for recommendations and new scripts." />
-    <section className="settings-section">
-      <div><h2>Appearance</h2><p>Choose how Scripted Fox looks on this device.</p></div>
-      <div className="settings-fields">
-        <div className="settings-appearance">
-          <div><strong>Colour theme</strong><small>Switch between the light and dark workspace.</small></div>
-          <ThemeToggle showLabel />
+  return <div className="dashboard-page dashboard-settings">
+    <PageHeader eyebrow="Workspace settings" title={<>Make it feel <span className="settings-title-accent">yours.</span></>} />
+    <div className="settings-identity-grid">
+      <section className="settings-section settings-account-entry">
+        <div className="settings-section__intro"><span><UserRound size={19} /></span><div><h2>Account</h2><p>Profile, plan, sign-in, and channel access.</p></div></div>
+        <div className="settings-account-entry__card">
+          <div><strong>{account.displayName}</strong><small>{account.email}</small></div>
+          <ManageAccountDialog account={account} />
         </div>
-      </div>
-    </section>
+      </section>
+      {channel ? (
+        <section className="settings-section settings-section--channel">
+          <div className="settings-section__intro"><span><Radio size={19} /></span><div><h2>Channel personalization</h2><p>Keep recommendations focused on your niche.</p></div></div>
+          <div className="settings-fields">
+            <div className="settings-niche">
+              <div><span>Channel niche</span><strong>{channel.niche}</strong><small>{channel.name}</small></div>
+              <NicheConfirmationDialog channelName={channel.name} suggestedNiche={channel.niche} mode="settings" />
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </div>
     <form action={formAction}>
       <section className="settings-section">
-        <div><h2>Content defaults</h2><p>Used when generating ideas and scripts.</p></div>
+        <div className="settings-section__intro"><span><Languages size={19} /></span><div><h2>Content defaults</h2><p>Language and audience used for new ideas.</p></div></div>
         <div className="settings-fields">
           <div className="settings-field">
             <label htmlFor="language">Primary language</label>
@@ -68,7 +80,7 @@ export function SettingsView({ initialValues }: { initialValues: SettingsValues 
         </div>
       </section>
       <section className="settings-section">
-        <div><h2>Script defaults</h2><p>You can change these for any individual script.</p></div>
+        <div className="settings-section__intro"><span><SlidersHorizontal size={19} /></span><div><h2>Script defaults</h2><p>Your starting point for every new script.</p></div></div>
         <div className="settings-fields">
           <div className="settings-field">
             <label htmlFor="tone">Default tone</label>
@@ -87,14 +99,6 @@ export function SettingsView({ initialValues }: { initialValues: SettingsValues 
             </select>
           </div>
           <div className="settings-field">
-            <label htmlFor="detailLevel">Outline detail</label>
-            <select id="detailLevel" name="detailLevel" defaultValue={initialValues.detailLevel}>
-              <option value="lean">Lean — key beats only</option>
-              <option value="balanced">Balanced — beats and talking points</option>
-              <option value="detailed">Detailed — full planning notes</option>
-            </select>
-          </div>
-          <div className="settings-field">
             <label htmlFor="openingStyle">Default opening</label>
             <select id="openingStyle" name="openingStyle" defaultValue={initialValues.openingStyle}>
               <option value="value-first">State the value immediately</option>
@@ -104,27 +108,10 @@ export function SettingsView({ initialValues }: { initialValues: SettingsValues 
           </div>
         </div>
       </section>
-      <section className="settings-section">
-        <div><h2>Export and editor</h2><p>Applied when starting and exporting a new script.</p></div>
+      <section className="settings-section settings-section--save">
+        <div className="settings-section__intro"><span><Save size={19} /></span><div><h2>Ready to apply?</h2><p>Use these defaults for future recommendations and scripts.</p></div></div>
         <div className="settings-fields">
-          <div className="settings-field">
-            <label htmlFor="exportFormat">Default export format</label>
-            <select id="exportFormat" name="exportFormat" defaultValue={initialValues.exportFormat}>
-              <option value="markdown">Markdown</option>
-              <option value="txt">Plain text</option>
-              <option value="pdf">PDF</option>
-              <option value="docx">Word document</option>
-            </select>
-          </div>
-          <label className="settings-check">
-            <input type="checkbox" name="includeTitle" defaultChecked={initialValues.includeTitle} />
-            <span><strong>Include script title</strong><small>Add the title at the top of exported files.</small></span>
-          </label>
-          <label className="settings-check">
-            <input type="checkbox" name="openAssistant" defaultChecked={initialValues.openAssistant} />
-            <span><strong>Open AI assistant with the editor</strong><small>Start new scripts with the right-side assistant ready.</small></span>
-          </label>
-          <p className={`settings-feedback${state.status === "error" ? " settings-feedback--error" : ""}`} role="status" aria-live="polite">{state.message}</p>
+          {state.message ? <p className={`settings-feedback${state.status === "error" ? " settings-feedback--error" : ""}`} role="status" aria-live="polite">{state.message}</p> : null}
           <button className="button button--primary" type="submit" disabled={pending}>
             {state.status === "success" && !pending && <Check size={15} aria-hidden="true" />}
             {pending ? "Saving…" : "Save all settings"}

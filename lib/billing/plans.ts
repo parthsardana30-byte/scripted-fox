@@ -2,9 +2,9 @@ export const planCodes = ["free", "pro", "elite"] as const;
 export type PlanCode = (typeof planCodes)[number];
 
 export const planDisplayNames: Record<PlanCode, string> = {
-  free: "Basic",
-  pro: "Plus",
-  elite: "Pro",
+  free: "7-Day Pro Trial",
+  pro: "Pro",
+  elite: "Gold",
 };
 
 export function getPlanDisplayName(plan: PlanCode) {
@@ -27,8 +27,13 @@ export type PlanDefinition = {
   monthlyPriceInr: number | null;
   annualMonthlyPriceInr: number | null;
   description: string;
-  features: string[];
+  features: PlanFeature[];
   highlighted?: boolean;
+};
+
+export type PlanFeature = {
+  label: string;
+  included: boolean;
 };
 
 export const trialDurationDays = 7;
@@ -45,16 +50,33 @@ export const plans: PlanDefinition[] = [
     name: planDisplayNames.free,
     monthlyPriceInr: null,
     annualMonthlyPriceInr: null,
-    description: "Explore the Plus workspace free for one week before choosing a paid plan.",
-    features: ["7 days of Plus access", "AI script writer", "10 AI version changes per script"],
+    description: "Experience ScriptedFox before choosing a paid plan.",
+    features: [
+      { label: "15 personalized video ideas every day", included: true },
+      { label: "500 Fox Credits for the trial", included: true },
+      { label: "AI script generation and Fox AI editing", included: true },
+      { label: "Recommendations based on your channel and niche", included: true },
+      { label: "Deep Research and source-backed scripts", included: false },
+      { label: "Standard Publishing Kit generation", included: true },
+      { label: "Limited export formats", included: true },
+      { label: "Additional credit recharges", included: false },
+    ],
   },
   {
     code: "pro",
     name: planDisplayNames.pro,
     monthlyPriceInr: 50,
     annualMonthlyPriceInr: 40,
-    description: "Write and refine scripts with a focused version history.",
-    features: ["AI script writer", "10 AI version changes per script", "Restore any saved version"],
+    description: "For creators who publish consistently and want a complete writing workflow.",
+    features: [
+      { label: "15 personalized video ideas every day", included: true },
+      { label: "3,000 monthly Fox Credits with optional recharges", included: true },
+      { label: "AI script generation and Fox AI editing", included: true },
+      { label: "Recommendations based on channel analytics and niche", included: true },
+      { label: "Deep Research and source-backed scripts", included: false },
+      { label: "30-day script version history", included: true },
+      { label: "Limited export formats", included: true },
+    ],
     highlighted: true,
   },
   {
@@ -62,8 +84,25 @@ export const plans: PlanDefinition[] = [
     name: planDisplayNames.elite,
     monthlyPriceInr: 150,
     annualMonthlyPriceInr: 120,
-    description: "Keep a longer history for scripts that need more iteration.",
-    features: ["Everything in Plus", "20 AI version changes per script", "Restore any saved version"],
+    description: "For serious creators who need deeper research, more content and publish-ready assets.",
+    features: [
+      { label: "30 personalized video ideas every day", included: true },
+      { label: "8,000 monthly Fox Credits with optional recharges", included: true },
+      { label: "Advanced AI script generation and Fox AI editing", included: true },
+      { label: "Advanced channel voice and audience personalization", included: true },
+      { label: "Deep Research with sources and research notes", included: true },
+      { label: "Advanced Publishing Kit for every project", included: true },
+      { label: "20 title variations across different angles", included: true },
+      { label: "5 thumbnail concepts", included: true },
+      { label: "AI-generated thumbnail renders", included: true },
+      { label: "2 optimized YouTube descriptions", included: true },
+      { label: "Chapters and timestamps", included: true },
+      { label: "Hashtags and keywords", included: true },
+      { label: "Pinned comment", included: true },
+      { label: "Community post", included: true },
+      { label: "Unlimited script version history", included: true },
+      { label: "All export formats and priority generation", included: true },
+    ],
   },
 ];
 

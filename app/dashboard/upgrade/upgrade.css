@@ -1,0 +1,88 @@
+.dashboard-pricing.youtube-landing {
+  width: 100%;
+  max-width: none;
+  min-height: calc(100dvh - 5.1rem);
+  margin: 0;
+  padding: 0;
+  overflow-x: clip;
+}
+
+.dashboard-pricing .pricing-page {
+  min-height: 0;
+}
+
+.dashboard-pricing .dashboard-pricing__header {
+  width: min(100%, 92rem);
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: clamp(.8rem, 1.5vw, 1.15rem);
+  padding-block: clamp(.75rem, 2vh, 1.25rem) clamp(1.4rem, 3vh, 2rem);
+}
+
+.dashboard-pricing.youtube-landing .dashboard-pricing__header h1 {
+  margin: 0;
+  color: var(--landing-ink);
+  font-family: var(--landing-font-display);
+  font-size: clamp(6.75rem, 11vw, 10rem);
+  font-stretch: condensed;
+  font-weight: 520;
+  letter-spacing: -.075em;
+  line-height: .82;
+}
+
+.dashboard-pricing.youtube-landing .dashboard-pricing__subtitle {
+  min-height: 2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  color: var(--landing-muted);
+  font-family: var(--landing-font-body);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.dashboard-pricing.youtube-landing .dashboard-pricing__subtitle-mark {
+  width: .38rem;
+  height: 2rem;
+  display: block;
+  flex: 0 0 auto;
+  margin-inline-end: .75rem;
+  border-radius: 999px;
+  background: #ff334b;
+  box-shadow: 0 0 1rem rgb(255 51 75 / .18);
+}
+
+.dashboard-pricing .pricing-billing-choice {
+  margin-block-end: .75rem;
+}
+
+.dashboard-pricing .pricing-context {
+  margin-block-end: .75rem;
+  padding-block: .7rem;
+}
+
+@media (max-width: 60rem) {
+  .dashboard-pricing .dashboard-pricing__header {
+    gap: .75rem;
+    padding-block-end: 1.25rem;
+  }
+
+  .dashboard-pricing.youtube-landing .dashboard-pricing__header h1 {
+    font-size: clamp(4rem, 13vw, 6rem);
+  }
+}
+
+@media (min-width: 901px) {
+  .dashboard-main--scroll-frame > .dashboard-pricing.youtube-landing {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 40rem) {
+  .dashboard-pricing.youtube-landing {
+    min-height: calc(100dvh - 4rem);
+  }
+}

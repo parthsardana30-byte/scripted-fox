@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Clock3, Eye, Link2, RotateCcw, Timer, UsersRound, Video } from "lucide-react";
+import { BarChart3, Clock3, Eye, Link2, RefreshCw, RotateCcw, Timer, TrendingUp, Trophy, UsersRound, Video } from "lucide-react";
 
 import type { AnalyticsSnapshot, ChannelAnalyticsState } from "@/lib/youtube/analytics";
 import { PageHeader } from "./page-header";
@@ -40,7 +40,7 @@ function AnalyticsGate({ state }: { state: Exclude<ChannelAnalyticsState, { kind
       : "Your channel totals, recent performance, and top videos will appear here after you connect a channel.";
 
   return <div className="dashboard-page dashboard-analytics">
-    <PageHeader title="Channel analytics" description="Understand what is working before you plan your next video." />
+    <PageHeader title={<>Channel <span className="analytics-title-accent">analytics</span></>} description="See what’s working across your channel." />
     <section className="dashboard-empty analytics-empty" aria-labelledby="analytics-empty-title">
       <span className="analytics-empty__icon">{permissionExpired ? <RotateCcw size={22} aria-hidden="true" /> : <Link2 size={22} aria-hidden="true" />}</span>
       <h2 id="analytics-empty-title">{title}</h2>
@@ -50,7 +50,7 @@ function AnalyticsGate({ state }: { state: Exclude<ChannelAnalyticsState, { kind
   </div>;
 }
 
-export function AnalyticsView({ state }: { state: ChannelAnalyticsState }) {
+export function AnalyticsView({ state, syncHref = "/dashboard/analytics?sync=1" }: { state: ChannelAnalyticsState; syncHref?: string }) {
   if (state.kind !== "ready") return <AnalyticsGate state={state} />;
 
   const { snapshot, isStale } = state;
@@ -58,34 +58,37 @@ export function AnalyticsView({ state }: { state: ChannelAnalyticsState }) {
   const maxWeeklyViews = Math.max(...weeks.map((week) => week.views), 1);
   const maxVideoViews = Math.max(...snapshot.topVideos.map((video) => video.views), 1);
   const netSubscribers = snapshot.summary.subscribersGained - snapshot.summary.subscribersLost;
-  const periodLabel = `${shortDate.format(new Date(`${snapshot.period.start}T00:00:00Z`))}–${shortDate.format(new Date(`${snapshot.period.end}T00:00:00Z`))}`;
-  const updatedLabel = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(snapshot.capturedAt));
-
   return <div className="dashboard-page dashboard-analytics">
-    <PageHeader title="Channel analytics" description={`${snapshot.channel.title} · ${periodLabel}`} actions={<span className="analytics-updated">{isStale ? "Showing saved data" : "Updated"} {updatedLabel}</span>} />
+    <PageHeader
+      title={<>Channel <span className="analytics-title-accent">analytics</span></>}
+      description="See what’s working across your channel."
+      actions={<Link className="trending-refresh analytics-sync" href={syncHref} prefetch={false} aria-label="Sync channel analytics"><span className="trending-refresh__radar" aria-hidden="true"><RefreshCw size={22} /></span><span className="trending-refresh__label">SYNC</span></Link>}
+    />
     {isStale ? <p className="analytics-notice" role="status">YouTube could not refresh the channel. These are the latest saved results.</p> : null}
 
     <dl className="analytics-summary analytics-summary--four">
-      <div><dt><Eye size={16} aria-hidden="true" /> Views</dt><dd>{compactNumber.format(snapshot.summary.views)}</dd><small>Last 28 days</small></div>
-      <div><dt><Clock3 size={16} aria-hidden="true" /> Watch time</dt><dd>{wholeNumber.format(snapshot.summary.watchTimeMinutes / 60)} hr</dd><small>Last 28 days</small></div>
-      <div><dt><UsersRound size={16} aria-hidden="true" /> Subscribers</dt><dd>{netSubscribers > 0 ? "+" : ""}{wholeNumber.format(netSubscribers)}</dd><small>{wholeNumber.format(snapshot.summary.subscribersGained)} gained · {wholeNumber.format(snapshot.summary.subscribersLost)} lost</small></div>
-      <div><dt><Timer size={16} aria-hidden="true" /> Average view</dt><dd>{formatDuration(snapshot.summary.averageViewDurationSeconds)}</dd><small>Per view</small></div>
+      <div className="analytics-metric-card analytics-metric-card--signal"><dt><span><Eye size={17} aria-hidden="true" /></span>Views</dt><dd>{compactNumber.format(snapshot.summary.views)}</dd><small>Last 28 days</small></div>
+      <div className="analytics-metric-card analytics-metric-card--dark"><dt><span><Clock3 size={17} aria-hidden="true" /></span>Watch time</dt><dd>{wholeNumber.format(snapshot.summary.watchTimeMinutes / 60)} <em>hr</em></dd><small>Last 28 days</small></div>
+      <div className="analytics-metric-card"><dt><span><UsersRound size={17} aria-hidden="true" /></span>Subscribers</dt><dd>{netSubscribers > 0 ? "+" : ""}{wholeNumber.format(netSubscribers)}</dd><small>{wholeNumber.format(snapshot.summary.subscribersGained)} gained · {wholeNumber.format(snapshot.summary.subscribersLost)} lost</small></div>
+      <div className="analytics-metric-card"><dt><span><Timer size={17} aria-hidden="true" /></span>Average view</dt><dd>{formatDuration(snapshot.summary.averageViewDurationSeconds)}</dd><small>Per view</small></div>
     </dl>
 
     <div className="analytics-grid">
-      <section className="dashboard-panel analytics-chart" aria-labelledby="top-videos-title">
-        <div className="dashboard-section-heading"><div><h2 id="top-videos-title">Top videos</h2><p>Ranked by views in this period.</p></div><Video size={20} aria-hidden="true" /></div>
-        {snapshot.topVideos.length > 0 ? <div className="analytics-bars">{snapshot.topVideos.map((video) => <div key={video.id}>
-          <div><span>{video.title}</span><strong>{compactNumber.format(video.views)} views · {wholeNumber.format(video.averageViewPercentage)}% viewed</strong></div>
-          <span className="analytics-bar" aria-hidden="true"><i style={{ width: `${video.views === 0 ? 0 : Math.max(2, video.views / maxVideoViews * 100)}%` }} /></span>
-        </div>)}</div> : <p className="analytics-panel-empty">No video activity was reported for this period.</p>}
+      <section className="dashboard-panel analytics-chart analytics-top-videos" aria-labelledby="top-videos-title">
+        <div className="dashboard-section-heading"><div><p className="analytics-panel-kicker"><Trophy size={14} aria-hidden="true" />Content leaders</p><h2 id="top-videos-title">Top videos</h2><p>Ranked by views in this period.</p></div><span className="analytics-panel-icon"><Video size={20} aria-hidden="true" /></span></div>
+        {snapshot.topVideos.length > 0 ? <div className="analytics-video-list">{snapshot.topVideos.map((video, index) => <article key={video.id}>
+          <span className="analytics-video-rank">{String(index + 1).padStart(2, "0")}</span>
+          <div className="analytics-video-copy"><strong>{video.title}</strong><span className="analytics-bar" aria-hidden="true"><i style={{ width: `${video.views === 0 ? 0 : Math.max(2, video.views / maxVideoViews * 100)}%` }} /></span></div>
+          <div className="analytics-video-metrics"><strong>{compactNumber.format(video.views)}</strong><small>views</small><em>{wholeNumber.format(video.averageViewPercentage)}% viewed</em></div>
+        </article>)}</div> : <p className="analytics-panel-empty">No video activity was reported for this period.</p>}
       </section>
 
-      <section className="dashboard-panel analytics-chart" aria-labelledby="view-trend-title">
-        <div className="dashboard-section-heading"><div><h2 id="view-trend-title">Four-week view trend</h2><p>Weekly totals from the same 28-day period.</p></div><BarChart3 size={20} aria-hidden="true" /></div>
-        {weeks.length > 0 ? <div className="analytics-bars analytics-bars--weeks">{weeks.map((week) => <div key={week.label}>
-          <div><span>{week.label}</span><strong>{compactNumber.format(week.views)} views</strong></div>
-          <span className="analytics-bar" aria-hidden="true"><i style={{ width: `${week.views === 0 ? 0 : Math.max(2, week.views / maxWeeklyViews * 100)}%` }} /></span>
+      <section className="dashboard-panel analytics-chart analytics-weekly" aria-labelledby="view-trend-title">
+        <div className="dashboard-section-heading"><div><p className="analytics-panel-kicker"><TrendingUp size={14} aria-hidden="true" />Momentum</p><h2 id="view-trend-title">Four-week view trend</h2><p>Weekly totals from the same 28-day period.</p></div><span className="analytics-panel-icon"><BarChart3 size={20} aria-hidden="true" /></span></div>
+        {weeks.length > 0 ? <div className="analytics-weekly-chart" aria-label="Weekly views">{weeks.map((week) => <div className="analytics-week" key={week.label}>
+          <strong>{compactNumber.format(week.views)}</strong>
+          <span className="analytics-week__track" aria-hidden="true"><i style={{ height: `${week.views === 0 ? 0 : Math.max(5, week.views / maxWeeklyViews * 100)}%` }} /></span>
+          <small>{week.label}</small>
         </div>)}</div> : <p className="analytics-panel-empty">No daily view data was reported for this period.</p>}
       </section>
     </div>
@@ -93,9 +96,9 @@ export function AnalyticsView({ state }: { state: ChannelAnalyticsState }) {
     <section className="analytics-lifetime" aria-labelledby="channel-totals-title">
       <div><h2 id="channel-totals-title">Channel totals</h2><p>Lifetime figures currently reported by YouTube.</p></div>
       <dl>
-        <div><dt>Total views</dt><dd>{snapshot.channel.lifetime.views === null ? "—" : compactNumber.format(snapshot.channel.lifetime.views)}</dd></div>
-        <div><dt>Subscribers</dt><dd>{snapshot.channel.lifetime.subscribersHidden || snapshot.channel.lifetime.subscribers === null ? "Hidden" : compactNumber.format(snapshot.channel.lifetime.subscribers)}</dd></div>
-        <div><dt>Videos</dt><dd>{snapshot.channel.lifetime.videos === null ? "—" : wholeNumber.format(snapshot.channel.lifetime.videos)}</dd></div>
+        <div><dt>Total views</dt><dd>{snapshot.channel.lifetime.views === null ? "—" : compactNumber.format(snapshot.channel.lifetime.views)}</dd><Eye size={17} aria-hidden="true" /></div>
+        <div><dt>Subscribers</dt><dd>{snapshot.channel.lifetime.subscribersHidden || snapshot.channel.lifetime.subscribers === null ? "Hidden" : compactNumber.format(snapshot.channel.lifetime.subscribers)}</dd><UsersRound size={17} aria-hidden="true" /></div>
+        <div><dt>Videos</dt><dd>{snapshot.channel.lifetime.videos === null ? "—" : wholeNumber.format(snapshot.channel.lifetime.videos)}</dd><Video size={17} aria-hidden="true" /></div>
       </dl>
     </section>
   </div>;

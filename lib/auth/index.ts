@@ -2,10 +2,13 @@ import "server-only";
 
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { emailOTP } from "better-auth/plugins";
 
 import { databasePool } from "@/lib/db/pool";
 import { publicEnvironment } from "@/lib/env/public";
 import { serverEnvironment } from "@/lib/env/server";
+import { revokeConnectedYouTubeAccess } from "@/lib/auth/delete-account";
+import { sendAccountDeletionEmail, sendPasswordResetEmail, sendVerificationCodeEmail } from "@/lib/email/verification-email";
 
 const google = serverEnvironment.GOOGLE_AUTH_CLIENT_ID && serverEnvironment.GOOGLE_AUTH_CLIENT_SECRET
   ? {
@@ -23,9 +26,42 @@ export const auth = betterAuth({
   database: databasePool,
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    autoSignIn: false,
+    requireEmailVerification: true,
     minPasswordLength: 8,
     maxPasswordLength: 72,
+    resetPasswordTokenExpiresIn: 60 * 60,
+    revokeSessionsOnPasswordReset: true,
+    async sendResetPassword({ user, url }) {
+      await sendPasswordResetEmail(user.email, url);
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+  },
+  verification: {
+    storeIdentifier: "hashed",
+  },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+      allowDifferentEmails: false,
+    },
+  },
+  user: {
+    deleteUser: {
+      enabled: true,
+      beforeDelete: async (user) => revokeConnectedYouTubeAccess(user.id),
+      ...(serverEnvironment.RESEND_API_KEY && serverEnvironment.AUTH_EMAIL_FROM
+        ? {
+            sendDeleteAccountVerification: async ({ user, url }: { user: { email: string }; url: string }) => {
+              await sendAccountDeletionEmail(user.email, url);
+            },
+          }
+        : {}),
+    },
   },
   socialProviders: google,
   databaseHooks: {
@@ -51,6 +87,20 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: [nextCookies()],
+  plugins: [
+    emailOTP({
+      overrideDefaultEmailVerification: true,
+      otpLength: 6,
+      expiresIn: 10 * 60,
+      allowedAttempts: 5,
+      storeOTP: "hashed",
+      rateLimit: { window: 60, max: 3 },
+      async sendVerificationOTP({ email, otp, type }) {
+        if (type !== "email-verification") return;
+        await sendVerificationCodeEmail(email, otp);
+      },
+    }),
+    nextCookies(),
+  ],
   telemetry: { enabled: false },
 });

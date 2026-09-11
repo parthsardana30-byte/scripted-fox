@@ -16,4 +16,10 @@ describe("title-based YouTube niche inference", () => {
       "PUBG OP #short #shortforyou #myfirstshort",
     ])).toBe("PUBG gaming");
   });
+
+  it("keeps piano-cover channels narrower than generic music", () => {
+    expect(inferNicheFromVideoTitles([
+      "EXPERIENCE - Piano Cover",
+    ])).toBe("Piano covers");
+  });
 });

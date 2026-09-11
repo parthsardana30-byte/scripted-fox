@@ -10,6 +10,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh }),
 }));
 
+vi.mock("@/components/ui/confetti", () => ({
+  Confetti: () => null,
+}));
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -20,26 +24,34 @@ describe("PricingCatalogue plan testing", () => {
   it("switches a signed-in user to a selected test plan without charging", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ label: "Pro", charged: false }),
+      json: async () => ({ label: "Gold", charged: false }),
     });
     vi.stubGlobal("fetch", fetchMock);
     const user = userEvent.setup();
 
     render(<PricingCatalogue currentPlan="pro" signedIn testMode />);
-    await user.click(screen.getByRole("button", { name: "Select Pro" }));
+    await user.click(screen.getByRole("button", { name: "Select Gold" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/billing/select-plan", expect.objectContaining({
       method: "POST",
       body: JSON.stringify({ plan: "elite", billingPeriod: "monthly" }),
     })));
-    expect(await screen.findByText("Pro is active for testing. No payment was charged.")).toBeVisible();
+    expect(await screen.findByText("Gold is active for testing. No payment was charged.")).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Congrats, you’re on Gold!" })).toBeVisible();
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it("celebrates a confirmed PayU plan change", () => {
+    render(<PricingCatalogue currentPlan="elite" signedIn celebrationPlan="elite" />);
+
+    expect(screen.getByRole("dialog", { name: "Congrats, you’re on Gold!" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Start creating with Gold" })).toBeVisible();
   });
 
   it("explains when PayU merchant credentials are not configured", async () => {
     const user = userEvent.setup();
     render(<PricingCatalogue currentPlan="pro" signedIn />);
-    await user.click(screen.getByRole("button", { name: "Select Pro" }));
+    await user.click(screen.getByRole("button", { name: "Select Gold" }));
     expect(screen.getByText("PayU merchant credentials are still required before checkout can open.")).toBeVisible();
   });
 
@@ -56,7 +68,7 @@ describe("PricingCatalogue plan testing", () => {
     const user = userEvent.setup();
 
     render(<PricingCatalogue currentPlan="free" signedIn payuConfigured />);
-    await user.click(screen.getByRole("button", { name: "Pay with PayU · Plus" }));
+    await user.click(screen.getByRole("button", { name: "Pay with PayU · Pro" }));
     await user.type(screen.getByRole("textbox", { name: "Mobile number" }), "9876543210");
     await user.click(screen.getByRole("button", { name: "Continue to payment" }));
 

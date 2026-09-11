@@ -5,11 +5,34 @@ import { revalidatePath } from "next/cache";
 
 import { requireAuthenticatedUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/db/client";
+import { disconnectYouTube } from "@/lib/youtube/repository";
 
 export type SettingsActionState = {
   status: "idle" | "success" | "error";
   message?: string;
 };
+
+export type ChannelDisconnectState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+};
+
+export async function disconnectYouTubeFromSettings(
+  _state: ChannelDisconnectState,
+  _formData: FormData,
+): Promise<ChannelDisconnectState> {
+  void _state;
+  void _formData;
+  try {
+    const user = await requireAuthenticatedUser();
+    await disconnectYouTube(user.id);
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/settings");
+    return { status: "success", message: "YouTube channel disconnected." };
+  } catch {
+    return { status: "error", message: "The channel could not be disconnected." };
+  }
+}
 
 const settingsSchema = z.object({
   language: z.enum(["en", "hi", "hinglish"]),
@@ -17,11 +40,7 @@ const settingsSchema = z.object({
   market: z.enum(["IN", "GLOBAL"]),
   tone: z.enum(["clear", "direct", "educational"]),
   videoLength: z.enum(["under-5", "7-10", "10-15"]),
-  detailLevel: z.enum(["lean", "balanced", "detailed"]),
   openingStyle: z.enum(["value-first", "hook", "story"]),
-  exportFormat: z.enum(["markdown", "txt", "pdf", "docx"]),
-  includeTitle: z.preprocess((value) => value === "on", z.boolean()),
-  openAssistant: z.preprocess((value) => value === "on", z.boolean()),
 }).refine(
   (values) => values.secondaryLanguage === "none" || values.secondaryLanguage !== values.language,
   { message: "Choose a different secondary language.", path: ["secondaryLanguage"] },
@@ -37,11 +56,7 @@ export async function saveSettings(
     market: formData.get("market"),
     tone: formData.get("tone"),
     videoLength: formData.get("videoLength"),
-    detailLevel: formData.get("detailLevel"),
     openingStyle: formData.get("openingStyle"),
-    exportFormat: formData.get("exportFormat"),
-    includeTitle: formData.get("includeTitle"),
-    openAssistant: formData.get("openAssistant"),
   });
   if (!parsed.success) {
     return { status: "error", message: "Choose a value for each preference, then save again." };
@@ -51,18 +66,13 @@ export async function saveSettings(
   const supabase = await createClient();
   const { data: current } = await supabase
     .from("user_preferences")
-    .select("default_script_preferences,export_defaults")
+    .select("default_script_preferences")
     .eq("user_id", user.id)
     .maybeSingle();
   const currentScriptPreferences = current?.default_script_preferences
     && typeof current.default_script_preferences === "object"
     && !Array.isArray(current.default_script_preferences)
     ? current.default_script_preferences
-    : {};
-  const currentExportDefaults = current?.export_defaults
-    && typeof current.export_defaults === "object"
-    && !Array.isArray(current.export_defaults)
-    ? current.export_defaults
     : {};
   const contentLanguages = [
     parsed.data.language,
@@ -78,14 +88,7 @@ export async function saveSettings(
         ...currentScriptPreferences,
         tone: parsed.data.tone,
         videoLength: parsed.data.videoLength,
-        detailLevel: parsed.data.detailLevel,
         openingStyle: parsed.data.openingStyle,
-        openAssistant: parsed.data.openAssistant,
-      },
-      export_defaults: {
-        ...currentExportDefaults,
-        format: parsed.data.exportFormat,
-        includeTitle: parsed.data.includeTitle,
       },
     })
     .eq("user_id", user.id);
