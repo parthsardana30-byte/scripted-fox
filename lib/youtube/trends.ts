@@ -62,6 +62,7 @@ export const trendSnapshotEvidenceSchema = z.object({
   videos: z.array(z.object({
     id: z.string(),
     title: z.string(),
+    channelId: z.string(),
     description: z.string().max(500).optional(),
     tags: z.array(z.string().max(80)).max(12).optional(),
     discoveryQuery: z.string().max(100).optional(),
@@ -279,6 +280,7 @@ async function collectPublicSignals(input: TrendLookupInput) {
     const discovery = discoveries.get(video.id) ?? { market: "IN", language: "en", discovery: "popular" as const };
     return {
       id: video.id,
+      channelId: video.snippet.channelId,
       title: video.snippet.title,
       description: video.snippet.description.slice(0, 500),
       tags: video.snippet.tags.slice(0, 12).map((tag) => tag.slice(0, 80)),

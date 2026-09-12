@@ -5,6 +5,7 @@ import { AuthenticationRequiredError, requireAuthenticatedUser } from "@/lib/aut
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
 import { createClient } from "@/lib/db/client";
 import { selectDiverseTrends } from "@/lib/youtube/trend-scoring";
+import { rankCompetitorChannelsWithAi } from "@/lib/ai/trend-ranking";
 import { getOrRefreshPublicTrends, refreshPublicTrends, YouTubeTrendsError } from "@/lib/youtube/trends";
 import type { Json } from "@/types/database";
 
@@ -53,6 +54,13 @@ async function creatorTrendPreferences(userId: string) {
     niche: savedNiche ?? inferredNiche ?? "content creation",
     languages: preferences?.content_languages ?? ["en"],
     markets: preferences?.target_markets ?? ["IN", "GLOBAL"],
+    creatorChannel: channel.success ? channel.data.channel?.title ?? null : null,
+    creatorTopVideos: channel.success ? channel.data.topVideos.map((video) => video.title) : [],
+    creatorSubscribers: (() => {
+      const metrics = objectValue(snapshot?.metrics);
+      const lifetime = metrics.lifetime;
+      return lifetime && typeof lifetime === "object" && !Array.isArray(lifetime) ? Number(lifetime.subscribers ?? 0) : 0;
+    })(),
   };
 }
 
@@ -108,7 +116,90 @@ async function recordTrendImpression(userId: string, videoIds: string[]) {
   });
 }
 
-function responsePayload(result: { evidence: Awaited<ReturnType<typeof refreshPublicTrends>>; refreshed: boolean }, recentlyShownIds = new Set<string>()) {
+async function competitorPayload(
+  evidence: Awaited<ReturnType<typeof refreshPublicTrends>>,
+  preferences: Awaited<ReturnType<typeof creatorTrendPreferences>>,
+) {
+  const byChannel = new Map<string, {
+    channelId: string; channelTitle: string; subscribers: number | null; views: number[]; topics: string[];
+  }>();
+  for (const video of evidence.videos) {
+    if (!video.channelId || video.channelTitle === preferences.creatorChannel) continue;
+    const current = byChannel.get(video.channelId) ?? {
+      channelId: video.channelId,
+      channelTitle: video.channelTitle,
+      subscribers: video.channelSubscribers ?? null,
+      views: [],
+      topics: [],
+    };
+    current.views.push(video.views);
+    current.topics.push(video.title);
+    byChannel.set(video.channelId, current);
+  }
+  const candidates = [...byChannel.values()]
+    .filter((candidate) => candidate.views.length >= 1)
+    .map((candidate) => ({
+      channelId: candidate.channelId,
+      channelTitle: candidate.channelTitle,
+      subscribers: candidate.subscribers,
+      videosFound: candidate.views.length,
+      averageViews: candidate.views.reduce((sum, views) => sum + views, 0) / candidate.views.length,
+      strongestViews: Math.max(...candidate.views),
+      topics: candidate.topics.slice(0, 3),
+    }))
+    .filter((candidate) => candidate.subscribers === null
+      || preferences.creatorSubscribers === 0
+      || candidate.subscribers >= Math.max(500, preferences.creatorSubscribers * .25))
+    .sort((left, right) => right.videosFound - left.videosFound || right.averageViews - left.averageViews)
+    .slice(0, 10);
+  if (!candidates.length) return [];
+  try {
+    const ranked = await rankCompetitorChannelsWithAi({
+      niche: evidence.niche,
+      creatorChannel: preferences.creatorChannel,
+      creatorSubscribers: preferences.creatorSubscribers,
+      creatorTopVideos: preferences.creatorTopVideos,
+      candidates,
+    });
+    const byId = new Map(candidates.map((candidate) => [candidate.channelId, candidate]));
+    return ranked.rankings
+      .filter((ranking) => ranking.relevanceScore >= 55)
+      .map((ranking) => {
+        const candidate = byId.get(ranking.channelId);
+        return candidate ? {
+          channelId: candidate.channelId,
+          channelTitle: candidate.channelTitle,
+          channelSubscribers: candidate.subscribers,
+          averageViews: Math.round(candidate.averageViews),
+          strongestViews: Math.round(candidate.strongestViews),
+          videosFound: candidate.videosFound,
+          topics: candidate.topics,
+          relevanceScore: ranking.relevanceScore,
+          reason: ranking.reason,
+        } : null;
+      })
+      .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
+      .slice(0, 5);
+  } catch {
+    return candidates.slice(0, 3).map((candidate) => ({
+      channelId: candidate.channelId,
+      channelTitle: candidate.channelTitle,
+      channelSubscribers: candidate.subscribers,
+      averageViews: Math.round(candidate.averageViews),
+      strongestViews: Math.round(candidate.strongestViews),
+      videosFound: candidate.videosFound,
+      topics: candidate.topics,
+      relevanceScore: 50,
+      reason: "Repeated relevant videos were found in your niche.",
+    }));
+  }
+}
+
+async function responsePayload(
+  result: { evidence: Awaited<ReturnType<typeof refreshPublicTrends>>; refreshed: boolean },
+  preferences: Awaited<ReturnType<typeof creatorTrendPreferences>>,
+  recentlyShownIds = new Set<string>(),
+) {
   const selectedSignals = selectDiverseTrends(result.evidence.videos, 12, recentlyShownIds);
   return {
     refreshed: result.refreshed,
@@ -133,6 +224,7 @@ function responsePayload(result: { evidence: Awaited<ReturnType<typeof refreshPu
       outlook: video.outlook ?? "steady",
       reason: video.reason ?? "Momentum is based on recent public YouTube performance.",
     })),
+    competitors: await competitorPayload(result.evidence, preferences),
     rankedBy: result.evidence.aiAnalysis?.provider ?? "momentum",
   };
 }
@@ -142,7 +234,7 @@ export async function GET() {
     const user = await requireAuthenticatedUser();
     const preferences = { ...await creatorTrendPreferences(user.id), userId: user.id };
     const result = await getOrRefreshPublicTrends(preferences);
-    const payload = responsePayload(result, await recentTrendIds(user.id));
+    const payload = await responsePayload(result, preferences, await recentTrendIds(user.id));
     await recordTrendImpression(user.id, payload.signals.map((signal) => signal.id));
     return Response.json(payload, {
       headers: { "Cache-Control": "private, no-store" },
@@ -169,7 +261,7 @@ export async function POST(request: Request) {
     const evidence = await refreshPublicTrends(preferences);
     const result = { evidence, refreshed: true };
     await recordRefresh(user.id, evidence.aiAnalysis?.provider ?? "momentum");
-    const payload = responsePayload(result, await recentTrendIds(user.id));
+    const payload = await responsePayload(result, preferences, await recentTrendIds(user.id));
     await recordTrendImpression(user.id, payload.signals.map((signal) => signal.id));
     return Response.json(payload, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {

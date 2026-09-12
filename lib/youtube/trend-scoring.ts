@@ -1,5 +1,6 @@
 export type PublicVideoSignal = {
   id: string;
+  channelId?: string;
   title: string;
   description?: string;
   tags?: string[];

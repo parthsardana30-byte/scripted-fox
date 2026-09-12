@@ -15,6 +15,17 @@ type TrendSignal = {
   viewsPerDay: number;
   nicheRelevance?: number | null;
 };
+type Competitor = {
+  channelId: string;
+  channelTitle: string;
+  channelSubscribers: number | null;
+  averageViews: number;
+  strongestViews: number;
+  videosFound: number;
+  topics: string[];
+  relevanceScore: number;
+  reason: string;
+};
 type LatestVideo = { id: string; title: string; views: number; averageViewPercentage: number };
 
 const compactNumber = new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits: 1 });
@@ -65,6 +76,7 @@ export function OverviewInsightCards({
     { id: "demo-1", title: "The format viewers are choosing now", channelTitle: "Creator Next Door", channelSubscribers: Math.max(120, subscriberCount + 80), views: 18400, viewsPerDay: 2600 },
     { id: "demo-2", title: "A sharper take on your niche", channelTitle: "Small Channel Lab", channelSubscribers: Math.max(90, subscriberCount), views: 12600, viewsPerDay: 1800 },
   ] : []);
+  const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(!useDemoData && enabled);
   const [targetsLoading, setTargetsLoading] = useState(!useDemoData && enabled);
 
@@ -86,8 +98,9 @@ export function OverviewInsightCards({
 
       try {
         const trendsResponse = await fetch("/api/trends", { cache: "no-store" });
-        const trendsPayload = await trendsResponse.json() as { signals?: TrendSignal[] };
+        const trendsPayload = await trendsResponse.json() as { signals?: TrendSignal[]; competitors?: Competitor[] };
         if (!cancelled && trendsResponse.ok && trendsPayload.signals) setSignals(trendsPayload.signals);
+        if (!cancelled && trendsResponse.ok && trendsPayload.competitors) setCompetitors(trendsPayload.competitors);
       } finally {
         if (!cancelled) setTargetsLoading(false);
       }
@@ -97,6 +110,7 @@ export function OverviewInsightCards({
   }, [enabled, useDemoData]);
 
   const targets = useMemo(() => {
+    if (!useDemoData && competitors.length > 0) return competitors;
     const strongestByChannel = new Map<string, TrendSignal>();
     signals.forEach((signal) => {
       if (!signal.channelTitle || signal.channelTitle === channelName || (signal.nicheRelevance ?? (useDemoData ? 100 : 0)) < 50) return;
@@ -114,7 +128,7 @@ export function OverviewInsightCards({
     return (matched.length >= 2 ? matched : candidates.filter((signal) => signal.channelSubscribers !== null))
       .sort((a, b) => b.views - a.views)
       .slice(0, 3);
-  }, [channelName, latestVideo?.views, signals, subscriberCount, useDemoData]);
+  }, [channelName, competitors, latestVideo?.views, signals, subscriberCount, useDemoData]);
 
   const rating = latestVideo ? Math.max(0, Math.min(100, Math.round(latestVideo.averageViewPercentage))) : 0;
 
@@ -132,13 +146,14 @@ export function OverviewInsightCards({
 
       <article className="overview-insight-card overview-insight-card--targets">
         <header><span className="overview-insight-card__icon"><InsightMark kind="targets" /></span><h2>Competitor Targets</h2></header>
-        <p className="overview-insight-card__intro">Similar-size channels in your niche pulling stronger views.</p>
+        <p className="overview-insight-card__intro">AI-suggested channels based on your niche, audience, and video performance.</p>
         <div className="overview-target-list">
-          {!enabled || targetsLoading ? Array.from({ length: 3 }).map((_, index) => <span className="overview-card-skeleton" key={index} />) : targets.length > 0 ? targets.map((target) => (
-            <a href={`https://www.youtube.com/watch?v=${target.id}`} target="_blank" rel="noreferrer" key={target.channelTitle}>
-              <span><UsersRound size={15} aria-hidden="true" /></span><div><strong>{target.channelTitle}</strong><small>{compactNumber.format(target.channelSubscribers ?? 0)} subs · {compactNumber.format(target.views)} views</small></div><ArrowRight size={15} aria-hidden="true" />
+          {!enabled || targetsLoading ? Array.from({ length: 3 }).map((_, index) => <span className="overview-card-skeleton" key={index} />) : targets.length > 0 ? targets.map((target) => {
+            const competitor = "channelId" in target;
+            return <a href={competitor ? `https://www.youtube.com/channel/${target.channelId}` : `https://www.youtube.com/watch?v=${target.id}`} target="_blank" rel="noreferrer" key={competitor ? target.channelId : target.channelTitle}>
+              <span><UsersRound size={15} aria-hidden="true" /></span><div><strong>{target.channelTitle}</strong><small>{compactNumber.format(target.channelSubscribers ?? 0)} subs · {compactNumber.format(competitor ? target.averageViews : target.views)} avg views</small>{competitor ? <em>{target.reason}</em> : null}</div><ArrowRight size={15} aria-hidden="true" />
             </a>
-          )) : <p className="overview-card-empty">No close competitor match yet. Refresh Trending Hub after your next channel sync.</p>}
+          }) : <p className="overview-card-empty">No strong competitor match yet. Refresh Trending Hub after your next channel sync.</p>}
         </div>
         <Link className="overview-insight-card__cta" href="/dashboard/trending">Explore targets <ArrowRight size={16} aria-hidden="true" /></Link>
       </article>

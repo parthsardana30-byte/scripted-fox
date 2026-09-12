@@ -2749,6 +2749,7 @@ body:has(.editor-workspace--focus) .dashboard-main { margin-inline-start: 0; }
 .overview-target-list a div { min-width: 0; display: grid; gap: .18rem; }
 .overview-target-list a strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .9rem; }
 .overview-target-list a small { color: rgb(255 255 255 / .58); font-size: .74rem; }
+.overview-target-list a em { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: rgb(255 255 255 / .68); font-size: .68rem; font-style: normal; line-height: 1.25; }
 .overview-insight-card__cta { margin-block-start: auto; padding-block-start: 1rem; display: inline-flex; align-items: center; justify-content: space-between; gap: .55rem; color: var(--color-accent); font-size: .83rem; font-weight: 800; }
 .overview-insight-card--targets .overview-insight-card__cta { color: #ff5368; }
 .overview-rating { display: grid; justify-items: center; gap: 1.15rem; padding: .5rem 0 1.2rem; text-align: center; }

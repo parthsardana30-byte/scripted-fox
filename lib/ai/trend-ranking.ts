@@ -84,5 +84,80 @@ export async function rankTrendSignalsWithAi(input: {
   if (new Set(rankings.map((ranking) => ranking.id)).size !== input.signals.length) {
     throw new Error("AI trend ranking did not rank every supplied video exactly once.");
   }
-  return { rankings, completion };
-}
+
+    return { rankings, completion };
+  }
+
+  const competitorSchema = z.object({
+    rankings: z.array(z.object({
+      channelId: z.string().min(1).max(100),
+      relevanceScore: z.number().int().min(0).max(100),
+      reason: z.string().min(8).max(180),
+    })).min(1).max(10),
+  });
+
+  export type CompetitorRankingInput = {
+    channelId: string;
+    channelTitle: string;
+    subscribers: number | null;
+    videosFound: number;
+    averageViews: number;
+    strongestViews: number;
+    topics: string[];
+  };
+
+  export async function rankCompetitorChannelsWithAi(input: {
+    niche: string;
+    creatorChannel: string | null;
+    creatorSubscribers: number;
+    creatorTopVideos: string[];
+    candidates: CompetitorRankingInput[];
+  }) {
+    const completion = await createAiCompletion({
+      system: "You identify relevant YouTube competitor channels for a creator. Use only supplied facts. Prefer channels with repeated evidence, similar audience size, overlapping topics, and stronger measured video performance. Do not call a channel a competitor merely because it is popular. Return concise evidence-based reasons.",
+      user: `Creator niche: ${input.niche}
+  Creator channel: ${input.creatorChannel ?? "unknown"}
+  Creator subscribers: ${input.creatorSubscribers}
+  Creator top videos: ${input.creatorTopVideos.slice(0, 8).join(" | ") || "unknown"}
+
+  Rank the supplied candidate channels:
+  ${input.candidates.map((candidate) => `- ID ${candidate.channelId}: ${candidate.channelTitle} | subscribers ${candidate.subscribers ?? "hidden"} | videos found ${candidate.videosFound} | average views ${Math.round(candidate.averageViews)} | strongest video ${Math.round(candidate.strongestViews)} | topics ${candidate.topics.join(", ")}`).join("\n")}`,
+      responseFormat: {
+        type: "json_schema",
+        json_schema: {
+          name: "youtube_competitor_ranking",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["rankings"],
+            properties: {
+              rankings: {
+                type: "array",
+                minItems: 1,
+                maxItems: 10,
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: ["channelId", "relevanceScore", "reason"],
+                  properties: {
+                    channelId: { type: "string", minLength: 1, maxLength: 100 },
+                    relevanceScore: { type: "integer", minimum: 0, maximum: 100 },
+                    reason: { type: "string", minLength: 8, maxLength: 180 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      maxCompletionTokens: 2_000,
+    });
+    const parsed = competitorSchema.safeParse(JSON.parse(completion.content));
+    if (!parsed.success) throw new Error("AI competitor ranking did not match the required format.");
+    const allowed = new Set(input.candidates.map((candidate) => candidate.channelId));
+    return {
+      rankings: parsed.data.rankings.filter((ranking) => allowed.has(ranking.channelId)),
+      completion,
+    };
+  }
