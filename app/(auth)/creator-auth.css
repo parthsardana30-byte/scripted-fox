@@ -613,19 +613,19 @@ body:has(.auth-shell) {
 }
 
 .auth-header--global .auth-wordmark {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  position: static;
+  left: auto;
+  transform: none;
   min-height: 0;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__symbol {
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 3.5rem;
+  height: 3.5rem;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__name {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__fox {
@@ -637,13 +637,39 @@ body:has(.auth-shell) {
 }
 
 .auth-header--global .theme-toggle {
+  width: 2.75rem;
+  justify-content: flex-start;
+  padding-inline: .8rem;
+  overflow: hidden;
+  border-radius: 999px;
   color: rgb(255 255 255 / .76);
+  transition: width 220ms ease, background-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .auth-header--global .theme-toggle:hover,
 .auth-header--global .theme-toggle:focus-visible {
+  width: 7.8rem;
   background: rgb(255 255 255 / .1);
   color: #fff;
+  transform: translateY(-1px);
+}
+
+.auth-header--global .theme-toggle::after {
+  content: "Switch theme";
+  margin-inline-start: .5rem;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: .72rem;
+  font-weight: 700;
+  transition: max-width 220ms ease, opacity 160ms ease;
+}
+
+.auth-header--global .theme-toggle:hover::after,
+.auth-header--global .theme-toggle:focus-visible::after {
+  max-width: 5rem;
+  opacity: 1;
 }
 
 .auth-shell__stage {
@@ -678,6 +704,11 @@ body:has(.auth-shell) {
   color: #fff;
   background: transparent;
   box-shadow: none;
+}
+
+.auth-card--sign-in {
+  height: auto;
+  min-height: 0;
 }
 
 .auth-card h1 {
