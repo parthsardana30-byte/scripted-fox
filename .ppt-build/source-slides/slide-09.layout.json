@@ -1,0 +1,2323 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/udsvah03",
+    "id": "udsvah03",
+    "slide": 9,
+    "layoutId": "/ppt/slideLayouts/slideLayout7.xml",
+    "layoutName": "Blank",
+    "layoutType": "blank",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4F81BD",
+      "accent2": "#C0504D",
+      "accent3": "#9BBB59",
+      "accent4": "#8064A2",
+      "accent5": "#4BACC6",
+      "accent6": "#F79646",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#1F497D",
+      "lt2": "#EEECE1",
+      "hlink": "#0000FF",
+      "folHlink": "#800080"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Poppins",
+      "Poppins Bold"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout7.xml",
+      "name": "Blank",
+      "type": "blank",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "shape",
+          "scope": "layout",
+          "aid": "template/layout//ppt/slideLayouts/slideLayout7.xml/2",
+          "id": "2",
+          "name": "Date Placeholder 1",
+          "bbox": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "text": "8/1/2011",
+          "textPreview": "8/1/2011",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "8/1/2011",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "8/1/2011"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "layout",
+          "aid": "template/layout//ppt/slideLayouts/slideLayout7.xml/3",
+          "id": "3",
+          "name": "Footer Placeholder 2",
+          "bbox": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "order": 3,
+          "kind": "shape",
+          "scope": "layout",
+          "aid": "template/layout//ppt/slideLayouts/slideLayout7.xml/4",
+          "id": "4",
+          "name": "Slide Number Placeholder 3",
+          "bbox": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "text": "‹#›",
+          "textPreview": "‹#›",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "‹#›",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "‹#›"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/2",
+          "id": "2",
+          "name": "Title Placeholder 1",
+          "bbox": [
+            48,
+            28.83,
+            864,
+            120
+          ],
+          "geometry": "rect",
+          "text": "Click to edit Master title style",
+          "textPreview": "Click to edit Master title style",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 4.8,
+              "right": 9.6,
+              "bottom": 4.8,
+              "left": 9.6
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Click to edit Master title style",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Click to edit Master title style"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/3",
+          "id": "3",
+          "name": "Text Placeholder 2",
+          "bbox": [
+            48,
+            168,
+            864,
+            475.17
+          ],
+          "geometry": "rect",
+          "text": "Click to edit Master text styles\nSecond level\nThird level\nFourth level\nFifth level",
+          "textPreview": "Click to edit Master text styles | Second level | Third level | Fourth level | Fifth level",
+          "resolvedTextStyle": {
+            "vertical": 1,
+            "autoFit": "shrinkText",
+            "insets": {
+              "top": 4.8,
+              "right": 9.6,
+              "bottom": 4.8,
+              "left": 9.6
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Click to edit Master text styles",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Click to edit Master text styles"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "Second level",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Second level"
+                }
+              ]
+            },
+            {
+              "index": 3,
+              "text": "Third level",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Third level"
+                }
+              ]
+            },
+            {
+              "index": 4,
+              "text": "Fourth level",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Fourth level"
+                }
+              ]
+            },
+            {
+              "index": 5,
+              "text": "Fifth level",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Fifth level"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/4",
+          "id": "4",
+          "name": "Date Placeholder 3",
+          "bbox": [
+            48,
+            667.33,
+            224,
+            38.33
+          ],
+          "geometry": "rect",
+          "text": "8/1/2011",
+          "textPreview": "8/1/2011",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "insets": {
+              "top": 4.8,
+              "right": 9.6,
+              "bottom": 4.8,
+              "left": 9.6
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "8/1/2011",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "8/1/2011"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/5",
+          "id": "5",
+          "name": "Footer Placeholder 4",
+          "bbox": [
+            328,
+            667.33,
+            304,
+            38.33
+          ],
+          "geometry": "rect",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "insets": {
+              "top": 4.8,
+              "right": 9.6,
+              "bottom": 4.8,
+              "left": 9.6
+            }
+          }
+        },
+        {
+          "order": 5,
+          "kind": "shape",
+          "scope": "master",
+          "aid": "template/master//ppt/slideMasters/slideMaster1.xml/6",
+          "id": "6",
+          "name": "Slide Number Placeholder 5",
+          "bbox": [
+            688,
+            667.33,
+            224,
+            38.33
+          ],
+          "geometry": "rect",
+          "text": "‹#›",
+          "textPreview": "‹#›",
+          "resolvedTextStyle": {
+            "anchor": 2,
+            "vertical": 1,
+            "verticalAlignment": "middle",
+            "insets": {
+              "top": 4.8,
+              "right": 9.6,
+              "bottom": 4.8,
+              "left": 9.6
+            }
+          },
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "‹#›",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "‹#›"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0b65obm9",
+      "id": "3",
+      "name": "Freeform 3",
+      "bbox": [
+        86.4,
+        153.63,
+        733.69,
+        166.85
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nex4jq5k",
+      "id": "4",
+      "name": "TextBox 4",
+      "bbox": [
+        86.4,
+        152.88,
+        733.69,
+        167.6
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "My Career Path",
+      "textPreview": "My Career Path",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "My Career Path"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "My Career Path",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "My Career Path",
+              "fontSize": 85.32,
+              "typeface": "Poppins Bold",
+              "color": "#111111",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9gzml0nq",
+      "id": "6",
+      "name": "Freeform 6",
+      "bbox": [
+        86.4,
+        337.78,
+        826.44,
+        79.3
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ofq5svm5",
+      "id": "7",
+      "name": "TextBox 7",
+      "bbox": [
+        86.4,
+        336.28,
+        826.44,
+        80.8
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "A decade of building, learning and evolving across agencies, studios and independent practice.",
+      "textPreview": "A decade of building, learning and evolving across agencies, studios and independent practice.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "A decade of building, learning and evolving across agencies,"
+          },
+          {
+            "index": 2,
+            "text": "studios and independent practice."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "A decade of building, learning and evolving across agencies, studios and independent practice.",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "A decade of building, learning and evolving across agencies, studios and independent practice.",
+              "fontSize": 25.32,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ah8nu54b",
+      "id": "9",
+      "name": "Freeform 9",
+      "bbox": [
+        85.07,
+        518.86,
+        1749.87,
+        7.47
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#EEEEEE",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p0ji9kf2",
+      "id": "11",
+      "name": "Freeform 11",
+      "bbox": [
+        219.47,
+        503.5,
+        37.23,
+        37.23
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#999999",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3y107axw",
+      "id": "13",
+      "name": "Freeform 13",
+      "bbox": [
+        85.07,
+        576.46,
+        405.87,
+        384.25
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#FAFAFA",
+      "lineColor": "#DDDDDD",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/do3id4fy",
+      "id": "15",
+      "name": "Freeform 15",
+      "bbox": [
+        115.2,
+        604.68,
+        345.6,
+        92.16
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qlcjipgn",
+      "id": "16",
+      "name": "TextBox 16",
+      "bbox": [
+        115.2,
+        602.43,
+        345.6,
+        94.41
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Agency 1\n2016",
+      "textPreview": "Agency 1 | 2016",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agency 1"
+          },
+          {
+            "index": 2,
+            "text": "2016"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agency 1",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agency 1",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "2016",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2016",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0ru1ozyp",
+      "id": "18",
+      "name": "Freeform 18",
+      "bbox": [
+        113.87,
+        699.34,
+        194.67,
+        7.47
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#EEEEEE",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/98ji147e",
+      "id": "20",
+      "name": "Freeform 20",
+      "bbox": [
+        115.2,
+        719.88,
+        345.6,
+        72.96
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/87a18zqt",
+      "id": "21",
+      "name": "TextBox 21",
+      "bbox": [
+        115.2,
+        718.38,
+        345.6,
+        74.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Junior Designer",
+      "textPreview": "Junior Designer",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Junior Designer"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Junior Designer",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Junior Designer",
+              "fontSize": 29.32,
+              "typeface": "Poppins Bold",
+              "color": "#111111",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ml8j6p8n",
+      "id": "23",
+      "name": "Freeform 23",
+      "bbox": [
+        115.2,
+        802.44,
+        345.6,
+        138.24
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hcji5o7a",
+      "id": "24",
+      "name": "TextBox 24",
+      "bbox": [
+        115.2,
+        800.19,
+        345.6,
+        140.49
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Learned craft, discipline and client communication.",
+      "textPreview": "Learned craft, discipline and client communication.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Learned craft, discipline and"
+          },
+          {
+            "index": 2,
+            "text": "client communication."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Learned craft, discipline and client communication.",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Learned craft, discipline and client communication.",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/va103ep4",
+      "id": "26",
+      "name": "Freeform 26",
+      "bbox": [
+        657.23,
+        503.5,
+        37.23,
+        37.23
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#999999",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xgzitk76",
+      "id": "28",
+      "name": "Freeform 28",
+      "bbox": [
+        522.83,
+        576.46,
+        405.87,
+        384.25
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#FAFAFA",
+      "lineColor": "#DDDDDD",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2l4faloj",
+      "id": "30",
+      "name": "Freeform 30",
+      "bbox": [
+        552.96,
+        604.68,
+        345.6,
+        92.16
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nmdg3q54",
+      "id": "31",
+      "name": "TextBox 31",
+      "bbox": [
+        552.96,
+        602.43,
+        345.6,
+        94.41
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Agency 2\n2018",
+      "textPreview": "Agency 2 | 2018",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agency 2"
+          },
+          {
+            "index": 2,
+            "text": "2018"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agency 2",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agency 2",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "2018",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2018",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pofy50nu",
+      "id": "33",
+      "name": "Freeform 33",
+      "bbox": [
+        551.63,
+        699.34,
+        194.67,
+        7.47
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#EEEEEE",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bqxg7q50",
+      "id": "35",
+      "name": "Freeform 35",
+      "bbox": [
+        552.96,
+        719.88,
+        345.6,
+        72.96
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cr6xgv6l",
+      "id": "36",
+      "name": "TextBox 36",
+      "bbox": [
+        552.96,
+        718.38,
+        345.6,
+        74.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Art Director",
+      "textPreview": "Art Director",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Art Director"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Art Director",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Art Director",
+              "fontSize": 29.32,
+              "typeface": "Poppins Bold",
+              "color": "#111111",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qtkf21ob",
+      "id": "38",
+      "name": "Freeform 38",
+      "bbox": [
+        552.96,
+        802.44,
+        345.6,
+        138.24
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rutwv65w",
+      "id": "39",
+      "name": "TextBox 39",
+      "bbox": [
+        552.96,
+        800.19,
+        345.6,
+        140.49
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Led visual direction for 3 major brand launches.",
+      "textPreview": "Led visual direction for 3 major brand launches.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Led visual direction for 3"
+          },
+          {
+            "index": 2,
+            "text": "major brand launches."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Led visual direction for 3 major brand launches.",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Led visual direction for 3 major brand launches.",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mdsnatcn",
+      "id": "41",
+      "name": "Freeform 41",
+      "bbox": [
+        1094.99,
+        503.5,
+        37.23,
+        37.23
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#999999",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8zu5c3ut",
+      "id": "43",
+      "name": "Freeform 43",
+      "bbox": [
+        960.59,
+        576.46,
+        405.87,
+        384.25
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#FAFAFA",
+      "lineColor": "#DDDDDD",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u1cnedcz",
+      "id": "45",
+      "name": "Freeform 45",
+      "bbox": [
+        990.72,
+        604.68,
+        345.6,
+        92.16
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h43mp8ba",
+      "id": "46",
+      "name": "TextBox 46",
+      "bbox": [
+        990.72,
+        602.43,
+        345.6,
+        94.41
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Agency 3\n2020",
+      "textPreview": "Agency 3 | 2020",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agency 3"
+          },
+          {
+            "index": 2,
+            "text": "2020"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agency 3",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agency 3",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "2020",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2020",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j6l4ritg",
+      "id": "48",
+      "name": "Freeform 48",
+      "bbox": [
+        989.39,
+        699.34,
+        194.67,
+        7.47
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#EEEEEE",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bel8na9",
+      "id": "50",
+      "name": "Freeform 50",
+      "bbox": [
+        990.72,
+        719.88,
+        345.6,
+        72.96
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1wnm1sru",
+      "id": "51",
+      "name": "TextBox 51",
+      "bbox": [
+        990.72,
+        718.38,
+        345.6,
+        74.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Strategy Lead",
+      "textPreview": "Strategy Lead",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Strategy Lead"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Strategy Lead",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Strategy Lead",
+              "fontSize": 29.32,
+              "typeface": "Poppins Bold",
+              "color": "#111111",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 31,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fa54zi9o",
+      "id": "53",
+      "name": "Freeform 53",
+      "bbox": [
+        990.72,
+        802.44,
+        345.6,
+        138.24
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 32,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/s7el4nax",
+      "id": "54",
+      "name": "TextBox 54",
+      "bbox": [
+        990.72,
+        800.19,
+        345.6,
+        140.49
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Merged design thinking with business outcomes.",
+      "textPreview": "Merged design thinking with business outcomes.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Merged design thinking with"
+          },
+          {
+            "index": 2,
+            "text": "business outcomes."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Merged design thinking with business outcomes.",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Merged design thinking with business outcomes.",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 33,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/65c32ds7",
+      "id": "56",
+      "name": "Freeform 56",
+      "bbox": [
+        1532.75,
+        503.5,
+        37.23,
+        37.23
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#111111",
+      "lineColor": "#111111",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 34,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/43ul03a1",
+      "id": "58",
+      "name": "Freeform 58",
+      "bbox": [
+        1398.35,
+        576.46,
+        405.87,
+        384.25
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#111111",
+      "lineColor": "#111111",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 35,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0v2x4ja",
+      "id": "60",
+      "name": "Freeform 60",
+      "bbox": [
+        1428.48,
+        604.68,
+        345.6,
+        92.16
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 36,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzm14z2p",
+      "id": "61",
+      "name": "TextBox 61",
+      "bbox": [
+        1428.48,
+        602.43,
+        345.6,
+        94.41
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Agency 4\n2022",
+      "textPreview": "Agency 4 | 2022",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Agency 4"
+          },
+          {
+            "index": 2,
+            "text": "2022"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Agency 4",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Agency 4",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#AAAAAA"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "2022",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "2022",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#AAAAAA"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 37,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yx4j2pkj",
+      "id": "63",
+      "name": "Freeform 63",
+      "bbox": [
+        1427.15,
+        699.34,
+        194.67,
+        7.47
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#333333",
+      "lineColor": "#333333",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 38,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wvm10f2t",
+      "id": "65",
+      "name": "Freeform 65",
+      "bbox": [
+        1428.48,
+        719.88,
+        345.6,
+        72.96
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 39,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/but0ra18",
+      "id": "66",
+      "name": "TextBox 66",
+      "bbox": [
+        1428.48,
+        718.38,
+        345.6,
+        74.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Independent",
+      "textPreview": "Independent",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Independent"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Independent",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Independent",
+              "fontSize": 29.32,
+              "typeface": "Poppins Bold",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 40,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hsf25oji",
+      "id": "68",
+      "name": "Freeform 68",
+      "bbox": [
+        1428.48,
+        802.44,
+        345.6,
+        138.24
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 41,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gr61cj2x",
+      "id": "69",
+      "name": "TextBox 69",
+      "bbox": [
+        1428.48,
+        800.19,
+        345.6,
+        140.49
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Launched solo practice, built exclusive client roster.",
+      "textPreview": "Launched solo practice, built exclusive client roster.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Launched solo practice, built"
+          },
+          {
+            "index": 2,
+            "text": "exclusive client roster."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Launched solo practice, built exclusive client roster.",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Launched solo practice, built exclusive client roster.",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#AAAAAA"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 42,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ze9gzqh0",
+      "id": "71",
+      "name": "Freeform 71",
+      "bbox": [
+        1766.4,
+        1017.6,
+        76.8,
+        48
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 43,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0zih8bil",
+      "id": "72",
+      "name": "TextBox 72",
+      "bbox": [
+        1766.4,
+        1016.1,
+        76.8,
+        49.5
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "9",
+      "textPreview": "9",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "9"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "9",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "9",
+              "fontSize": 21.32,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 44,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q9gf210j",
+      "id": "74",
+      "name": "Freeform 74",
+      "bbox": [
+        86.4,
+        1017.6,
+        576,
+        48
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillImage": {
+        "assetId": "/ppt/media/image1.jpeg",
+        "contentType": "image/jpeg",
+        "byteLength": 21932
+      }
+    },
+    {
+      "order": 45,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rapgv61o",
+      "id": "75",
+      "name": "TextBox 75",
+      "bbox": [
+        86.4,
+        1016.1,
+        576,
+        49.5
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "www.reallygreatsite.com",
+      "textPreview": "www.reallygreatsite.com",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "www.reallygreatsite.com"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "www.reallygreatsite.com",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "www.reallygreatsite.com",
+              "fontSize": 21.32,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 46,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dcryxgzu",
+      "id": "77",
+      "name": "Freeform 77",
+      "bbox": [
+        -1.33,
+        94.67,
+        1922.67,
+        4.97
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#EEEEEE",
+      "lineColor": "#EEEEEE",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 47,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b6tg7ah8",
+      "id": "79",
+      "name": "Freeform 79",
+      "bbox": [
+        1692.97,
+        92.21,
+        165.11,
+        8.43
+      ],
+      "rotation": 0,
+      "geometry": "custom",
+      "fillColor": "#111111",
+      "lineColor": "#111111",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 48,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ja58b650",
+      "id": "80",
+      "name": "TextBox 80",
+      "bbox": [
+        86.4,
+        31.28,
+        254.75,
+        35.93
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "SelfPortfolio",
+      "textPreview": "SelfPortfolio",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SelfPortfolio"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SelfPortfolio",
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "SelfPortfolio",
+              "fontSize": 25.33,
+              "typeface": "Poppins Bold",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 49,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y9w721of",
+      "id": "81",
+      "name": "TextBox 81",
+      "bbox": [
+        1213.11,
+        33.01,
+        127.37,
+        32.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Home",
+      "textPreview": "Home",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Home"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Home",
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Home",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 50,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lc7qdgn6",
+      "id": "82",
+      "name": "TextBox 82",
+      "bbox": [
+        1433.51,
+        33.01,
+        179.32,
+        32.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "About Us",
+      "textPreview": "About Us",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "About Us"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "About Us",
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "About Us",
+              "fontSize": 22.67,
+              "typeface": "Poppins",
+              "color": "#999999"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 51,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kbep4b6l",
+      "id": "83",
+      "name": "TextBox 83",
+      "bbox": [
+        1685.86,
+        33.01,
+        179.32,
+        32.46
+      ],
+      "rotation": 0,
+      "geometry": "rect",
+      "text": "Experience",
+      "textPreview": "Experience",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "resizeShapeToFitText",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Experience"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Experience",
+          "resolvedTextStyle": {
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Experience",
+              "fontSize": 22.67,
+              "typeface": "Poppins Bold",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

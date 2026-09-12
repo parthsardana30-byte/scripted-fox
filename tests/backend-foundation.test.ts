@@ -77,4 +77,22 @@ describe("deployment environment safety", () => {
 
     expect(result.success).toBe(false);
   });
+
+  it("allows Fox AI to be absent but rejects partial production configuration", () => {
+    const base = {
+      NEXT_PUBLIC_DEPLOYMENT_ENV: "production",
+      DATABASE_URL: "postgresql://example",
+      BETTER_AUTH_SECRET: "a-production-secret-that-is-long-enough",
+    };
+
+    expect(serverEnvironmentSchema.safeParse(base).success).toBe(true);
+    expect(serverEnvironmentSchema.safeParse({ ...base, FOX_AI_API_URL: "https://ai.example/chat" }).success).toBe(false);
+    expect(serverEnvironmentSchema.safeParse({
+      ...base,
+      FOX_AI_API_URL: "https://ai.example/chat",
+      FOX_AI_API_KEY: "secret",
+      FOX_AI_MODEL: "support-model",
+      FOX_AI_SUPPORT_EMAIL: "support@example.com",
+    }).success).toBe(true);
+  });
 });

@@ -83,6 +83,31 @@ describe("EditorWorkspace", () => {
     );
   });
 
+  it("downloads a professional PDF for plans with advanced exports", async () => {
+    const user = userEvent.setup();
+    const createObjectUrl = vi.fn(() => "blob:script-pdf");
+    const revokeObjectUrl = vi.fn();
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createObjectUrl });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: revokeObjectUrl });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: new Headers({ "content-disposition": 'attachment; filename="pencils-to-pixels.pdf"' }),
+      blob: async () => new Blob(["pdf"], { type: "application/pdf" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<EditorWorkspace canUseAdvancedExports projectTitle="Pencils to Pixels" />);
+
+    await user.type(screen.getByLabelText("Script content"), "A complete creator script.");
+    await user.type(screen.getByLabelText("Author name"), "Aryan Atharv");
+    await user.click(screen.getByRole("button", { name: /Export/ }));
+    await user.click(screen.getByRole("menuitem", { name: /PDF/ }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/export/pdf", expect.objectContaining({ method: "POST" })));
+    expect(createObjectUrl).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+  });
+
   it("asks for a topic instead of inventing a script when an empty draft receives an editing command", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn();

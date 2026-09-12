@@ -63,6 +63,11 @@ export const serverEnvironmentSchema = z
     XAI_MODEL: optionalString,
     GROK_API_KEY: optionalString,
     GROK_MODEL: optionalString,
+    FOX_AI_API_URL: optionalUrl,
+    FOX_AI_API_KEY: optionalString,
+    FOX_AI_MODEL: optionalString,
+    FOX_AI_SUPPORT_EMAIL: z.preprocess((value) => value === "" ? undefined : value, z.email().optional()),
+    BILLING_TEST_USER_IDS: optionalString,
     BILLING_PROVIDER: z.enum(["payu"]).optional(),
     PAYU_MERCHANT_KEY: optionalString,
     PAYU_MERCHANT_SALT: optionalString,
@@ -75,6 +80,15 @@ export const serverEnvironmentSchema = z
         code: "custom",
         path: ["GOOGLE_YOUTUBE_REDIRECT_URI"],
         message: "Production cannot use a localhost YouTube callback.",
+      });
+    }
+
+    const foxAiValues = [environment.FOX_AI_API_URL, environment.FOX_AI_API_KEY, environment.FOX_AI_MODEL, environment.FOX_AI_SUPPORT_EMAIL];
+    if (foxAiValues.some(Boolean) && foxAiValues.some((value) => !value)) {
+      context.addIssue({
+        code: "custom",
+        path: ["FOX_AI_API_URL"],
+        message: "FOX_AI_API_URL, FOX_AI_API_KEY, FOX_AI_MODEL, and FOX_AI_SUPPORT_EMAIL must be configured together.",
       });
     }
   });

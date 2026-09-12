@@ -133,6 +133,8 @@ export function EditorWorkspace({
   const [draft, setDraft] = useState<ScriptDraft>(() => emptyDraft(projectTitle));
   const [aiOpen, setAiOpen] = useState(initialAiOpen);
   const [exportOpen, setExportOpen] = useState(false);
+  const [pdfExportBusy, setPdfExportBusy] = useState(false);
+  const [pdfExportError, setPdfExportError] = useState("");
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [teleprompter, setTeleprompter] = useState(false);
@@ -151,7 +153,8 @@ export function EditorWorkspace({
   const versionMenuRef = useRef<HTMLDivElement>(null);
   const historyHydrated = useRef(false);
   const initialGenerationStarted = useRef(false);
-  const historyStorageKey = `next-video:versions:${encodeURIComponent(projectKey)}`;
+  const historyStorageKey = 
+`next-video:versions:${encodeURIComponent(projectKey)}`;
 
   const nextMessageId = () => `message-${messageSequence.current++}`;
 
@@ -446,10 +449,48 @@ export function EditorWorkspace({
     const url = URL.createObjectURL(file);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `next-video-script.${extension}`;
+    anchor.download = 
+`next-video-script.${extension}`;
     anchor.click();
     URL.revokeObjectURL(url);
     setExportOpen(false);
+  };
+
+  const downloadPdf = async () => {
+    if (!hasScript || pdfExportBusy) return;
+    setPdfExportBusy(true);
+    setPdfExportError("");
+    try {
+      const response = await fetch("/api/export/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim() || draft.title.trim() || "Untitled script",
+          author: author.trim(),
+          sections: draft.sections.filter((section) => section.body.trim()).map((section) => ({
+            label: section.label,
+            body: section.body,
+          })),
+        }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(data.error || "The PDF could not be generated.");
+      }
+      const disposition = response.headers.get("content-disposition") ?? "";
+      const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "scripted-fox-script.pdf";
+      const url = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      setExportOpen(false);
+    } catch (error) {
+      setPdfExportError(error instanceof Error ? error.message : "The PDF could not be generated.");
+    } finally {
+      setPdfExportBusy(false);
+    }
   };
 
   return (
@@ -486,8 +527,12 @@ export function EditorWorkspace({
               <p>Download</p>
               {[["Plain text", "txt"], ["Markdown", "md"], ["Subtitles", "srt"]].map(([label, ext]) => <button type="button" role="menuitem" key={ext} onClick={() => downloadText(ext)}>{label}<span>.{ext}</span></button>)}
               {canUseAdvancedExports ? <>
-                <button type="button" role="menuitem" disabled>PDF <span>Provider setup pending</span></button>
-                <button type="button" role="menuitem" disabled>Word document <span>Provider setup pending</span></button>
+                <button type="button" role="menuitem" disabled={!hasScript || pdfExportBusy} onClick={() => void downloadPdf()}>
+                  {pdfExportBusy ? <><RefreshCw className="spin" size={14} aria-hidden="true" /> Designing PDF</> : "PDF"}
+                  <span>{hasScript ? ".pdf" : "Add script text"}</span>
+                </button>
+                <button type="button" role="menuitem" disabled>Word document <span>Coming soon</span></button>
+                {pdfExportError && <p className="editor-export__error" role="status">{pdfExportError}</p>}
               </> : <>
                 <Link role="menuitem" href="/dashboard/upgrade?feature=advanced_exports">PDF <span>Upgrade</span></Link>
                 <Link role="menuitem" href="/dashboard/upgrade?feature=advanced_exports">Word document <span>Upgrade</span></Link>
@@ -508,6 +553,7 @@ export function EditorWorkspace({
           </article>
         </div>
 
+        {aiOpen && <button className="editor-ai-scrim" type="button" aria-label="Close AI writing assistant" onClick={() => setAiOpen(false)} />}
         {aiOpen && <aside className="editor-ai" aria-label="AI writing assistant">
           <header><div><span><Sparkles size={16} aria-hidden="true" /></span><div><p>Writing assistant</p><small>Changes appear directly in your script</small></div></div></header>
           <div className="editor-ai__conversation" aria-live="polite">

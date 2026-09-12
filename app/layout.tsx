@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import "./fox-ai.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { FoxAiChat } from "@/components/support/fox-ai-chat";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -50,6 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     >
       <body>
         {children}
+        <FoxAiChat />
         <Script id="scripted-fox-theme" strategy="beforeInteractive">
           {`(function(){try{var t=localStorage.getItem("scripted-fox:theme");if(t==="dark"||t==="light")document.documentElement.dataset.nextVideoTheme=t}catch(e){}})()`}
         </Script>

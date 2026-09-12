@@ -1,0 +1,144 @@
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"Hi, I'm","textShapes":8}
+{"kind":"shape","id":"sh/k3yl0zql","slide":1,"name":"Freeform 3","bbox":[-1.33,94.67,1922.67,4.97]}
+{"kind":"shape","id":"sh/sryl4zqx","slide":1,"name":"Freeform 7","bbox":[86.4,144,960,96]}
+{"kind":"textbox","id":"sh/fu94fe98","slide":1,"name":"TextBox 8","text":"Hi, I'm","textPreview":"Hi, I'm","textChars":7,"textLines":1,"bbox":[86.4,141.75,960,98.25]}
+{"kind":"shape","id":"sh/h072l4jy","slide":1,"name":"Freeform 33","bbox":[1095.73,168.77,709.07,811.76]}
+{"kind":"shape","id":"sh/z650ba1k","slide":1,"name":"Freeform 39","bbox":[1766.4,1017.6,76.8,48]}
+{"kind":"textbox","id":"sh/nqxgjqtk","slide":1,"name":"TextBox 44","text":"Aryan","textPreview":"Aryan","textChars":5,"textLines":1,"bbox":[85,250,900,250]}
+{"kind":"textbox","id":"sh/mpozalcz","slide":1,"name":"TextBox 45","text":"ASPIRING PRODUCT BUILDER","textPreview":"ASPIRING PRODUCT BUILDER","textChars":24,"textLines":1,"bbox":[88,535,760,60]}
+{"kind":"textbox","id":"sh/9sfylgbq","slide":1,"name":"TextBox 46","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[86.4,31.28,254.75,35.93]}
+{"kind":"textbox","id":"sh/or6hcvu5","slide":1,"name":"Brand Hook Idea","text":"IDEA","textPreview":"IDEA","textChars":4,"textLines":1,"bbox":[1180,320,560,110]}
+{"kind":"textbox","id":"sh/buh0nqtg","slide":1,"name":"Brand Hook To","text":"TO","textPreview":"TO","textChars":2,"textLines":1,"bbox":[1180,445,560,90]}
+{"kind":"textbox","id":"sh/at8zelcb","slide":1,"name":"Brand Hook Product","text":"PRODUCT","textPreview":"PRODUCT","textChars":7,"textLines":1,"bbox":[1135,550,650,120]}
+{"kind":"textbox","id":"sh/8zqx4vq9","slide":1,"name":"Brand Tagline","text":"I turn rough ideas into useful digital tools.","textPreview":"I turn rough ideas into useful digital tools.","textChars":45,"textLines":1,"bbox":[88,660,850,120]}
+{"kind":"notes","id":"nt/y90nupkv","slide":1,"text":"Good morning. I am Aryan. I am interested in building digital products. I enjoy taking a rough idea and turning it into something useful. I chose the words ‘idea to product’ because they describe how I like to work. In this presentation, I will explain the kind of problems I enjoy, how I work, the skills I am building, and one project that shows my direction."}
+{"kind":"slide","id":"sl/hwbqtkby","slide":2,"title":"The kind of","textShapes":11}
+{"kind":"shape","id":"sh/ozy1ofad","slide":2,"name":"Freeform 3","bbox":[-1.33,94.67,1922.67,4.97]}
+{"kind":"shape","id":"sh/a10jqpsj","slide":2,"name":"Freeform 5","bbox":[86.4,124.8,864,268.8]}
+{"kind":"textbox","id":"sh/x4r21kru","slide":2,"name":"TextBox 6","text":"The kind of\nwork I enjoy","textPreview":"The kind of | work I enjoy","textChars":24,"textLines":2,"bbox":[86.4,133.8,864,259.8]}
+{"kind":"shape","id":"sh/ove9o7yd","slide":2,"name":"Freeform 10","bbox":[915.32,123.47,929.21,876.27]}
+{"kind":"shape","id":"sh/mtwrmxg7","slide":2,"name":"Freeform 12","bbox":[986.73,192,806.4,72.96]}
+{"kind":"textbox","id":"sh/nu58f2hs","slide":2,"name":"TextBox 13","text":"A rough idea","textPreview":"A rough idea","textChars":12,"textLines":1,"bbox":[986.73,190.5,806.4,74.46]}
+{"kind":"shape","id":"sh/xk7qlczu","slide":2,"name":"Freeform 15","bbox":[986.73,274.56,806.4,201.6]}
+{"kind":"textbox","id":"sh/ahwrqhgj","slide":2,"name":"TextBox 16","text":"I like finding the real problem behind an idea.","textPreview":"I like finding the real problem behind an idea.","textChars":47,"textLines":1,"bbox":[986.73,273.06,806.4,203.1]}
+{"kind":"shape","id":"sh/cnupgny5","slide":2,"name":"Freeform 18","bbox":[985.4,497.87,732.27,4.97]}
+{"kind":"shape","id":"sh/t8byxkn2","slide":2,"name":"Freeform 20","bbox":[986.73,529.92,806.4,67.2]}
+{"kind":"textbox","id":"sh/s72xofmh","slide":2,"name":"TextBox 21","text":"A useful answer","textPreview":"A useful answer","textChars":15,"textLines":1,"bbox":[986.73,528.42,806.4,68.7]}
+{"kind":"shape","id":"sh/65kfmpor","slide":2,"name":"Freeform 23","bbox":[986.73,606.72,806.4,163.2]}
+{"kind":"textbox","id":"sh/hcvy14ne","slide":2,"name":"TextBox 24","text":"I break the work into small steps, build, and improve.","textPreview":"I break the work into small steps, build, and improve.","textChars":54,"textLines":1,"bbox":[986.73,605.22,806.4,164.7]}
+{"kind":"shape","id":"sh/fadgzu58","slide":2,"name":"Freeform 26","bbox":[985.4,791.63,732.27,4.97]}
+{"kind":"shape","id":"sh/p0vy54na","slide":2,"name":"Freeform 28","bbox":[986.73,821.76,345.6,67.2]}
+{"kind":"textbox","id":"sh/4zmxwzmp","slide":2,"name":"TextBox 29","text":"Product thinking","textPreview":"Product thinking","textChars":16,"textLines":1,"bbox":[986.73,820.26,345.6,68.7]}
+{"kind":"shape","id":"sh/nmpcj6ls","slide":2,"name":"Freeform 31","bbox":[986.73,888.96,384,42.24]}
+{"kind":"textbox","id":"sh/onydsbmd","slide":2,"name":"TextBox 32","text":"What I practise","textPreview":"What I practise","textChars":15,"textLines":1,"bbox":[986.73,887.46,384,43.74]}
+{"kind":"shape","id":"sh/a9gvulkj","slide":2,"name":"Freeform 34","bbox":[1370.73,821.76,230.4,67.2]}
+{"kind":"textbox","id":"sh/ba9cn6l4","slide":2,"name":"TextBox 35","text":"Web development","textPreview":"Web development","textChars":15,"textLines":1,"bbox":[1370.73,820.26,230.4,68.7]}
+{"kind":"shape","id":"sh/xcrupg3u","slide":2,"name":"Freeform 37","bbox":[1370.73,888.96,288,42.24]}
+{"kind":"textbox","id":"sh/id0vylkf","slide":2,"name":"TextBox 38","text":"What I build","textPreview":"What I build","textChars":12,"textLines":1,"bbox":[1370.73,887.46,288,43.74]}
+{"kind":"textbox","id":"sh/jix0niho","slide":2,"name":"TextBox 62","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[86.4,31.28,254.75,35.93]}
+{"kind":"textbox","id":"sh/xgfil8zy","slide":2,"name":"Thinking Caption","text":"I enjoy work that starts unclear\nand ends useful.","textPreview":"I enjoy work that starts unclear | and ends useful.","textChars":49,"textLines":2,"bbox":[120,855,700,90]}
+{"kind":"image","id":"im/fa50vexk","slide":2,"name":"","bbox":[255,420,430,430]}
+{"kind":"notes","id":"nt/hwbqtkby","slide":2,"text":"I enjoy work that does not have a clear answer at the start. First, I try to understand the real problem. Then I divide the work into smaller steps. I build a simple version, see what works, and improve it. This is why product thinking and web development interest me. They allow me to move from an idea to something a person can actually use."}
+{"kind":"slide","id":"sl/ofy9wn61","slide":3,"title":"How I","textShapes":8}
+{"kind":"shape","id":"sh/d0jax03i","slide":3,"name":"Freeform 3","bbox":[1049.51,157.07,768,844.82]}
+{"kind":"shape","id":"sh/3ah8rqlg","slide":3,"name":"Freeform 5","bbox":[86.4,133.34,883.2,259.2]}
+{"kind":"textbox","id":"sh/obq90bml","slide":3,"name":"TextBox 6","text":"How I\nwork","textPreview":"How I | work","textChars":10,"textLines":2,"bbox":[86.4,137.09,883.2,255.45]}
+{"kind":"shape","id":"sh/m5cra54z","slide":3,"name":"Freeform 8","bbox":[85.07,405.71,885.87,165.87]}
+{"kind":"shape","id":"sh/n2l4fq98","slide":3,"name":"Freeform 10","bbox":[124.8,426.24,806.4,57.6]}
+{"kind":"textbox","id":"sh/m1c3mlsn","slide":3,"name":"TextBox 11","text":"Curiosity","textPreview":"Curiosity","textChars":9,"textLines":1,"bbox":[124.8,424.74,806.4,59.1]}
+{"kind":"shape","id":"sh/83ulovat","slide":3,"name":"Freeform 13","bbox":[124.8,479.47,787.2,67.2]}
+{"kind":"textbox","id":"sh/v6l4jq94","slide":3,"name":"TextBox 14","text":"I ask why before I choose a solution.","textPreview":"I ask why before I choose a solution.","textChars":37,"textLines":1,"bbox":[124.8,477.22,787.2,69.45]}
+{"kind":"shape","id":"sh/x8nml0ra","slide":3,"name":"Freeform 16","bbox":[85.07,597.71,885.87,165.87]}
+{"kind":"shape","id":"sh/ja54na9g","slide":3,"name":"Freeform 18","bbox":[124.8,618.24,806.4,57.6]}
+{"kind":"textbox","id":"sh/i9w3u58v","slide":3,"name":"TextBox 19","text":"Clarity","textPreview":"Clarity","textChars":7,"textLines":1,"bbox":[124.8,616.74,806.4,59.1]}
+{"kind":"shape","id":"sh/f29gbyx0","slide":3,"name":"Freeform 21","bbox":[124.8,671.47,787.2,67.2]}
+{"kind":"textbox","id":"sh/03ix43e5","slide":3,"name":"TextBox 22","text":"I explain ideas in simple words.","textPreview":"I explain ideas in simple words.","textChars":32,"textLines":1,"bbox":[124.8,669.22,787.2,69.45]}
+{"kind":"shape","id":"sh/6d0fytg3","slide":3,"name":"Freeform 24","bbox":[85.07,789.71,885.87,165.87]}
+{"kind":"shape","id":"sh/sfix03y9","slide":3,"name":"Freeform 26","bbox":[124.8,810.24,806.4,57.6]}
+{"kind":"textbox","id":"sh/tgry9ofu","slide":3,"name":"TextBox 27","text":"Ownership","textPreview":"Ownership","textChars":9,"textLines":1,"bbox":[124.8,808.74,806.4,59.1]}
+{"kind":"shape","id":"sh/batgjixs","slide":3,"name":"Freeform 29","bbox":[124.8,863.47,787.2,67.2]}
+{"kind":"textbox","id":"sh/l4fi9cza","slide":3,"name":"TextBox 30","text":"I stay with the task until the result works.","textPreview":"I stay with the task until the result works.","textChars":44,"textLines":1,"bbox":[124.8,861.22,787.2,69.45]}
+{"kind":"shape","id":"sh/hwzihwzi","slide":3,"name":"Freeform 38","bbox":[-1.33,94.67,1922.67,4.97]}
+{"kind":"textbox","id":"sh/po3ilcvm","slide":3,"name":"TextBox 41","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[86.4,31.28,254.75,35.93]}
+{"kind":"notes","id":"nt/ofy9wn61","slide":3,"text":"Three behaviours guide my work. The first is curiosity. I ask why before choosing a solution. The second is clarity. I try to explain ideas in simple words so the team can move together. The third is ownership. When I accept a task, I stay with it until the result works. These behaviours are the character I want people to connect with my name."}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":4,"title":"What I","textShapes":11}
+{"kind":"shape","id":"sh/0ba143al","slide":4,"name":"Freeform 3","bbox":[86.4,178.46,811.16,259.2]}
+{"kind":"textbox","id":"sh/rm1k7yt4","slide":4,"name":"TextBox 4","text":"What I\ncan bring","textPreview":"What I | can bring","textChars":16,"textLines":2,"bbox":[86.4,188.96,811.16,248.7]}
+{"kind":"shape","id":"sh/ih8ju9sn","slide":4,"name":"Freeform 9","bbox":[85.07,505.55,10.35,171.63]}
+{"kind":"shape","id":"sh/5cva1cfq","slide":4,"name":"Freeform 11","bbox":[134.4,516.48,693.02,67.2]}
+{"kind":"textbox","id":"sh/i94r6xgz","slide":4,"name":"TextBox 12","text":"Think before building","textPreview":"Think before building","textChars":21,"textLines":1,"bbox":[134.4,514.98,693.02,68.7]}
+{"kind":"shape","id":"sh/w72947yt","slide":4,"name":"Freeform 14","bbox":[134.4,586.85,693.02,74.3]}
+{"kind":"textbox","id":"sh/x8vaxsfe","slide":4,"name":"TextBox 15","text":"I connect user needs with practical features.","textPreview":"I connect user needs with practical features.","textChars":45,"textLines":1,"bbox":[134.4,585.35,693.02,75.8]}
+{"kind":"shape","id":"sh/v6tsv2xo","slide":4,"name":"Freeform 17","bbox":[85.07,751.31,10.35,171.63]}
+{"kind":"shape","id":"sh/h4fa9wfy","slide":4,"name":"Freeform 19","bbox":[134.4,762.24,693.02,67.2]}
+{"kind":"textbox","id":"sh/p0batw72","slide":4,"name":"TextBox 20","text":"Build and improve","textPreview":"Build and improve","textChars":17,"textLines":1,"bbox":[134.4,760.74,693.02,68.7]}
+{"kind":"shape","id":"sh/3ytsrmpw","slide":4,"name":"Freeform 22","bbox":[134.4,832.61,693.02,74.3]}
+{"kind":"textbox","id":"sh/2xkrih8b","slide":4,"name":"TextBox 23","text":"I turn an idea into a working product, then improve it with feedback.","textPreview":"I turn an idea into a working product, then improve it with feedback.","textChars":69,"textLines":1,"bbox":[134.4,831.11,693.02,75.8]}
+{"kind":"shape","id":"sh/et0reh8f","slide":4,"name":"Freeform 27","bbox":[1016.27,616.91,386.67,83.31]}
+{"kind":"shape","id":"sh/sri9s7q9","slide":4,"name":"Freeform 29","bbox":[1017.6,618.24,384,80.64]}
+{"kind":"textbox","id":"sh/ilwf69kv","slide":4,"name":"TextBox 30","text":"Product thinking","textPreview":"Product thinking","textChars":16,"textLines":1,"bbox":[1017.6,615.99,384,82.89]}
+{"kind":"shape","id":"sh/knex8j21","slide":4,"name":"Freeform 32","bbox":[1429.07,616.91,386.67,83.31]}
+{"kind":"shape","id":"sh/axcf29kj","slide":4,"name":"Freeform 34","bbox":[1430.4,618.24,384,80.64]}
+{"kind":"textbox","id":"sh/vy5gbe14","slide":4,"name":"TextBox 35","text":"Web development","textPreview":"Web development","textChars":15,"textLines":1,"bbox":[1430.4,615.99,384,82.89]}
+{"kind":"shape","id":"sh/xknyx4ja","slide":4,"name":"Freeform 37","bbox":[1016.27,728.27,386.67,83.31]}
+{"kind":"shape","id":"sh/nulw7u18","slide":4,"name":"Freeform 39","bbox":[1017.6,729.6,384,80.64]}
+{"kind":"textbox","id":"sh/fm5c3q54","slide":4,"name":"TextBox 40","text":"User research","textPreview":"User research","textChars":13,"textLines":1,"bbox":[1017.6,727.35,384,82.89]}
+{"kind":"shape","id":"sh/18nu50nu","slide":4,"name":"Freeform 42","bbox":[1429.07,728.27,386.67,83.31]}
+{"kind":"shape","id":"sh/rilczq5s","slide":4,"name":"Freeform 44","bbox":[1430.4,729.6,384,80.64]}
+{"kind":"textbox","id":"sh/qhcb6l47","slide":4,"name":"TextBox 45","text":"AI tools","textPreview":"AI tools","textChars":8,"textLines":1,"bbox":[1430.4,727.35,384,82.89]}
+{"kind":"shape","id":"sh/sjut8vmd","slide":4,"name":"Freeform 47","bbox":[1016.27,839.63,386.67,83.31]}
+{"kind":"shape","id":"sh/idcb2lob","slide":4,"name":"Freeform 49","bbox":[1017.6,840.96,384,80.64]}
+{"kind":"textbox","id":"sh/8jq9c72t","slide":4,"name":"TextBox 50","text":"Testing","textPreview":"Testing","textChars":7,"textLines":1,"bbox":[1017.6,838.71,384,82.89]}
+{"kind":"shape","id":"sh/wr694nm1","slide":4,"name":"Freeform 58","bbox":[-1.33,94.67,1922.67,4.97]}
+{"kind":"textbox","id":"sh/cnyp8jep","slide":4,"name":"TextBox 61","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[86.4,31.28,254.75,35.93]}
+{"kind":"image","id":"im/kv69cze5","slide":4,"name":"","bbox":[1200,125,470,470]}
+{"kind":"notes","id":"nt/jyx0ra1s","slide":4,"text":"My main strength is the combination of thinking and building. I try to understand what the user needs before deciding what to create. I can then turn the idea into a working web product. Research and testing help me improve the result. I also use AI tools as support, while keeping the final decisions clear and human. This combination helps me contribute from the early idea stage to the working solution."}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"Proof: Scripted Fox","textShapes":9}
+{"kind":"shape","id":"sh/yhkbe1o7","slide":5,"name":"Freeform 5","bbox":[86.4,139.53,941.15,156.96]}
+{"kind":"textbox","id":"sh/l4bupwny","slide":5,"name":"TextBox 6","text":"Proof: Scripted Fox","textPreview":"Proof: Scripted Fox","textChars":19,"textLines":1,"bbox":[86.4,134.28,941.15,162.21]}
+{"kind":"shape","id":"sh/n6dcr65o","slide":5,"name":"Freeform 8","bbox":[86.4,287.52,846.79,105.6]}
+{"kind":"textbox","id":"sh/m5kbi1oj","slide":5,"name":"TextBox 9","text":"A working product made for YouTube creators.","textPreview":"A working product made for YouTube creators.","textChars":44,"textLines":1,"bbox":[86.4,286.02,846.79,107.1]}
+{"kind":"shape","id":"sh/x4vedgvm","slide":5,"name":"Freeform 11","bbox":[86.4,420.49,436.8,167.02]}
+{"kind":"textbox","id":"sh/ahkvi1cb","slide":5,"name":"TextBox 12","text":"PROBLEM","textPreview":"PROBLEM","textChars":7,"textLines":1,"bbox":[86,420,430,70]}
+{"kind":"shape","id":"sh/k7mxovud","slide":5,"name":"Freeform 14","bbox":[86.4,573.11,420,86.4]}
+{"kind":"textbox","id":"sh/58vehgvy","slide":5,"name":"TextBox 15","text":"Creators have ideas but may struggle to shape a clear video.","textPreview":"Creators have ideas but may struggle to shape a clear video.","textChars":60,"textLines":1,"bbox":[86,505,450,145]}
+{"kind":"shape","id":"sh/j6dwfqds","slide":5,"name":"Freeform 17","bbox":[594.53,420.49,436.8,167.02]}
+{"kind":"textbox","id":"sh/sb6xsvu9","slide":5,"name":"TextBox 18","text":"APPROACH","textPreview":"APPROACH","textChars":8,"textLines":1,"bbox":[585,420,450,70]}
+{"kind":"shape","id":"sh/hgrmpwj2","slide":5,"name":"Freeform 20","bbox":[594.53,573.11,420,86.4]}
+{"kind":"textbox","id":"sh/gfi5grih","slide":5,"name":"TextBox 21","text":"Make the path from idea to a ready script simple.","textPreview":"Make the path from idea to a ready script simple.","textChars":49,"textLines":1,"bbox":[585,505,450,145]}
+{"kind":"shape","id":"sh/4ji5kbid","slide":5,"name":"Freeform 25","bbox":[86.4,756.54,655.62,74.3]}
+{"kind":"textbox","id":"sh/3i94r61s","slide":5,"name":"TextBox 26","text":"What this proves: I can connect user needs, design and technology.","textPreview":"What this proves: I can connect user needs, design and technology.","textChars":66,"textLines":1,"bbox":[86,755,910,80]}
+{"kind":"shape","id":"sh/5o7mhcju","slide":5,"name":"Freeform 28","bbox":[86.4,870.85,655.62,80.64]}
+{"kind":"textbox","id":"sh/kny587i9","slide":5,"name":"TextBox 29","text":"Building it taught me to stay close to the user.","textPreview":"Building it taught me to stay close to the user.","textChars":48,"textLines":1,"bbox":[86,865,910,70]}
+{"kind":"shape","id":"sh/5kn2hszu","slide":5,"name":"Freeform 37","bbox":[-1.33,94.67,1922.67,4.97]}
+{"kind":"textbox","id":"sh/fid07u98","slide":5,"name":"TextBox 40","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[86.4,31.28,254.75,35.93]}
+{"kind":"image","id":"im/d4j298b2","slide":5,"name":"","bbox":[1103,118,750,871]}
+{"kind":"notes","id":"nt/i107q5of","slide":5,"text":"Scripted Fox is evidence of this direction. It is a digital product for YouTube creators. Many creators have an idea but still struggle to shape it into a clear video. The product is designed to make the path from an idea to a ready script simpler. Working on it required product thinking, interface design and web development. It taught me that useful products begin with a clear user problem and improve through repeated testing."}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"My brand","textShapes":11}
+{"kind":"shape","id":"sh/zi98nu94","slide":6,"name":"Freeform 3","bbox":[1189.07,129.23,684.27,895.47]}
+{"kind":"shape","id":"sh/98rqt4r6","slide":6,"name":"Freeform 5","bbox":[1219.2,155.89,624,459.3]}
+{"kind":"shape","id":"sh/7m98ru9g","slide":6,"name":"Freeform 7","bbox":[86.4,149,844.52,480]}
+{"kind":"textbox","id":"sh/oryp8fah","slide":6,"name":"TextBox 8","text":"My brand\npromise","textPreview":"My brand | promise","textChars":16,"textLines":2,"bbox":[86.4,173.75,844.52,455.25]}
+{"kind":"shape","id":"sh/h4bupgn6","slide":6,"name":"Freeform 10","bbox":[86.4,613.62,767.5,124.8]}
+{"kind":"textbox","id":"sh/w32twb6l","slide":6,"name":"TextBox 11","text":"I am Aryan, an aspiring product builder who turns unclear ideas into simple digital tools. My strength is staying curious and improving the work until it becomes useful.","textPreview":"I am Aryan, an aspiring product builder who turns unclear ideas into simple digital tools. My strength is staying curious and improving t...","textChars":169,"textLines":1,"bbox":[86,590,800,170]}
+{"kind":"shape","id":"sh/u1kbu1ov","slide":6,"name":"Freeform 13","bbox":[85.07,785.87,386.67,94.83]}
+{"kind":"shape","id":"sh/47mt0b6x","slide":6,"name":"Freeform 15","bbox":[128.09,787.2,300.62,92.16]}
+{"kind":"textbox","id":"sh/j6dcr65c","slide":6,"name":"TextBox 16","text":"CURIOUS","textPreview":"CURIOUS","textChars":7,"textLines":1,"bbox":[128.09,785.7,300.62,93.66]}
+{"kind":"shape","id":"sh/twfux0ne","slide":6,"name":"Freeform 18","bbox":[498.53,786.53,385.33,93.49]}
+{"kind":"shape","id":"sh/cbe5g3ih","slide":6,"name":"Freeform 20","bbox":[540.89,787.2,300.62,92.16]}
+{"kind":"textbox","id":"sh/dcnm98zm","slide":6,"name":"TextBox 21","text":"DEPENDABLE","textPreview":"DEPENDABLE","textChars":10,"textLines":1,"bbox":[540.89,785.7,300.62,93.66]}
+{"kind":"shape","id":"sh/bq547yhw","slide":6,"name":"Freeform 23","bbox":[1219.2,648.18,624,76.8]}
+{"kind":"textbox","id":"sh/0fy5k3id","slide":6,"name":"TextBox 24","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[1219.2,645.93,624,79.05]}
+{"kind":"shape","id":"sh/ydgnit07","slide":6,"name":"Freeform 26","bbox":[1219.2,711.54,624,53.76]}
+{"kind":"textbox","id":"sh/zep4byhs","slide":6,"name":"TextBox 27","text":"Aspiring Product Builder","textPreview":"Aspiring Product Builder","textChars":24,"textLines":1,"bbox":[1219.2,710.04,624,55.26]}
+{"kind":"shape","id":"sh/1k3mhozu","slide":6,"name":"Freeform 29","bbox":[1313.87,794.69,434.67,4.97]}
+{"kind":"shape","id":"sh/idk7ehkr","slide":6,"name":"Freeform 31","bbox":[1219.2,823.84,624,57.6]}
+{"kind":"textbox","id":"sh/50bqpcj2","slide":6,"name":"TextBox 32","text":"github.com/aryanatharv","textPreview":"github.com/aryanatharv","textChars":22,"textLines":1,"bbox":[1219.2,821.59,624,59.85]}
+{"kind":"shape","id":"sh/va98j210","slide":6,"name":"Freeform 34","bbox":[1219.2,868,624,57.6]}
+{"kind":"textbox","id":"sh/u907axkf","slide":6,"name":"TextBox 35","text":"Project: Scripted Fox","textPreview":"Project: Scripted Fox","textChars":21,"textLines":1,"bbox":[1219.2,865.75,624,59.85]}
+{"kind":"shape","id":"sh/wbipc72l","slide":6,"name":"Freeform 37","bbox":[1219.2,914.4,624,57.6]}
+{"kind":"textbox","id":"sh/7698f214","slide":6,"name":"TextBox 38","text":"Learning through building","textPreview":"Learning through building","textChars":25,"textLines":1,"bbox":[1219.2,912.15,624,59.85]}
+{"kind":"shape","id":"sh/2dkbalg3","slide":6,"name":"Freeform 40","bbox":[-1.33,94.67,1922.67,4.97]}
+{"kind":"textbox","id":"sh/pgbul0fu","slide":6,"name":"TextBox 43","text":"ARYAN","textPreview":"ARYAN","textChars":5,"textLines":1,"bbox":[86.4,31.28,254.75,35.93]}
+{"kind":"textbox","id":"sh/1sbuh0fi","slide":6,"name":"Monogram","text":"A","textPreview":"A","textChars":1,"textLines":1,"bbox":[1300,205,460,320]}
+{"kind":"notes","id":"nt/x8f69ofe","slide":6,"text":"The professional identity I am building is simple. I want people to see me as someone who can take an unclear idea and make it useful. I am still learning, so my brand is not based on claiming that I know everything. It is based on curiosity, steady improvement and taking responsibility for my work. My final brand statement is: I am Aryan, an aspiring product builder who turns unclear ideas into simple digital tools."}
