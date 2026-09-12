@@ -26,9 +26,7 @@ export const serverEnvironment = serverEnvironmentSchema.parse({
   XAI_MODEL: process.env.XAI_MODEL,
   GROK_API_KEY: process.env.GROK_API_KEY,
   GROK_MODEL: process.env.GROK_MODEL,
-  BILLING_TEST_USER_IDS: process.env.BILLING_TEST_USER_IDS,
   BILLING_PROVIDER: process.env.BILLING_PROVIDER,
-  PAYU_ENVIRONMENT: process.env.PAYU_ENVIRONMENT,
   PAYU_MERCHANT_KEY: process.env.PAYU_MERCHANT_KEY,
   PAYU_MERCHANT_SALT: process.env.PAYU_MERCHANT_SALT,
 });

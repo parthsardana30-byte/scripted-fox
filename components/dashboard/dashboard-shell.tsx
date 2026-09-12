@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   FileText,
+  House,
   Lightbulb,
   Menu,
   MessagesSquare,
-  MoonStar,
   Plus,
   Settings,
   TrendingUp,
@@ -22,7 +22,6 @@ import { getPlanDisplayName, type PlanCode } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 const primaryNavigation = [
-  { href: "/dashboard", label: "Overview", icon: BarChart3, exact: true },
   { href: "/dashboard/trending", label: "Trending Hub", icon: TrendingUp },
   { href: "/dashboard/editor", label: "Script Hub", icon: FileText },
   { href: "/dashboard/ideas", label: "Recommendations", icon: Lightbulb },
@@ -101,9 +100,9 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
           </button>
         </div>
 
-        <Link className="dashboard-new-script" href={destination("/dashboard/editor")} prefetch onClick={() => setMobileOpen(false)}>
-          <Plus size={18} aria-hidden="true" />
-          <span className="dashboard-nav-label">Create script</span>
+        <Link className="dashboard-new-script" href={destination("/dashboard")} prefetch aria-label="Home" title="Home" aria-current={isActive("/dashboard", true) ? "page" : undefined} onClick={() => setMobileOpen(false)}>
+          <House size={18} aria-hidden="true" />
+          <span className="dashboard-nav-label">Home</span>
         </Link>
 
         {previewMode && <div className="dashboard-demo-session" title="Local preview account">
@@ -112,11 +111,11 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
         </div>}
 
         <DashboardGooeyNav
-          items={primaryNavigation.map(({ href, label, icon, exact }) => ({
+          items={primaryNavigation.map(({ href, label, icon }) => ({
             href: destination(href),
             label,
             icon,
-            active: isActive(href, exact),
+            active: isActive(href),
           }))}
           collapsed={collapsed}
           onNavigate={() => setMobileOpen(false)}
@@ -142,7 +141,6 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
         <div className="dashboard-global-tools" aria-label="Dashboard tools">
           <div className="dashboard-global-controls">
             <Link className={`dashboard-plan-badge dashboard-plan-badge--${planUi.key}`} href={destination("/dashboard/upgrade")} aria-label={`Current plan: ${planUi.label}`}>
-              <span className="dashboard-plan-badge__dark-icon" aria-hidden="true"><MoonStar size={18} /></span>
               <strong>{planUi.label}</strong>
             </Link>
             <span className="dashboard-global-theme"><ThemeToggle /></span>

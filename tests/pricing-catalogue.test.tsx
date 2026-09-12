@@ -4,12 +4,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { PricingCatalogue } from "@/components/billing/pricing-catalogue";
 
-const refresh = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh }),
-}));
-
 vi.mock("@/components/ui/confetti", () => ({
   Confetti: () => null,
 }));
@@ -17,30 +11,9 @@ vi.mock("@/components/ui/confetti", () => ({
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
-  refresh.mockReset();
 });
 
-describe("PricingCatalogue plan testing", () => {
-  it("switches a signed-in user to a selected test plan without charging", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ label: "Gold", charged: false }),
-    });
-    vi.stubGlobal("fetch", fetchMock);
-    const user = userEvent.setup();
-
-    render(<PricingCatalogue currentPlan="pro" signedIn testMode />);
-    await user.click(screen.getByRole("button", { name: "Select Gold" }));
-
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/billing/select-plan", expect.objectContaining({
-      method: "POST",
-      body: JSON.stringify({ plan: "elite", billingPeriod: "monthly" }),
-    })));
-    expect(await screen.findByText("Gold is active for testing. No payment was charged.")).toBeVisible();
-    expect(screen.getByRole("dialog", { name: "Congrats, you’re on Gold!" })).toBeVisible();
-    expect(refresh).toHaveBeenCalled();
-  });
-
+describe("PricingCatalogue PayU checkout", () => {
   it("celebrates a confirmed PayU plan change", () => {
     render(<PricingCatalogue currentPlan="elite" signedIn celebrationPlan="elite" />);
 
@@ -59,7 +32,7 @@ describe("PricingCatalogue plan testing", () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        action: "https://test.payu.in/_payment",
+        action: "https://secure.payu.in/_payment",
         fields: { key: "merchant-key", txnid: "SF123", hash: "signed-value" },
       }),
     });
@@ -78,7 +51,7 @@ describe("PricingCatalogue plan testing", () => {
     })));
     expect(submit).toHaveBeenCalledOnce();
     const submittedForm = submit.mock.instances[0] as HTMLFormElement;
-    expect(submittedForm.action).toBe("https://test.payu.in/_payment");
+    expect(submittedForm.action).toBe("https://secure.payu.in/_payment");
     expect(submittedForm.querySelector<HTMLInputElement>('input[name="txnid"]')?.value).toBe("SF123");
   });
 });

@@ -2585,7 +2585,7 @@ body:has(.editor-workspace--focus) .dashboard-main { margin-inline-start: 0; }
   height: 2.75rem;
   min-width: auto;
   min-height: 2.75rem;
-  padding: .28rem .68rem .28rem .34rem;
+  padding: .28rem .68rem;
   gap: .4rem;
 }
 :root .dashboard-global-controls .dashboard-plan-badge__dark-icon {

@@ -3,7 +3,6 @@ import { requireAuthenticatedUser } from "@/lib/auth/session";
 import { getBillingAccess } from "@/lib/billing/access";
 import { isPayuConfigured } from "@/lib/billing/payu";
 import { featureLabels, getPlanDisplayName, isBillingFeature, isPlanCode } from "@/lib/billing/plans";
-import { isPlanTestingUser } from "@/lib/billing/testing";
 import "../../landing-youtube.css";
 import "../../pricing/pricing.css";
 import "./upgrade.css";
@@ -20,7 +19,6 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
   const feature = isBillingFeature(params.feature) ? params.feature : null;
   const requestedPlan = isPlanCode(params.plan) && params.plan !== "free" ? params.plan : null;
   const payuConfigured = isPayuConfigured();
-  const testMode = isPlanTestingUser(user.id) && !payuConfigured;
   const paymentStatus = ["success", "failed", "pending", "invalid"].includes(params.payment ?? "")
     ? params.payment
     : null;
@@ -28,8 +26,8 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
   return <div className="dashboard-page dashboard-pricing youtube-landing pricing-shell">
     <main className="pricing-page">
       <header className="section-shell dashboard-pricing__header">
-        <h1>Pricing</h1>
-        <p className="dashboard-pricing__subtitle"><i className="dashboard-pricing__subtitle-mark" aria-hidden="true" />Choose the plan that keeps your creative workflow moving.</p>
+        <h1>A plan for your next <span>chapter.</span></h1>
+        <p className="dashboard-pricing__subtitle">Create at your pace. Upgrade when you need more.</p>
       </header>
       <section className="section-shell pricing-section">
         {paymentStatus ? <div className="pricing-context" role="status">
@@ -49,11 +47,6 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
                   : "No paid access was activated. You can safely try again."}
             </p>
           </div>
-        </div> : testMode ? <div className="pricing-context" role="status">
-          <div>
-            <strong>Plan testing is active.</strong>
-            <p>Select any plan to switch access instantly. No payment or charge will be created.</p>
-          </div>
         </div> : feature || requestedPlan ? <div className="pricing-context" role="status">
           <div>
             <strong>{feature ? featureLabels[feature] + " is a paid feature." : getPlanDisplayName(requestedPlan!) + " access selected."}</strong>
@@ -61,9 +54,9 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
           </div>
         </div> : null}
         <PricingCatalogue
+          compact
           currentPlan={access.plan}
           signedIn
-          testMode={testMode}
           payuConfigured={payuConfigured}
           celebrationPlan={paymentStatus === "success" ? (requestedPlan ?? access.plan) : undefined}
         />

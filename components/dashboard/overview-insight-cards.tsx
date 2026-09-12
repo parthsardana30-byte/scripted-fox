@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Eye, Lightbulb, Star, Target, UsersRound } from "lucide-react";
+import { ArrowRight, Eye, Target, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { dashboardSnapshot } from "@/lib/dashboard-mocks";
 
@@ -18,6 +18,26 @@ type TrendSignal = {
 type LatestVideo = { id: string; title: string; views: number; averageViewPercentage: number };
 
 const compactNumber = new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits: 1 });
+
+function InsightMark({ kind }: { kind: "topics" | "targets" | "rating" }) {
+  return <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    {kind === "topics" ? <>
+      <path d="M8 5h17v20H8z" fill="currentColor" opacity=".25" transform="rotate(9 16 16)" />
+      <path d="M6 7h18v21H6z" fill="currentColor" />
+      <path d="M10 12h10M10 16h6M10 23h8" stroke="#ef233c" strokeWidth="2" strokeLinecap="round" />
+      <path d="m19 17 7 4-7 4z" fill="#171719" stroke="currentColor" strokeWidth="1.2" />
+    </> : kind === "targets" ? <>
+      <path d="M4 19h6v9H4zM13 13h6v15h-6z" fill="currentColor" opacity=".45" />
+      <path d="M22 7h6v21h-6z" fill="currentColor" />
+      <path d="m4 12 8-7 5 3 8-6M20 2h5v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </> : <>
+      <rect x="3" y="6" width="23" height="19" rx="4" stroke="currentColor" strokeWidth="2" />
+      <path d="m11 11 8 4.5-8 4.5z" fill="currentColor" />
+      <circle cx="24" cy="24" r="7" fill="#171719" stroke="currentColor" strokeWidth="1.5" />
+      <path d="m20.5 24 2.3 2.2 4-4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </>}
+  </svg>;
+}
 
 function ratingLabel(score: number) {
   if (score >= 80) return "Excellent";
@@ -101,7 +121,7 @@ export function OverviewInsightCards({
   return (
     <section className="overview-insight-grid" aria-label="Your next growth moves">
       <article className="overview-insight-card overview-insight-card--topics">
-        <header><span className="overview-insight-card__icon"><Lightbulb size={21} aria-hidden="true" /></span><h2>Daily Topics</h2></header>
+        <header><span className="overview-insight-card__icon"><InsightMark kind="topics" /></span><h2>Daily Topics</h2></header>
         <div className="overview-topic-list">
           {!enabled || topicsLoading ? Array.from({ length: 5 }).map((_, index) => <span className="overview-card-skeleton" key={index} />) : topics.length > 0 ? topics.map((topic, index) => (
             <Link href="/dashboard/ideas" key={topic.id}><small>{String(index + 1).padStart(2, "0")}</small><strong>{topic.title}</strong><ArrowRight size={15} aria-hidden="true" /></Link>
@@ -111,7 +131,7 @@ export function OverviewInsightCards({
       </article>
 
       <article className="overview-insight-card overview-insight-card--targets">
-        <header><span className="overview-insight-card__icon"><Target size={21} aria-hidden="true" /></span><h2>Competitor Targets</h2></header>
+        <header><span className="overview-insight-card__icon"><InsightMark kind="targets" /></span><h2>Competitor Targets</h2></header>
         <p className="overview-insight-card__intro">Similar-size channels in your niche pulling stronger views.</p>
         <div className="overview-target-list">
           {!enabled || targetsLoading ? Array.from({ length: 3 }).map((_, index) => <span className="overview-card-skeleton" key={index} />) : targets.length > 0 ? targets.map((target) => (
@@ -124,7 +144,7 @@ export function OverviewInsightCards({
       </article>
 
       <article className="overview-insight-card overview-insight-card--rating">
-        <header><span className="overview-insight-card__icon"><Star size={21} aria-hidden="true" /></span><h2>Latest Video Rating</h2></header>
+        <header><span className="overview-insight-card__icon"><InsightMark kind="rating" /></span><h2>Latest Video Rating</h2></header>
         <div className="overview-rating">
           <div className="overview-rating__score" style={{ "--rating": `${rating * 3.6}deg` } as React.CSSProperties}><span><strong>{latestVideo ? rating : "—"}</strong><small>/100</small></span></div>
           <div><p>{latestVideo ? ratingLabel(rating) : "Waiting for video data"}</p><h3>{latestVideo?.title ?? "Publish or sync a video to unlock its rating."}</h3></div>

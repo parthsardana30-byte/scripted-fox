@@ -6,7 +6,6 @@ import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
 import { isPayuConfigured } from "@/lib/billing/payu";
 import { featureLabels, isBillingFeature } from "@/lib/billing/plans";
-import { isPlanTestingUser } from "@/lib/billing/testing";
 import { getLandingUser } from "@/lib/landing-user";
 import "../landing-youtube.css";
 import "./pricing.css";
@@ -30,7 +29,6 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
   const feature = isBillingFeature(params.feature) ? params.feature : null;
   const returnTo = safeInternalPath(params.next);
   const payuConfigured = isPayuConfigured();
-  const testMode = user ? isPlanTestingUser(user.id) && !payuConfigured : false;
 
   return <div className="youtube-landing pricing-shell">
     <SiteHeader variant="creator" isAuthenticated={Boolean(user)} />
@@ -50,13 +48,11 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           </div>
           {returnTo ? <Link href={returnTo}>Return to your script</Link> : null}
         </div> : null}
-        <PricingCatalogue currentPlan={access?.plan} signedIn={Boolean(user)} returnTo={returnTo} testMode={testMode} payuConfigured={payuConfigured} />
+        <PricingCatalogue currentPlan={access?.plan} signedIn={Boolean(user)} returnTo={returnTo} payuConfigured={payuConfigured} />
         <div className="pricing-status" role="note">
-          <strong>{testMode ? "Plan testing is active." : payuConfigured ? "Secure PayU checkout" : "PayU setup pending"}</strong>
+          <strong>{payuConfigured ? "Secure PayU checkout" : "PayU setup pending"}</strong>
           <p>
-            {testMode
-              ? "Signed-in users can switch plans instantly for testing. No payment or charge is created."
-              : payuConfigured
+            {payuConfigured
                 ? "Paid access starts only after PayU verifies the transaction."
                 : "The checkout flow is ready and will activate after merchant credentials are added."}
           </p>

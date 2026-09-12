@@ -13,7 +13,7 @@ export type PaidPlanCode = Exclude<PlanCode, "free">;
 export type PayuConfiguration = {
   key: string;
   salt: string;
-  environment: "test" | "production";
+  environment: "production";
   paymentUrl: string;
   verificationUrl: string;
 };
@@ -27,17 +27,12 @@ export function getPayuConfiguration(): PayuConfiguration | null {
     return null;
   }
 
-  const environment = serverEnvironment.PAYU_ENVIRONMENT ?? "test";
   return {
     key: serverEnvironment.PAYU_MERCHANT_KEY,
     salt: serverEnvironment.PAYU_MERCHANT_SALT,
-    environment,
-    paymentUrl: environment === "production"
-      ? "https://secure.payu.in/_payment"
-      : "https://test.payu.in/_payment",
-    verificationUrl: environment === "production"
-      ? "https://info.payu.in/merchant/postservice.php?form=2"
-      : "https://test.payu.in/merchant/postservice.php?form=2",
+    environment: "production",
+    paymentUrl: "https://secure.payu.in/_payment",
+    verificationUrl: "https://info.payu.in/merchant/postservice.php?form=2",
   };
 }
 

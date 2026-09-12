@@ -63,9 +63,7 @@ export const serverEnvironmentSchema = z
     XAI_MODEL: optionalString,
     GROK_API_KEY: optionalString,
     GROK_MODEL: optionalString,
-    BILLING_TEST_USER_IDS: optionalString,
     BILLING_PROVIDER: z.enum(["payu"]).optional(),
-    PAYU_ENVIRONMENT: z.enum(["test", "production"]).optional(),
     PAYU_MERCHANT_KEY: optionalString,
     PAYU_MERCHANT_SALT: optionalString,
   })

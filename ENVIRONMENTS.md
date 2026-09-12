@@ -64,15 +64,13 @@ For the simplest implementation, use PayU Hosted Checkout with PayU Zion
 subscription automation. Keep the merchant key and salt in server-only
 environment variables; never expose them through a `NEXT_PUBLIC_` variable.
 
-Development uses PayU Test Mode:
+Billing uses PayU production Hosted Checkout only:
 
 - `BILLING_PROVIDER=payu`
-- `PAYU_ENVIRONMENT=test`
-- `PAYU_MERCHANT_KEY` from the PayU test dashboard
-- `PAYU_MERCHANT_SALT` from the PayU test dashboard
+- `PAYU_MERCHANT_KEY` from the PayU live dashboard
+- `PAYU_MERCHANT_SALT` from the PayU live dashboard
 
-Production uses a separate production key and salt with
-`PAYU_ENVIRONMENT=production`. Checkout must remain disabled until the server
+Checkout must remain disabled until the server
 can generate the payment hash, validate PayU's reverse hash, compare the amount
 and transaction ID with the stored order, verify the transaction server-to-server,
 and process callbacks idempotently before changing `billing_accounts`.

@@ -2,7 +2,7 @@ export const planCodes = ["free", "pro", "elite"] as const;
 export type PlanCode = (typeof planCodes)[number];
 
 export const planDisplayNames: Record<PlanCode, string> = {
-  free: "7-Day Pro Trial",
+  free: "Basic",
   pro: "Pro",
   elite: "Gold",
 };
