@@ -1,4 +1,4 @@
-.dashboard-pricing.youtube-landing { width:100%; min-height:0; margin:0; padding:0; display:flex; background:radial-gradient(ellipse at 50% 48%, rgb(239 35 60 / .055), transparent 68%); }
+.dashboard-pricing.youtube-landing { width:100%; max-width:none; min-width:0; min-height:0; margin:0; padding:0; display:flex; background:radial-gradient(ellipse at 50% 48%, rgb(239 35 60 / .055), transparent 68%); }
 .dashboard-pricing.pricing-shell .pricing-page { width:100%; min-height:0; max-width:1120px; margin:auto; padding:18px; }
 .dashboard-pricing .section-shell { width:100%; max-width:none; margin:0; padding-inline:0; }
 .dashboard-pricing .dashboard-pricing__header { padding-block:8px 20px; text-align:center; }
