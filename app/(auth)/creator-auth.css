@@ -597,7 +597,7 @@ body:has(.auth-shell) {
   min-height: 100svh;
   height: auto;
   overflow: auto;
-  background: linear-gradient(180deg, #a90f27 0%, #55121e 28%, #171719 68%, #080808 100%);
+  background: linear-gradient(180deg, #65101e 0%, #3a1018 18%, #171316 33%, #0b0b0c 48%, #050505 100%);
   color: #fff;
 }
 
@@ -620,12 +620,12 @@ body:has(.auth-shell) {
 }
 
 .auth-header--global .auth-wordmark .brand-logo__symbol {
-  width: 6rem;
-  height: 6rem;
+  width: 4.25rem;
+  height: 4.25rem;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__name {
-  font-size: 1.65rem;
+  font-size: 1.25rem;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__fox {
@@ -650,13 +650,13 @@ body:has(.auth-shell) {
   min-height: 100svh;
   height: auto;
   display: block;
-  padding: 7rem 1.25rem 2.5rem;
+  padding: 6.25rem 1.25rem 2rem;
 }
 
 .auth-shell__form-side {
   width: 100%;
   height: auto;
-  min-height: calc(100svh - 9.5rem);
+  min-height: calc(100svh - 8.25rem);
   display: grid;
   place-items: center;
   padding: 0;
@@ -670,7 +670,7 @@ body:has(.auth-shell) {
 }
 
 .auth-card {
-  width: min(100%, 25rem);
+  width: min(100%, 22rem);
   margin-inline: auto;
   padding: 0;
   border: 0;
@@ -681,26 +681,26 @@ body:has(.auth-shell) {
 }
 
 .auth-card h1 {
-  margin-block: 0 1.75rem;
+  margin-block: 0 1.15rem;
   text-align: center;
-  font-size: clamp(1.8rem, 4vw, 2.35rem);
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
   letter-spacing: -0.045em;
   color: #fff;
 }
 
 .auth-card--sign-up {
-  width: min(100%, 25rem);
+  width: min(100%, 22rem);
   min-height: 0;
   padding: 0;
 }
 
 .auth-card--sign-up h1 {
-  font-size: clamp(1.8rem, 4vw, 2.35rem);
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
 }
 
 .auth-card .auth-google {
   margin-block: 0;
-  min-height: 3.25rem;
+  min-height: 2.8rem;
   border-color: rgb(255 255 255 / .12);
   border-radius: .7rem;
   background: rgb(22 20 24 / .52);
@@ -718,7 +718,7 @@ body:has(.auth-shell) {
 }
 
 .auth-card .auth-divider {
-  margin-block: 1.25rem;
+  margin-block: .85rem;
   color: rgb(255 255 255 / .58);
 }
 
@@ -727,7 +727,7 @@ body:has(.auth-shell) {
 }
 
 .auth-card form {
-  gap: .9rem;
+  gap: .65rem;
 }
 
 .auth-card form > label {
@@ -735,7 +735,7 @@ body:has(.auth-shell) {
 }
 
 .auth-card form > label > div {
-  min-height: 3.25rem;
+  min-height: 2.8rem;
   border-radius: .7rem;
   border-color: rgb(255 255 255 / .12);
   background: rgb(22 20 24 / .52);
@@ -774,7 +774,7 @@ body:has(.auth-shell) {
 }
 
 .auth-card .auth-submit {
-  min-height: 3.25rem;
+  min-height: 2.8rem;
   margin-block-start: .25rem;
   border-radius: .7rem;
   background: #ef233c;
@@ -794,12 +794,12 @@ body:has(.auth-shell) {
 }
 
 .auth-card .auth-switch {
-  margin-block: 1.35rem 0;
+  margin-block: .9rem 0;
   text-align: center;
 }
 
 .auth-card .auth-legal {
-  margin-block: 1.5rem 0;
+  margin-block: 1rem 0;
   text-align: center;
 }
 
@@ -821,7 +821,7 @@ body:has(.auth-shell) {
 }
 
 :root[data-next-video-theme="dark"] .auth-shell {
-  background: linear-gradient(180deg, #8f0b22 0%, #4a0e1a 28%, #111010 68%, #050505 100%);
+  background: linear-gradient(180deg, #520a18 0%, #300b14 18%, #141012 33%, #080808 48%, #030303 100%);
 }
 
 @media (max-width: 30rem) {
@@ -830,12 +830,12 @@ body:has(.auth-shell) {
   }
 
   .auth-header--global .auth-wordmark .brand-logo__symbol {
-    width: 4.75rem;
-    height: 4.75rem;
+    width: 3.5rem;
+    height: 3.5rem;
   }
 
   .auth-header--global .auth-wordmark .brand-logo__name {
-    font-size: 1.25rem;
+    font-size: 1.05rem;
   }
 
   .auth-shell__stage {
