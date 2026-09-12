@@ -658,7 +658,7 @@ body:has(.auth-shell) {
 .auth-header--global .theme-toggle::before {
   content: "";
   position: absolute;
-  right: .65rem;
+  left: 1.8rem;
   width: 2.15rem;
   height: 1.2rem;
   border: 1px solid rgb(255 255 255 / .25);
@@ -681,10 +681,37 @@ body:has(.auth-shell) {
   transition: right 220ms ease, opacity 160ms ease, background-color 180ms ease;
 }
 
+.auth-header--global .theme-toggle .landing-theme-toggle__moon,
+.auth-header--global .theme-toggle .landing-theme-toggle__sun {
+  position: absolute;
+  z-index: 2;
+  width: .85rem;
+  height: .85rem;
+  color: rgb(255 255 255 / .78);
+  opacity: 0;
+  transition: opacity 160ms ease, color 180ms ease;
+}
+
+.auth-header--global .theme-toggle .landing-theme-toggle__moon {
+  left: .65rem;
+}
+
+.auth-header--global .theme-toggle .landing-theme-toggle__sun {
+  right: .65rem;
+}
+
 .auth-header--global .theme-toggle:hover::before,
 .auth-header--global .theme-toggle:focus-visible::before,
 .auth-header--global .theme-toggle:hover::after,
 .auth-header--global .theme-toggle:focus-visible::after {
+  opacity: 1;
+}
+
+.auth-header--global .theme-toggle:hover .landing-theme-toggle__moon,
+.auth-header--global .theme-toggle:focus-visible .landing-theme-toggle__moon,
+.auth-header--global .theme-toggle:hover .landing-theme-toggle__sun,
+.auth-header--global .theme-toggle:focus-visible .landing-theme-toggle__sun {
+  display: block;
   opacity: 1;
 }
 
@@ -695,6 +722,11 @@ body:has(.auth-shell) {
 
 :root[data-next-video-theme="dark"] .auth-header--global .theme-toggle::before {
   background: rgb(239 35 60 / .2);
+}
+
+:root[data-next-video-theme="dark"] .auth-header--global .theme-toggle .landing-theme-toggle__moon,
+:root[data-next-video-theme="light"] .auth-header--global .theme-toggle .landing-theme-toggle__sun {
+  color: #fff;
 }
 
 @media (max-width: 30rem) {
