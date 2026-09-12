@@ -54,8 +54,8 @@ export function EmailVerificationStep({ email, nextPath, message }: { email: str
 }
 
 const copy = {
-  "sign-in": { eyebrow: "", title: "Login to Scripted Fox", description: "", submit: "Login" },
-  "sign-up": { eyebrow: "", title: "Sign up to Scripted Fox", description: "", submit: "Sign up" },
+  "sign-in": { eyebrow: "", title: "Login", description: "", submit: "Login" },
+  "sign-up": { eyebrow: "", title: "Signup", description: "", submit: "Signup" },
   forgot: { eyebrow: "Password recovery", title: "Reset your password", description: "Enter your email and we’ll send reset instructions.", submit: "Send reset link" },
   reset: { eyebrow: "Choose a new password", title: "Set a new password", description: "Use at least eight characters and avoid a password you use elsewhere.", submit: "Save new password" },
 };

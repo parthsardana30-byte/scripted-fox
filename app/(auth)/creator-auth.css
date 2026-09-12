@@ -597,7 +597,7 @@ body:has(.auth-shell) {
   min-height: 100svh;
   height: auto;
   overflow: auto;
-  background: linear-gradient(180deg, #292832 0%, #25242d 32%, #1b1b22 58%, #131417 100%);
+  background: linear-gradient(180deg, #24242b 0%, #222229 28%, #191a20 58%, #101114 100%);
   color: #fff;
 }
 
@@ -620,12 +620,12 @@ body:has(.auth-shell) {
 }
 
 .auth-header--global .auth-wordmark .brand-logo__symbol {
-  width: 4.75rem;
-  height: 4.75rem;
+  width: 3.25rem;
+  height: 3.25rem;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__name {
-  font-size: 1.45rem;
+  font-size: 1.05rem;
 }
 
 .auth-header--global .auth-wordmark .brand-logo__fox {
@@ -821,7 +821,7 @@ body:has(.auth-shell) {
 }
 
 :root[data-next-video-theme="dark"] .auth-shell {
-  background: linear-gradient(180deg, #292832 0%, #25242d 32%, #1b1b22 58%, #131417 100%);
+  background: linear-gradient(180deg, #24242b 0%, #222229 28%, #191a20 58%, #101114 100%);
 }
 
 @media (max-width: 30rem) {
@@ -830,12 +830,12 @@ body:has(.auth-shell) {
   }
 
   .auth-header--global .auth-wordmark .brand-logo__symbol {
-    width: 3.75rem;
-    height: 3.75rem;
+    width: 2.85rem;
+    height: 2.85rem;
   }
 
   .auth-header--global .auth-wordmark .brand-logo__name {
-    font-size: 1.15rem;
+    font-size: .95rem;
   }
 
   .auth-shell__stage {
