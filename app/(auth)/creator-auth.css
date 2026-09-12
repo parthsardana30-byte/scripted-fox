@@ -597,7 +597,7 @@ body:has(.auth-shell) {
   min-height: 100svh;
   height: auto;
   overflow: auto;
-  background: linear-gradient(180deg, #24242b 0%, #222229 28%, #191a20 58%, #101114 100%);
+  background: linear-gradient(180deg, #3b171f 0%, #2b1820 16%, #202027 34%, #121317 68%, #070708 100%);
   color: #fff;
 }
 
@@ -821,7 +821,7 @@ body:has(.auth-shell) {
 }
 
 :root[data-next-video-theme="dark"] .auth-shell {
-  background: linear-gradient(180deg, #24242b 0%, #222229 28%, #191a20 58%, #101114 100%);
+  background: linear-gradient(180deg, #32121b 0%, #25131b 16%, #1c1c23 34%, #0e0f12 68%, #050506 100%);
 }
 
 @media (max-width: 30rem) {
