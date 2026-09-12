@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { ArrowRight, CheckCircle2, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Mail } from "lucide-react";
 
 import { sendPasswordReset, type AuthActionState } from "@/app/(auth)/actions";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -22,8 +22,7 @@ export function PasswordResetDialog({ defaultOpen = false }: { defaultOpen?: boo
         <DialogDescription>{state.message}</DialogDescription>
         <DialogClose asChild><button className="button button--secondary" type="button">Back to sign in</button></DialogClose>
       </div> : <>
-        <span className="password-reset-dialog__icon"><ShieldCheck size={23} aria-hidden="true" /></span>
-        <div className="password-reset-dialog__heading"><p className="auth-eyebrow">Password recovery</p><DialogTitle>Reset your password</DialogTitle><DialogDescription>Enter the email used for your account. We’ll send a secure, one-time reset link.</DialogDescription></div>
+        <div className="password-reset-dialog__heading"><DialogTitle>Reset your password</DialogTitle></div>
         <form action={action}>
           <label htmlFor="recovery-email">Email address</label>
           <div className="password-reset-dialog__field"><Mail size={17} aria-hidden="true" /><input id="recovery-email" name="email" type="email" autoComplete="email" maxLength={254} required autoFocus placeholder="you@example.com" /></div>

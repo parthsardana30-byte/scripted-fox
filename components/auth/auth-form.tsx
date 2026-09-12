@@ -54,8 +54,18 @@ export function EmailVerificationStep({ email, nextPath, message }: { email: str
 }
 
 const copy = {
-  "sign-in": { eyebrow: "", title: "Login", description: "", submit: "Login" },
-  "sign-up": { eyebrow: "", title: "Signup", description: "", submit: "Signup" },
+  "sign-in": {
+    eyebrow: "",
+    title: "Log In",
+    description: "Welcome back to Scripted Fox.",
+    submit: "Login",
+  },
+  "sign-up": {
+    eyebrow: "",
+    title: "Sign Up",
+    description: "Create your account and start your journey.",
+    submit: "Sign Up",
+  },
   forgot: { eyebrow: "Password recovery", title: "Reset your password", description: "Enter your email and we’ll send reset instructions.", submit: "Send reset link" },
   reset: { eyebrow: "Choose a new password", title: "Set a new password", description: "Use at least eight characters and avoid a password you use elsewhere.", submit: "Save new password" },
 };
@@ -70,7 +80,7 @@ export function AuthForm({ mode, nextPath = "/dashboard", oauthError, resetToken
     return <EmailVerificationStep email={state.email} nextPath={state.next ?? nextPath} message={state.message} />;
   }
 
-  if (state.status === "success") return <div className="auth-card auth-card--complete"><span><CheckCircle2 size={24} aria-hidden="true" /></span><p className="auth-eyebrow">Check your inbox</p><h1>{mode === "sign-up" ? "Verify your email" : "Reset link sent"}</h1><p>{state.message}</p><Link className="button button--secondary" href={`/sign-in${nextQuery}`}>Back to sign in</Link><p className="auth-legal">By continuing, you agree to the Terms and Privacy Policy.</p></div>;
+  if (state.status === "success") return <div className="auth-card auth-card--complete"><span><CheckCircle2 size={24} aria-hidden="true" /></span><p className="auth-eyebrow">Check your inbox</p><h1>{mode === "sign-up" ? "Verify your email" : "Reset link sent"}</h1><p>{state.message}</p><Link className="button button--secondary" href={`/sign-in${nextQuery}`}>Back to sign in</Link><p className="auth-legal">By continuing, you agree to the <Link href="/terms">Terms and Privacy</Link> Policy.</p></div>;
 
   return <div className={`auth-card auth-card--${mode}`}>
     {details.eyebrow ? <p className="auth-eyebrow">{details.eyebrow}</p> : null}<h1>{details.title}</h1>{details.description ? <p className="auth-description">{details.description}</p> : null}
@@ -79,15 +89,14 @@ export function AuthForm({ mode, nextPath = "/dashboard", oauthError, resetToken
     <form action={formAction}>
       <input type="hidden" name="next" value={nextPath} />
       {mode === "reset" && <input type="hidden" name="token" value={resetToken ?? ""} />}
-      {mode === "sign-up" && <label>Display name<div><input name="displayName" type="text" autoComplete="name" required maxLength={80} placeholder="Your name" /></div>{state.fieldErrors?.displayName && <small className="auth-field-error">{state.fieldErrors.displayName[0]}</small>}</label>}
       {mode !== "reset" && <label>Email address<div><Mail size={17} aria-hidden="true" /><input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></div>{state.fieldErrors?.email && <small className="auth-field-error">{state.fieldErrors.email[0]}</small>}</label>}
       {(mode === "sign-in" || mode === "sign-up" || mode === "reset") && <label>{mode === "reset" ? "New password" : "Password"}<div><LockKeyhole size={17} aria-hidden="true" /><input name="password" type="password" autoComplete={mode === "sign-in" ? "current-password" : "new-password"} minLength={8} maxLength={72} required placeholder="At least 8 characters" /></div>{state.fieldErrors?.password && <small className="auth-field-error">{state.fieldErrors.password[0]}</small>}</label>}
-      {mode === "reset" && <label>Confirm new password<div><LockKeyhole size={17} aria-hidden="true" /><input name="confirmPassword" type="password" autoComplete="new-password" minLength={8} maxLength={72} required placeholder="Repeat your new password" /></div>{state.fieldErrors?.confirmPassword && <small className="auth-field-error">{state.fieldErrors.confirmPassword[0]}</small>}</label>}
+      {(mode === "sign-up" || mode === "reset") && <label>{mode === "reset" ? "Confirm new password" : "Confirm password"}<div><LockKeyhole size={17} aria-hidden="true" /><input name="confirmPassword" type="password" autoComplete="new-password" minLength={8} maxLength={72} required placeholder={mode === "reset" ? "Repeat your new password" : "Repeat your password"} /></div>{state.fieldErrors?.confirmPassword && <small className="auth-field-error">{state.fieldErrors.confirmPassword[0]}</small>}</label>}
       {mode === "sign-in" && <div className="auth-form-help"><span>Secure session</span><PasswordResetDialog defaultOpen={recoveryOpen} /></div>}
       {state.message && <p className="auth-form-error" role="alert">{state.message}</p>}
       <button className="button button--primary auth-submit" type="submit" disabled={pending}>{pending ? "Please wait…" : details.submit}<ArrowRight size={17} aria-hidden="true" /></button>
     </form>
-    <p className="auth-switch">{mode === "sign-in" ? <>New to Scripted Fox? <Link href={`/sign-up${nextQuery}`}>Create an account</Link></> : mode === "sign-up" ? <>Already have an account? <Link href={`/sign-in${nextQuery}`}>Sign in</Link></> : mode === "forgot" ? <Link href="/sign-in">Return to sign in</Link> : null}</p>
-    <p className="auth-legal">By continuing, you agree to the Terms and Privacy Policy.</p>
+    <p className="auth-switch">{mode === "sign-in" ? <>New to Scripted Fox? <Link href={`/sign-up${nextQuery}`}>Create an account</Link></> : mode === "sign-up" ? <>Already have an account? <Link href={`/sign-in${nextQuery}`}>Log In</Link></> : mode === "forgot" ? <Link href="/sign-in">Return to sign in</Link> : null}</p>
+    <p className="auth-legal">By continuing, you agree to the <Link href="/terms">Terms and Privacy</Link> Policy.</p>
   </div>;
 }

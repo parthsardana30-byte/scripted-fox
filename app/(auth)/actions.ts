@@ -13,7 +13,7 @@ export type AuthActionState = {
   message?: string;
   email?: string;
   next?: string;
-  fieldErrors?: Partial<Record<"displayName" | "email" | "password" | "confirmPassword" | "token", string[]>>;
+  fieldErrors?: Partial<Record<"email" | "password" | "confirmPassword" | "token", string[]>>;
 };
 
 export type EmailVerificationActionState = {
@@ -99,14 +99,16 @@ export async function signUpWithEmail(
   formData: FormData,
 ): Promise<AuthActionState> {
   const parsed = z.object({
-    displayName: z.string().trim().min(2, "Enter at least 2 characters").max(80),
     email: emailSchema,
     password: passwordSchema,
+    confirmPassword: z.string(),
     next: nextPathSchema,
+  }).refine((value) => value.password === value.confirmPassword, {
+    message: "Passwords do not match.", path: ["confirmPassword"],
   }).safeParse({
-    displayName: formData.get("displayName"),
     email: formData.get("email"),
     password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
     next: formData.get("next") || undefined,
   });
 
@@ -119,8 +121,13 @@ export async function signUpWithEmail(
   }
 
   try {
+    const defaultName = parsed.data.email
+      .split("@", 1)[0]
+      .replace(/[._-]+/g, " ")
+      .trim()
+      .slice(0, 80) || "Creator";
     await auth.api.signUpEmail({
-      body: { name: parsed.data.displayName, email: parsed.data.email, password: parsed.data.password },
+      body: { name: defaultName, email: parsed.data.email, password: parsed.data.password },
       headers: await headers(),
     });
   } catch (error) {

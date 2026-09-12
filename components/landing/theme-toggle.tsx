@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
+import { Switch } from "@/components/ui/switch";
 
 type LandingTheme = "light" | "dark";
 const THEME_STORAGE_KEY = "scripted-fox:theme";
@@ -34,10 +35,10 @@ export function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
   };
 
   return (
-    <button
+    <Switch
       className="theme-toggle landing-theme-toggle"
-      type="button"
-      onClick={toggleTheme}
+      checked={theme === "dark"}
+      onCheckedChange={toggleTheme}
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       suppressHydrationWarning
@@ -45,6 +46,6 @@ export function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
       <Moon className="landing-theme-toggle__moon" aria-hidden="true" size={18} />
       <Sun className="landing-theme-toggle__sun" aria-hidden="true" size={18} />
       {showLabel && <span className="theme-toggle__label">{theme === "dark" ? "Dark mode" : "Light mode"}</span>}
-    </button>
+    </Switch>
   );
 }

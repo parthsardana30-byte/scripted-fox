@@ -25,16 +25,31 @@ afterEach(() => {
 describe("email signup verification", () => {
   it("keeps a password signup pending until the email code is verified", async () => {
     const form = new FormData();
-    form.set("displayName", "Aryan");
     form.set("email", "Aryan@Example.com");
     form.set("password", "correct-horse-battery");
+    form.set("confirmPassword", "correct-horse-battery");
     form.set("next", "/dashboard");
 
     const result = await signUpWithEmail({ status: "idle" }, form);
 
-    expect(signUpEmail).toHaveBeenCalledWith(expect.objectContaining({ body: expect.objectContaining({ email: "aryan@example.com" }) }));
+    expect(signUpEmail).toHaveBeenCalledWith(expect.objectContaining({ body: expect.objectContaining({ name: "aryan", email: "aryan@example.com" }) }));
     expect(result).toMatchObject({ status: "verification", email: "aryan@example.com", next: "/dashboard" });
     expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("rejects mismatched signup passwords before calling the auth provider", async () => {
+    const form = new FormData();
+    form.set("email", "aryan@example.com");
+    form.set("password", "correct-horse-battery");
+    form.set("confirmPassword", "different-password");
+
+    const result = await signUpWithEmail({ status: "idle" }, form);
+
+    expect(result).toMatchObject({
+      status: "error",
+      fieldErrors: { confirmPassword: ["Passwords do not match."] },
+    });
+    expect(signUpEmail).not.toHaveBeenCalled();
   });
 
   it("rejects malformed codes before calling the auth provider", async () => {

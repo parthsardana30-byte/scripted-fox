@@ -415,9 +415,9 @@ export async function refreshPublicTrends(input: TrendLookupInput) {
     markets: [...new Set(collected.targets.map((target) => target.market))],
     languages: [...new Set(collected.targets.map((target) => target.language))],
     queries: collected.searches,
-    videos: ranked.videos.map(({ ageDays, ...video }) => {
+    videos: ranked.videos.map(({ ageDays, channelId, ...video }) => {
       void ageDays;
-      return video;
+      return { ...video, channelId: channelId ?? "" };
     }),
     capturedAt: now.toISOString(),
     aiAnalysis: ranked.aiAnalysis,

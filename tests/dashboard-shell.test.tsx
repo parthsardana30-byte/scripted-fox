@@ -35,14 +35,14 @@ describe("DashboardShell", () => {
     document.documentElement.dataset.nextVideoTheme = "light";
     const firstRender = render(<DashboardShell><h1>Overview</h1></DashboardShell>);
 
-    await user.click(screen.getAllByRole("button", { name: "Switch to dark mode" })[0]);
+    await user.click(screen.getAllByRole("switch", { name: "Switch to dark mode" })[0]);
     expect(document.documentElement.dataset.nextVideoTheme).toBe("dark");
     expect(window.localStorage.getItem("scripted-fox:theme")).toBe("dark");
 
     firstRender.unmount();
     render(<DashboardShell><h1>Another page</h1></DashboardShell>);
     expect(document.documentElement.dataset.nextVideoTheme).toBe("dark");
-    await waitFor(() => expect(screen.getAllByRole("button", { name: "Switch to light mode" })).toHaveLength(2));
+    await waitFor(() => expect(screen.getAllByRole("switch", { name: "Switch to light mode" })).toHaveLength(2));
   });
 
   it("hides the global Help shortcut on the Help page", () => {
@@ -52,7 +52,7 @@ describe("DashboardShell", () => {
     expect(screen.getByRole("main")).toHaveClass("dashboard-main--support");
     expect(screen.queryByRole("link", { name: "Open Help & Support" })).not.toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Help & Support" })).toHaveLength(1);
-    expect(screen.getAllByRole("button", { name: /Switch to (light|dark) mode/ })).toHaveLength(2);
+    expect(screen.getAllByRole("switch", { name: /Switch to (light|dark) mode/ })).toHaveLength(2);
   });
 
   it("keeps the Settings workspace inside the viewport frame", () => {
