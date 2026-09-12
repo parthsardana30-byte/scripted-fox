@@ -32,7 +32,11 @@ function featureForPath(pathname: string) {
 }
 
 function supportsFoxAi(pathname: string) {
-  return !pathname.startsWith("/ui-preview");
+  return !pathname.startsWith("/ui-preview")
+    && !pathname.startsWith("/sign-in")
+    && !pathname.startsWith("/sign-up")
+    && !pathname.startsWith("/forgot-password")
+    && !pathname.startsWith("/reset-password");
 }
 
 export function FoxAiChat() {
