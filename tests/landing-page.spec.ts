@@ -12,7 +12,7 @@ test("validates the hero and carries an anonymous visitor's idea into sign up", 
   await page.getByLabel("Start with your video idea").fill("Compare five free editing tools on the same short video");
   await page.getByRole("button", { name: "Create my script" }).click();
   await expect(page).toHaveURL(/\/sign-up\?next=%2Fdashboard%2Feditor/);
-  await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign up to Scripted Fox" })).toBeVisible();
 });
 
 test("supports the connection explanation and animated script preview", async ({ page }) => {
