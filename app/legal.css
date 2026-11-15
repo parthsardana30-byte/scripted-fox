@@ -11,6 +11,32 @@
   padding: clamp(5rem, 10vw, 8rem) 0 clamp(4rem, 8vw, 7rem);
 }
 
+.legal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.legal-nav a {
+  padding: 0.55rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 13%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-paper) 72%, transparent);
+  color: var(--color-ink-2);
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-decoration: none;
+  backdrop-filter: blur(0.8rem);
+}
+
+.legal-nav a:hover,
+.legal-nav a:focus-visible {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 9%, var(--color-paper));
+  color: var(--color-accent-strong);
+}
+
 .legal-page__eyebrow {
   margin-bottom: 0.75rem;
   color: var(--color-accent-strong);
@@ -47,6 +73,7 @@
 .legal-page__content p,
 .legal-page__content li {
   color: var(--color-ink-2);
+  line-height: 1.72;
 }
 
 .legal-page__content ul {

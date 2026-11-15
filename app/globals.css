@@ -744,6 +744,21 @@ h3 {
   font-size: var(--text-xs);
 }
 
+.pricing-checkout-dialog__legal {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  text-align: center;
+}
+
+.pricing-checkout-dialog__legal a {
+  color: var(--color-accent-strong);
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+}
+
 .pricing-success-dialog {
   width: min(calc(100% - 2rem), 28rem);
   overflow: hidden;

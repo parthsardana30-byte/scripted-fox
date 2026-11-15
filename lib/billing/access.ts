@@ -8,30 +8,39 @@ export type BillingStatus = "free" | "trialing" | "active" | "past_due" | "cance
 
 export type BillingAccess = {
   plan: PlanCode;
+  displayPlan: PlanCode;
   status: BillingStatus;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
+  creditsAllowance: number;
+  creditsRemaining: number;
 };
 
 const freeAccess: BillingAccess = {
   plan: "free",
+  displayPlan: "free",
   status: "free",
   trialEndsAt: null,
   currentPeriodEnd: null,
+  creditsAllowance: 0,
+  creditsRemaining: 0,
 };
 
 const developmentTrialAccess: BillingAccess = {
   plan: "pro",
+  displayPlan: "free",
   status: "trialing",
   trialEndsAt: null,
   currentPeriodEnd: null,
+  creditsAllowance: 500,
+  creditsRemaining: 500,
 };
 
 export async function getBillingAccess(userId: string): Promise<BillingAccess> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("billing_accounts")
-    .select("plan_code,status,trial_ends_at,current_period_end")
+    .select("plan_code,status,trial_ends_at,current_period_end,credits_allowance,credits_remaining")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -55,9 +64,12 @@ export async function getBillingAccess(userId: string): Promise<BillingAccess> {
 
   return {
     plan: paidAccessIsValid ? storedPlan : "free",
+    displayPlan: data.status === "trialing" && !trialExpired ? "free" : paidAccessIsValid ? storedPlan : "free",
     status: trialExpired || paidPeriodExpired ? "free" : data.status,
     trialEndsAt: data.trial_ends_at,
     currentPeriodEnd: data.current_period_end,
+    creditsAllowance: paidAccessIsValid ? Number(data.credits_allowance ?? 0) : 0,
+    creditsRemaining: paidAccessIsValid ? Number(data.credits_remaining ?? 0) : 0,
   };
 }
 

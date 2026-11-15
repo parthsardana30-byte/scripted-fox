@@ -101,7 +101,7 @@ export function ScriptReadyDemo({ contextLabel = "Scripted Fox flow" }: ScriptRe
             >
               <div className="script-ready-demo__icon" aria-hidden="true"><Icon size={20} /></div>
               <p className="script-ready-demo__label">{stage.topic ? "Notification" : `${visibleStage + 1} · ${stage.label}`}</p>
-              <h3>{stage.question}</h3>
+              <h2>{stage.question}</h2>
               <p className="script-ready-demo__answer">{stage.answer}</p>
               {stage.topic ? (
                 <div className="script-ready-demo__topic">

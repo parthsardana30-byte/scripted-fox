@@ -48,6 +48,7 @@ export function ScriptHub({
   };
   if (mode && setupComplete && !setupVisible) {
     return <EditorWorkspace
+      persistProjects
       canUseAdvancedExports={canUseAdvancedExports}
       canUseScriptWriter={canUseScriptWriter}
       versionChangeLimit={versionChangeLimit}

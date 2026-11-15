@@ -41,6 +41,13 @@ When the company account is ready, create a company-owned Google Cloud project a
 5. Configure the production variables from `.env.production.example` in the hosting platform.
 6. Deploy and test email and Google sign-in before enabling YouTube connection.
 
+For a public launch, set the OAuth audience to **External / In production**.
+Add `scriptedfox.com` as an authorised domain, keep the homepage, privacy policy,
+and terms URLs on the consent screen, and request Google verification for the
+exact YouTube scopes used by the app: `youtube.readonly` and
+`yt-analytics.readonly`. Publishing alone makes basic Google Sign-In available;
+the YouTube consent warning remains until Google approves those scopes.
+
 ## Email verification codes
 
 Email/password accounts require a six-digit code before Better Auth creates a

@@ -24,6 +24,8 @@ export function SiteFooter({ variant = "default" }: { variant?: "default" | "cre
             <Link href="/pricing">Pricing</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
+            <Link href="/refund-policy">Refunds</Link>
+            <Link href="/cookies">Cookies</Link>
           </nav>
           <span>Plan, write, and prepare to record · © 2026</span>
         </div>
@@ -41,6 +43,8 @@ export function SiteFooter({ variant = "default" }: { variant?: "default" | "cre
           <Link href="#faq">FAQ</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
+          <Link href="/refund-policy">Refunds</Link>
+          <Link href="/cookies">Cookies</Link>
         </nav>
         <span>Plan, write, and prepare to record · © 2026</span>
       </div>

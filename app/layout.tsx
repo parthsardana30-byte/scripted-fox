@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import "./fox-ai.css";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import "@fontsource-variable/manrope";
 import { FoxAiChat } from "@/components/support/fox-ai-chat";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://scriptedfox.com");
 
@@ -34,11 +31,13 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Scripted Fox",
     type: "website",
+    images: [{ url: "/scripted-fox-email-logo.png", width: 512, height: 512, alt: "Scripted Fox" }],
   },
   twitter: {
     card: "summary",
     title: "Scripted Fox — AI YouTube Script Writer & Idea Planner",
     description: "Find channel-matched video ideas, spot trends, and create focused YouTube scripts with AI.",
+    images: ["/scripted-fox-email-logo.png"],
   },
 };
 
@@ -48,7 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       lang="en"
       data-scroll-behavior="smooth"
       data-next-video-theme="light"
-      suppressHydrationWarning className={cn("font-sans", geist.variable)}
+      suppressHydrationWarning
     >
       <body>
         {children}

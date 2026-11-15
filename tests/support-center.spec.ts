@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("renders the complete Help Center and dismisses Fox AI", async ({ page }) => {
   await page.goto("/help");
 
-  await expect(page.getByRole("heading", { name: "What can we help you fix?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How can we help?" })).toBeVisible();
   await expect(page.getByRole("button", { name: /^General/ })).toBeVisible();
   await expect(page.getByText("14 answers")).toBeVisible();
 

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -8,12 +7,14 @@ import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
 import { VideoPlanPreview } from "@/components/landing/video-plan-preview";
 import { getLandingUser } from "@/lib/landing-user";
+import { pageMetadata } from "@/lib/seo";
 import "../landing-youtube.css";
 
-export const metadata: Metadata = {
-  title: "Video plan · Scripted Fox",
+export const metadata = pageMetadata({
+  title: "Video plan",
   description: "See how Scripted Fox plans the hook, structure, pacing, and payoff before writing your YouTube script.",
-};
+  path: "/video-plan",
+});
 
 export default async function VideoPlanPage() {
   const user = await getLandingUser();

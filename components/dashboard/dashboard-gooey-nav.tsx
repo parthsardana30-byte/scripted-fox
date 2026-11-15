@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 type GooeyNavItem = {
@@ -66,7 +66,8 @@ export function DashboardGooeyNav({
   const navRef = useRef<HTMLElement>(null);
   const effectRef = useRef<HTMLSpanElement>(null);
   const timersRef = useRef<number[]>([]);
-  const routeIndex = Math.max(0, items.findIndex((item) => item.active));
+  const filterId = useId().replace(/:/g, "");
+  const routeIndex = items.findIndex((item) => item.active);
   const clearParticles = () => {
     timersRef.current.forEach(window.clearTimeout);
     timersRef.current = [];
@@ -76,6 +77,7 @@ export function DashboardGooeyNav({
   const positionEffect = (index: number) => {
     const nav = navRef.current;
     const effect = effectRef.current;
+    if (effect) effect.style.opacity = index < 0 ? "0" : "1";
     const link = nav?.querySelectorAll<HTMLElement>(".dashboard-nav__link")[index];
     if (!nav || !effect || !link) return;
 
@@ -96,7 +98,7 @@ export function DashboardGooeyNav({
 
     for (let index = 0; index < particleCount; index += 1) {
       const time = animationTime * 2 + particleNoise(timeVariance * 2);
-      const particleData = buildParticle(index, time, particleCount, particleDistances, particleR, colors);
+      const particleData = buildParticle(index, time, particleCount, [Math.min(particleDistances[0], collapsed ? 34 : 48), particleDistances[1]], particleR, colors);
       const timer = window.setTimeout(() => {
         const particle = document.createElement("span");
         const point = document.createElement("span");
@@ -156,14 +158,25 @@ export function DashboardGooeyNav({
           prefetch
           aria-current={active ? "page" : undefined}
           title={collapsed ? label : undefined}
-          onPointerDown={() => activate(index)}
-          onClick={onNavigate}
+          onClick={(event) => {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            activate(index);
+            onNavigate();
+          }}
         >
           <span className="dashboard-nav-icon"><Icon size={18} aria-hidden="true" /></span>
           <span className="dashboard-nav-label">{label}</span>
         </Link>
       ))}
-      <span className="dashboard-gooey-effect dashboard-gooey-effect--active" ref={effectRef} aria-hidden="true" />
+      <svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }}>
+        <defs>
+          <filter id={filterId} x="-100%" y="-150%" width="300%" height="400%" colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" />
+          </filter>
+        </defs>
+      </svg>
+      <span className="dashboard-gooey-effect" style={{ filter: `url(#${filterId})`, opacity: routeIndex < 0 ? 0 : 1 }} ref={effectRef} aria-hidden="true" />
     </nav>
   );
 }

@@ -1,20 +1,21 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { signUpEmail, verifyEmailOTP, redirect } = vi.hoisted(() => ({
+const { signUpEmail, verifyEmailOTP, sendVerificationOTP, redirect } = vi.hoisted(() => ({
   signUpEmail: vi.fn(),
   verifyEmailOTP: vi.fn(),
+  sendVerificationOTP: vi.fn(),
   redirect: vi.fn((path: string) => { throw new Error(`REDIRECT:${path}`); }),
 }));
 
 vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
 vi.mock("next/navigation", () => ({ redirect }));
 vi.mock("@/lib/auth", () => ({
-  auth: { api: { signUpEmail, verifyEmailOTP, signInEmail: vi.fn(), signOut: vi.fn() } },
+  auth: { api: { signUpEmail, verifyEmailOTP, sendVerificationOTP, signInEmail: vi.fn(), signOut: vi.fn() } },
 }));
 vi.mock("@/lib/email/verification-email", () => ({ isVerificationEmailConfigured: () => true }));
 
-import { signUpWithEmail, verifySignUpEmail } from "@/app/(auth)/actions";
+import { resendSignUpOTP, signUpWithEmail, verifySignUpEmail } from "@/app/(auth)/actions";
 import { EmailVerificationStep } from "@/components/auth/auth-form";
 
 afterEach(() => {
@@ -74,6 +75,17 @@ describe("email signup verification", () => {
     expect(verifyEmailOTP).toHaveBeenCalledWith(expect.objectContaining({ body: { email: "aryan@example.com", otp: "123456" } }));
   });
 
+  it("resends a fresh signup verification code", async () => {
+    const form = new FormData();
+    form.set("email", "aryan@example.com");
+    form.set("next", "/dashboard");
+
+    const result = await resendSignUpOTP({ status: "idle", email: "aryan@example.com" }, form);
+
+    expect(sendVerificationOTP).toHaveBeenCalledWith(expect.objectContaining({ body: { email: "aryan@example.com", type: "email-verification" } }));
+    expect(result).toMatchObject({ status: "success", message: "A new 6-digit code has been sent." });
+  });
+
   it("renders a numeric one-time-code form", () => {
     render(<EmailVerificationStep email="aryan@example.com" nextPath="/dashboard" message="Enter your code." />);
 
@@ -81,5 +93,6 @@ describe("email signup verification", () => {
     expect(input).toHaveAttribute("inputmode", "numeric");
     expect(input).toHaveAttribute("autocomplete", "one-time-code");
     expect(screen.getByRole("button", { name: /Verify and continue/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Resend code" })).toBeVisible();
   });
 });

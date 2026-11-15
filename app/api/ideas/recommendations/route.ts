@@ -4,12 +4,15 @@ import { z } from "zod";
 
 import { AiConfigurationError, AiProviderError } from "@/lib/ai/groq";
 import { generateIdeaRecommendations } from "@/lib/ai/ideas";
-import { buildEvidenceBackedFallbackRecommendations } from "@/lib/ideas/fallback";
 import { inferCreatorNiche } from "@/lib/ai/niche";
 import { AuthenticationRequiredError, requireAuthenticatedUser } from "@/lib/auth/session";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
+import { readJsonBody, RequestBodyError } from "@/lib/security/request-body";
 import { createClient } from "@/lib/db/client";
-import { getOrRefreshPublicTrends, YouTubeTrendsError } from "@/lib/youtube/trends";
+import { databasePool } from "@/lib/db/pool";
+import { getBillingAccess, hasBillingFeature } from "@/lib/billing/access";
+import { consumeCredits, refundCredits } from "@/lib/billing/credits";
+import { dailyIdeaLimits } from "@/lib/billing/plans";
 import type { Json } from "@/types/database";
 
 export const runtime = "nodejs";
@@ -29,7 +32,8 @@ const channelSnapshotSchema = z.object({
   recentVideos: z.array(z.object({ title: z.string() })).max(50).default([]),
 });
 const cachedRecommendationsSchema = z.object({
-  algorithmVersion: z.literal("niche-v3"),
+  algorithmVersion: z.literal("channel-ideas-v4"),
+  channelFingerprint: z.string(),
   batchId: z.uuid(),
   recommendations: z.array(z.object({
     id: z.string(),
@@ -48,7 +52,7 @@ const cachedRecommendationsSchema = z.object({
 });
 
 const RECOMMENDATION_CACHE_HOURS = 24;
-const RECOMMENDATION_ALGORITHM_VERSION = "niche-v3" as const;
+const RECOMMENDATION_ALGORITHM_VERSION = "channel-ideas-v4" as const;
 const HOURLY_GENERATION_LIMIT = 20;
 
 function objectValue(value: Json | undefined) {
@@ -66,6 +70,10 @@ async function loadContext(userId: string) {
   ]);
   const defaults = objectValue(preferences?.default_script_preferences);
   const channel = channelSnapshotSchema.safeParse(snapshot?.metrics);
+  const channelVideos = channel.success ? [...new Set([
+    ...channel.data.recentVideos.map((video) => video.title.trim()),
+    ...channel.data.topVideos.map((video) => video.title.trim()),
+  ])].filter(Boolean).slice(0, 50).map((title, index) => ({ id: `upload-${index + 1}`, title })) : [];
   const topVideo = channel.success ? [...channel.data.topVideos].sort((a, b) => b.views - a.views)[0] : null;
   const savedNiche = typeof defaults.channelNiche === "string" && defaults.channelNiche.trim() ? defaults.channelNiche.trim() : null;
   const inferredNiche = savedNiche || !channel.success ? null : await inferCreatorNiche({
@@ -85,6 +93,8 @@ async function loadContext(userId: string) {
     : "";
   return {
     userId,
+    channelVideos,
+    channelFingerprint: JSON.stringify(channelVideos.map((video) => video.title)),
     niche: savedNiche ?? inferredNiche ?? "content creation",
     goal: typeof defaults.channelGoal === "string" ? defaults.channelGoal : "growth",
     languages: preferences?.content_languages ?? ["en"],
@@ -97,7 +107,7 @@ async function loadContext(userId: string) {
   };
 }
 
-async function cachedRecommendations(userId: string, niche: string, notBefore?: string | null) {
+async function cachedRecommendations(userId: string, niche: string, channelFingerprint: string, notBefore?: string | null) {
   const supabase = await createClient();
   const cacheFloor = Date.now() - RECOMMENDATION_CACHE_HOURS * 60 * 60_000;
   const requestedFloor = notBefore ? Date.parse(notBefore) : Number.NaN;
@@ -112,7 +122,7 @@ async function cachedRecommendations(userId: string, niche: string, notBefore?: 
 
   for (const event of data ?? []) {
     const parsed = cachedRecommendationsSchema.safeParse(event.metadata);
-    if (!parsed.success || parsed.data.niche !== niche) continue;
+    if (!parsed.success || parsed.data.niche !== niche || parsed.data.channelFingerprint !== channelFingerprint) continue;
     const { data: rows } = await supabase.from("ideas").select("id,status")
       .eq("user_id", userId).eq("recommendation_batch_id", parsed.data.batchId).limit(5);
     const statuses = (rows ?? []) as Array<{ id: string; status: string }>;
@@ -133,20 +143,41 @@ async function rateLimitReached(userId: string) {
   return (count ?? 0) >= HOURLY_GENERATION_LIMIT;
 }
 
+async function dailyIdeaCount(userId: string) {
+  const supabase = await createClient();
+  const since = new Date();
+  since.setUTCHours(0, 0, 0, 0);
+  const { data } = await supabase.from("usage_events").select("metadata")
+    .eq("user_id", userId).eq("operation", "ai_idea_recommendations").gte("created_at", since.toISOString()).limit(20);
+  return (data ?? []).reduce((total: number, event: { metadata?: Json }) => {
+    const recommendations = objectValue(event.metadata).recommendations;
+    return total + (Array.isArray(recommendations) ? recommendations.length : 0);
+  }, 0);
+}
+
 export async function POST(request: Request) {
   if (!isTrustedSameOriginRequest(request)) return Response.json({ error: "This request is not allowed." }, { status: 403 });
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > 5_000) return Response.json({ error: "This request is too large." }, { status: 413 });
 
+  let reservedForUser: string | null = null;
   try {
     const user = await requireAuthenticatedUser();
-    const parsed = requestSchema.safeParse(await request.json());
+    const access = await getBillingAccess(user.id);
+    if (!hasBillingFeature(access, "channel_aware_ideas")) {
+      return Response.json({ error: "Start a trial or choose Pro or Gold for channel-matched ideas." }, { status: 402 });
+    }
+    const parsed = requestSchema.safeParse(await readJsonBody(request, 5000));
     if (!parsed.success) return Response.json({ error: "The recommendation request is invalid." }, { status: 400 });
     const context = await loadContext(user.id);
+    if (!context.channelVideos.length) {
+      return Response.json({ error: "Sync your YouTube channel first. Daily Topics needs your previous upload titles to suggest fresh video ideas." }, { status: 409 });
+    }
     if (parsed.data.excludeTitles.length === 0) {
       const cached = await cachedRecommendations(
         user.id,
         context.niche,
+        context.channelFingerprint,
         parsed.data.initialSetup ? context.setupStartedAt : null,
       );
       if (cached) {
@@ -156,21 +187,22 @@ export async function POST(request: Request) {
     if (!parsed.data.initialSetup && await rateLimitReached(user.id)) {
       return Response.json({ error: "Idea generation limit reached. Try again later." }, { status: 429 });
     }
-    const trends = await getOrRefreshPublicTrends(context);
-    if (trends.evidence.videos.length < 3) return Response.json({ error: "Not enough current trend evidence is available yet." }, { status: 503 });
-    const trendSignals = trends.evidence.videos.slice(0, 14);
+    const dailyLimit = dailyIdeaLimits[access.plan];
+    if (await dailyIdeaCount(user.id) + 5 > dailyLimit) {
+      return Response.json({ error: `Your ${dailyLimit}-idea daily limit has been reached.` }, { status: 429 });
+    }
+    const capturedAt = new Date().toISOString();
     const excludedTitles = [...new Set([...parsed.data.excludeTitles, ...context.historicalTitles])].slice(0, 140);
-    const generated = parsed.data.initialSetup
-      ? {
-          ideas: buildEvidenceBackedFallbackRecommendations({ niche: context.niche, trendSignals }),
-          completion: null,
-        }
-      : await generateIdeaRecommendations({ ...context, trendSignals, excludedTitles });
-    const byId = new Map(trendSignals.map((signal) => [signal.id, signal]));
+    if (!(await consumeCredits(user.id, 5))) {
+      return Response.json({ error: "You need 5 Fox Credits to generate another topic set." }, { status: 402 });
+    }
+    reservedForUser = user.id;
+    const generated = await generateIdeaRecommendations({ ...context, excludedTitles });
+    const byId = new Map(context.channelVideos.map((video) => [video.id, video]));
     const batchId = randomUUID();
     const ideas = generated.ideas.map((idea) => {
-      const signal = byId.get(idea.trendVideoId);
-      if (!signal) throw new AiProviderError("A recommendation referenced unverified trend evidence.");
+      const source = byId.get(idea.sourceVideoId);
+      if (!source) throw new AiProviderError("A recommendation referenced an unknown upload.");
       return {
         id: randomUUID(),
         title: idea.title,
@@ -178,55 +210,63 @@ export async function POST(request: Request) {
         format: idea.format,
         reason: idea.reason,
         evidence: [
-          { label: "Recent public momentum", value: `${Math.round(signal.viewsPerDay).toLocaleString("en-US")} views/day · ${signal.market}`, source: "YouTube trend" as const },
-          ...(context.channelSummary ? [{ label: "Channel context", value: "Included in recommendation", source: "Your channel" as const }] : []),
+          { label: "Based on your upload history", value: source.title, source: "Your channel" as const },
         ],
       };
     });
-    const supabase = await createClient();
-    const { error: ideasError } = await supabase.from("ideas").insert(ideas.map((idea) => ({
-      id: idea.id, user_id: user.id, title: idea.title, angle: idea.angle, format: idea.format, reason: idea.reason,
-      status: "recommended", recommendation_batch_id: batchId, creator_profile_version: null,
-      generation_version: parsed.data.initialSetup ? `${RECOMMENDATION_ALGORITHM_VERSION}-evidence` : RECOMMENDATION_ALGORITHM_VERSION, dismissed_at: null,
-    })));
-    if (ideasError) {
-      console.error("[Ideas] Recommendation insert failed", {
-        name: ideasError.name,
-        message: ideasError.message,
-      });
-      throw new Error("Recommendations could not be stored.");
-    }
     const evidenceRows = ideas.flatMap((idea) => idea.evidence.map((evidence) => ({
-      user_id: user.id, idea_id: idea.id, source: evidence.source === "YouTube trend" ? "youtube_trend" : "channel",
+      user_id: user.id, idea_id: idea.id, source: "channel",
       label: evidence.label, value: evidence.value, explanation: idea.reason, source_snapshot_id: null,
-      captured_at: trends.evidence.capturedAt,
+      captured_at: capturedAt,
     })));
-    const { error: evidenceError } = await supabase.from("idea_evidence").insert(evidenceRows);
-    if (evidenceError) {
-      console.error("[Ideas] Recommendation evidence insert failed", {
-        name: evidenceError.name,
-        message: evidenceError.message,
-      });
-      throw new Error("Recommendation evidence could not be stored.");
+    const client = await databasePool.connect();
+    try {
+      await client.query("BEGIN");
+      for (const idea of ideas) {
+        await client.query(
+          `INSERT INTO ideas (id, user_id, title, angle, format, reason, status, recommendation_batch_id, generation_version)
+           VALUES ($1, $2, $3, $4, $5, $6, 'recommended', $7, $8)`,
+          [idea.id, user.id, idea.title, idea.angle, idea.format, idea.reason, batchId,
+            RECOMMENDATION_ALGORITHM_VERSION],
+        );
+      }
+      for (const evidence of evidenceRows) {
+        await client.query(
+          `INSERT INTO idea_evidence (user_id, idea_id, source, label, value, explanation, source_snapshot_id, captured_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::timestamptz)`,
+          [evidence.user_id, evidence.idea_id, evidence.source, evidence.label, evidence.value, evidence.explanation,
+            evidence.source_snapshot_id, evidence.captured_at],
+        );
+      }
+      await client.query(
+        `INSERT INTO usage_events (user_id, operation, provider, model, input_units, output_units, cost_microunits, metadata)
+         VALUES ($1, 'ai_idea_recommendations', $2, $3, $4, $5, NULL, $6::jsonb)`,
+        [user.id, generated.completion.provider, generated.completion.model,
+          generated.completion.inputTokens, generated.completion.outputTokens,
+          JSON.stringify({ algorithmVersion: RECOMMENDATION_ALGORITHM_VERSION, channelFingerprint: context.channelFingerprint, batchId, generationMode: "channel_ai", trendSnapshotAt: capturedAt, niche: context.niche, recommendations: ideas })],
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
     }
-    await supabase.from("usage_events").insert({
-      user_id: user.id,
-      operation: "ai_idea_recommendations",
-      provider: generated.completion?.provider ?? null,
-      model: generated.completion?.model ?? "evidence-template-v1",
-      input_units: generated.completion?.inputTokens ?? null,
-      output_units: generated.completion?.outputTokens ?? null,
-      cost_microunits: null,
-      metadata: { algorithmVersion: RECOMMENDATION_ALGORITHM_VERSION, batchId, generationMode: parsed.data.initialSetup ? "evidence_template" : "ai", trend_snapshot_at: trends.evidence.capturedAt, trendSnapshotAt: trends.evidence.capturedAt, niche: context.niche, recommendations: ideas },
-    });
-    return Response.json({ ideas, niche: context.niche, capturedAt: trends.evidence.capturedAt, refreshedTrends: trends.refreshed }, { headers: { "Cache-Control": "private, no-store" } });
+    reservedForUser = null;
+    return Response.json({ ideas, niche: context.niche, capturedAt, refreshedTrends: false }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
+    if (reservedForUser) await refundCredits(reservedForUser, 5).catch(() => undefined);
+    if (error instanceof RequestBodyError) return Response.json({ error: error.message }, { status: error.status });
     if (error instanceof AuthenticationRequiredError) return Response.json({ error: "Sign in to generate recommendations." }, { status: 401 });
-    if (error instanceof AiConfigurationError) return Response.json({ error: "AI is not configured yet." }, { status: 503 });
-    if (error instanceof AiProviderError) return Response.json({ error: "Recommendations are temporarily unavailable." }, { status: 502 });
-    if (error instanceof YouTubeTrendsError) {
-      const status = error.code === "quota" ? 429 : error.code === "configuration" ? 503 : 502;
-      return Response.json({ error: error.message }, { status });
+    if (error instanceof AiConfigurationError) return Response.json({ error: "The idea service is not configured. Please contact support; retrying cannot fix this." }, { status: 503 });
+    if (error instanceof AiProviderError) {
+      console.error("[Ideas] AI unavailable", { status: error.status, code: error.code });
+      const message = error.status === 429
+        ? "The AI service has reached its usage limit. Please try later or contact support. This is not a problem with your channel."
+        : error.status === 401 || error.status === 403
+          ? "The AI service is currently unavailable because provider access needs attention. Please contact support; repeated retries will not fix it."
+          : "Fresh video ideas could not be generated right now. Please try again later.";
+      return Response.json({ error: message }, { status: 503 });
     }
     console.error("[Ideas] Recommendation generation failed", error instanceof Error ? {
       name: error.name,

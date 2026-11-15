@@ -24,6 +24,26 @@ const generatedDraft = {
 };
 
 describe("IdeasView", () => {
+  it("shows the server failure instead of silently asking for another scan", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: "The AI service has reached its usage limit." }) }));
+    render(<IdeasView />);
+    await userEvent.setup().click(screen.getByRole("button", { name: "Refresh topics" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("usage limit");
+    expect(screen.getByRole("button", { name: "Refresh topics" })).toBeEnabled();
+  });
+
+  it("disables refresh while generation is pending", async () => {
+    let finish: (value: unknown) => void = () => {};
+    const pending = new Promise((resolve) => { finish = resolve; });
+    const fetcher = vi.fn().mockReturnValue(pending);
+    vi.stubGlobal("fetch", fetcher);
+    render(<IdeasView />);
+    await userEvent.setup().click(screen.getByRole("button", { name: "Refresh topics" }));
+    expect(screen.getByRole("button", { name: "Refreshing topics" })).toBeDisabled();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    finish({ ok: false, json: async () => ({ error: "Please try later." }) });
+    await screen.findByRole("alert");
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     window.sessionStorage.clear();
@@ -50,9 +70,12 @@ describe("IdeasView", () => {
   it("shows the generation state only on the selected idea", async () => {
     const user = userEvent.setup();
     let finishGeneration: (() => void) | undefined;
-    const fetchMock = vi.fn().mockReturnValue(new Promise((resolve) => {
+    const generation = new Promise((resolve) => {
       finishGeneration = () => resolve({ ok: true, json: async () => ({ draft: generatedDraft }) });
-    }));
+    });
+    const fetchMock = vi.fn()
+      .mockImplementationOnce(() => generation)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ projectId: "saved-project" }) });
     vi.stubGlobal("fetch", fetchMock);
     render(<IdeasView />);
 
@@ -64,8 +87,9 @@ describe("IdeasView", () => {
     expect(within(secondIdea!).getByRole("button", { name: "Generate script" })).toBeEnabled();
 
     finishGeneration?.();
-    await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/dashboard/editor/new-script"));
-    expect(JSON.parse(window.sessionStorage.getItem("next-video:draft") ?? "null")).toEqual(generatedDraft);
+    await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/dashboard/editor/saved-project"));
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/projects", expect.objectContaining({ method: "POST" }));
+    expect(window.sessionStorage.getItem("next-video:draft")).toBeNull();
   });
 
   it("opens pricing instead of calling AI when script writing is not included", async () => {

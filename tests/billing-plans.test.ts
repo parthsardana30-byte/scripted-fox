@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { getScriptVersionChangeLimit, isBillingFeature, isPlanCode, planIncludesFeature, plans, pricingHref, trialDurationDays, upgradeHref } from "@/lib/billing/plans";
+import { dailyIdeaLimits, getScriptVersionChangeLimit, isBillingFeature, isPlanCode, planCreditAllowances, planIncludesFeature, plans, pricingHref, trialDurationDays, upgradeHref } from "@/lib/billing/plans";
 
 describe("billing access model", () => {
   it("keeps free users out of premium exports", () => {
@@ -17,6 +17,8 @@ describe("billing access model", () => {
     expect(getScriptVersionChangeLimit("free")).toBe(0);
     expect(getScriptVersionChangeLimit("pro")).toBe(10);
     expect(getScriptVersionChangeLimit("elite")).toBe(20);
+    expect(planCreditAllowances).toEqual({ free: 0, pro: 3_000, elite: 8_000 });
+    expect(dailyIdeaLimits).toEqual({ free: 0, pro: 15, elite: 30 });
     expect(plans.find((plan) => plan.code === "pro")).toMatchObject({ monthlyPriceInr: 50, annualMonthlyPriceInr: 40 });
     expect(plans.find((plan) => plan.code === "elite")).toMatchObject({ monthlyPriceInr: 150, annualMonthlyPriceInr: 120 });
   });

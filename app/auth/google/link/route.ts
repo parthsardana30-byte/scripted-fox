@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/lib/auth";
 import { publicEnvironment } from "@/lib/env/public";
-import { serverEnvironment } from "@/lib/env/server";
+import { googleSignInCredentials } from "@/lib/auth/google-config";
 
 export async function GET(request: Request) {
-  if (!serverEnvironment.GOOGLE_AUTH_CLIENT_ID || !serverEnvironment.GOOGLE_AUTH_CLIENT_SECRET) {
+  if (!googleSignInCredentials) {
     return NextResponse.redirect(new URL("/dashboard/account?google=unavailable", publicEnvironment.NEXT_PUBLIC_SITE_URL));
   }
 
@@ -19,7 +19,10 @@ export async function GET(request: Request) {
       headers: request.headers,
     });
     return NextResponse.redirect(result.url);
-  } catch {
+  } catch (error) {
+    console.error("Google account linking could not be started.", {
+      name: error instanceof Error ? error.name : "UnknownError",
+    });
     return NextResponse.redirect(new URL("/dashboard/account?google=error", publicEnvironment.NEXT_PUBLIC_SITE_URL));
   }
 }

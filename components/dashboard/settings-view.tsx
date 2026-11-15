@@ -1,9 +1,10 @@
 "use client";
 
-import { Check, Languages, Radio, Save, SlidersHorizontal, UserRound } from "lucide-react";
+import { Check, Languages, LogOut, Radio, Save, SlidersHorizontal, UserRound } from "lucide-react";
 import { useActionState } from "react";
 
 import { saveSettings, type SettingsActionState } from "@/app/dashboard/settings/actions";
+import { signOut } from "@/app/(auth)/actions";
 import { NicheConfirmationDialog } from "./niche-confirmation-dialog";
 import { ManageAccountDialog, type ManagedAccount } from "./manage-account-dialog";
 import { PageHeader } from "./page-header";
@@ -33,7 +34,12 @@ export function SettingsView({ initialValues, channel = null, account }: {
         <div className="settings-section__intro"><span><UserRound size={19} /></span><div><h2>Account</h2><p>Profile, plan, sign-in, and channel access.</p></div></div>
         <div className="settings-account-entry__card">
           <div><strong>{account.displayName}</strong><small>{account.email}</small></div>
-          <ManageAccountDialog account={account} />
+          <div className="settings-account-entry__actions">
+            <ManageAccountDialog account={account} />
+            <form action={signOut}>
+              <button className="button button--secondary button--small settings-sign-out" type="submit"><LogOut size={15} aria-hidden="true" /> Sign out</button>
+            </form>
+          </div>
         </div>
       </section>
       {channel ? (

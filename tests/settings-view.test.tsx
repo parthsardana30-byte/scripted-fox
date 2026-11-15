@@ -51,6 +51,7 @@ describe("SettingsView", () => {
     expect(screen.queryByText("Export and editor")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Outline detail")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save all settings" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Sign out" })).toBeVisible();
   });
 
   it("lets a connected creator reopen the niche selector", async () => {

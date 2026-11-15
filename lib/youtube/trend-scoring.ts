@@ -98,13 +98,11 @@ type DiversifiableTrend = {
   outlook?: "rising-now" | "breakout-candidate" | "steady";
 };
 
-function titleSimilarity(left: string, right: string) {
-  const leftTokens = topicTokens(left);
-  const rightTokens = topicTokens(right);
+function titleSimilarity(leftTokens: Set<string>, rightTokens: Set<string>) {
   if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
   let intersection = 0;
   leftTokens.forEach((token) => { if (rightTokens.has(token)) intersection += 1; });
-  return intersection / new Set([...leftTokens, ...rightTokens]).size;
+  return intersection / (leftTokens.size + rightTokens.size - intersection);
 }
 
 export function selectDiverseTrends<T extends DiversifiableTrend>(videos: T[], limit: number, recentlyShownIds: Set<string> = new Set()) {
@@ -119,19 +117,33 @@ export function selectDiverseTrends<T extends DiversifiableTrend>(videos: T[], l
     ordered.filter((video) => video.outlook !== "rising-now" && video.outlook !== "breakout-candidate"),
   ];
   const selected: T[] = [];
+  const selectedIds = new Set<string>();
+  const tokensByTitle = new Map<string, Set<string>>();
+  const tokensFor = (title: string) => {
+    let tokens = tokensByTitle.get(title);
+    if (!tokens) {
+      tokens = topicTokens(title);
+      tokensByTitle.set(title, tokens);
+    }
+    return tokens;
+  };
   const channelCounts = new Map<string, number>();
   const tryAdd = (video: T) => {
-    if (selected.some((item) => item.id === video.id)) return;
-    if ((channelCounts.get(video.channelTitle) ?? 0) >= 2) return;
-    if (selected.some((item) => titleSimilarity(item.title, video.title) >= .72)) return;
+    if (selectedIds.has(video.id)) return false;
+    if ((channelCounts.get(video.channelTitle) ?? 0) >= 2) return false;
+    const tokens = tokensFor(video.title);
+    if (selected.some((item) => titleSimilarity(tokensFor(item.title), tokens) >= .72)) return false;
     selected.push(video);
+    selectedIds.add(video.id);
     channelCounts.set(video.channelTitle, (channelCounts.get(video.channelTitle) ?? 0) + 1);
+    return true;
   };
   const targets = [4, 3, Math.max(0, limit - 7)];
   buckets.forEach((bucket, index) => {
+    let added = 0;
     for (const video of bucket) {
-      if (selected.length >= limit || selected.filter((item) => buckets[index].some((candidate) => candidate.id === item.id)).length >= targets[index]) break;
-      tryAdd(video);
+      if (selected.length >= limit || added >= targets[index]) break;
+      if (tryAdd(video)) added += 1;
     }
   });
   ordered.forEach((video) => { if (selected.length < limit) tryAdd(video); });

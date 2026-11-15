@@ -50,7 +50,7 @@ function AnalyticsGate({ state }: { state: Exclude<ChannelAnalyticsState, { kind
   </div>;
 }
 
-export function AnalyticsView({ state, syncHref = "/dashboard/analytics?sync=1" }: { state: ChannelAnalyticsState; syncHref?: string }) {
+export function AnalyticsView({ state, syncHref, syncAction }: { state: ChannelAnalyticsState; syncHref?: string; syncAction?: () => Promise<void> }) {
   if (state.kind !== "ready") return <AnalyticsGate state={state} />;
 
   const { snapshot, isStale } = state;
@@ -62,7 +62,11 @@ export function AnalyticsView({ state, syncHref = "/dashboard/analytics?sync=1" 
     <PageHeader
       title={<>Channel <span className="analytics-title-accent">analytics</span></>}
       description="See what’s working across your channel."
-      actions={<Link className="trending-refresh analytics-sync" href={syncHref} prefetch={false} aria-label="Sync channel analytics"><span className="trending-refresh__radar" aria-hidden="true"><RefreshCw size={22} /></span><span className="trending-refresh__label">SYNC</span></Link>}
+      actions={syncHref
+        ? <Link className="trending-refresh analytics-sync" href={syncHref} aria-label="Sync channel analytics"><span className="trending-refresh__radar" aria-hidden="true"><RefreshCw size={22} /></span><span className="trending-refresh__label">SYNC</span></Link>
+        : syncAction
+          ? <form action={syncAction}><button className="trending-refresh analytics-sync" type="submit" aria-label="Sync channel analytics"><span className="trending-refresh__radar" aria-hidden="true"><RefreshCw size={22} /></span><span className="trending-refresh__label">SYNC</span></button></form>
+          : undefined}
     />
     {isStale ? <p className="analytics-notice" role="status">YouTube could not refresh the channel. These are the latest saved results.</p> : null}
 

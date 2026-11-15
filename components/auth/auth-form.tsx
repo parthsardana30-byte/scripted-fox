@@ -6,6 +6,7 @@ import { useActionState } from "react";
 
 import {
   sendPasswordReset,
+  resendSignUpOTP,
   signInWithEmail,
   signUpWithEmail,
   updatePassword,
@@ -34,6 +35,7 @@ function GoogleMark() {
 export function EmailVerificationStep({ email, nextPath, message }: { email: string; nextPath: string; message?: string }) {
   const initialState: EmailVerificationActionState = { status: "idle", email, next: nextPath };
   const [state, action, pending] = useActionState(verifySignUpEmail, initialState);
+  const [resendState, resendAction, resendPending] = useActionState(resendSignUpOTP, initialState);
 
   return <div className="auth-card auth-card--verification">
     <span className="auth-verification-icon"><ShieldCheck size={25} aria-hidden="true" /></span>
@@ -49,6 +51,12 @@ export function EmailVerificationStep({ email, nextPath, message }: { email: str
       {state.message ? <p className="auth-form-error" role="alert">{state.message}</p> : null}
       <button className="button button--primary auth-submit" type="submit" disabled={pending}>{pending ? "Verifying…" : "Verify and continue"}<ArrowRight size={17} aria-hidden="true" /></button>
     </form>
+    <form className="auth-resend" action={resendAction}>
+      <input type="hidden" name="email" value={email} />
+      <input type="hidden" name="next" value={nextPath} />
+      <button className="button button--secondary" type="submit" disabled={resendPending}>{resendPending ? "Sending…" : "Resend code"}</button>
+      {resendState.message ? <p className={resendState.status === "error" ? "auth-form-error" : "auth-resend-success"} role="status">{resendState.message}</p> : null}
+    </form>
     <p className="auth-switch">Wrong email? <Link href={`/sign-up?next=${encodeURIComponent(nextPath)}`}>Start again</Link></p>
   </div>;
 }
@@ -63,8 +71,8 @@ const copy = {
   "sign-up": {
     eyebrow: "",
     title: "Sign Up",
-    description: "Create your account and start your journey.",
-    submit: "Sign Up",
+    description: "",
+    submit: "Send verification code",
   },
   forgot: { eyebrow: "Password recovery", title: "Reset your password", description: "Enter your email and we’ll send reset instructions.", submit: "Send reset link" },
   reset: { eyebrow: "Choose a new password", title: "Set a new password", description: "Use at least eight characters and avoid a password you use elsewhere.", submit: "Save new password" },
@@ -80,12 +88,12 @@ export function AuthForm({ mode, nextPath = "/dashboard", oauthError, resetToken
     return <EmailVerificationStep email={state.email} nextPath={state.next ?? nextPath} message={state.message} />;
   }
 
-  if (state.status === "success") return <div className="auth-card auth-card--complete"><span><CheckCircle2 size={24} aria-hidden="true" /></span><p className="auth-eyebrow">Check your inbox</p><h1>{mode === "sign-up" ? "Verify your email" : "Reset link sent"}</h1><p>{state.message}</p><Link className="button button--secondary" href={`/sign-in${nextQuery}`}>Back to sign in</Link><p className="auth-legal">By continuing, you agree to the <Link href="/terms">Terms and Privacy</Link> Policy.</p></div>;
+  if (state.status === "success") return <div className="auth-card auth-card--complete"><span><CheckCircle2 size={24} aria-hidden="true" /></span><p className="auth-eyebrow">Check your inbox</p><h1>{mode === "sign-up" ? "Verify your email" : "Reset link sent"}</h1><p>{state.message}</p><Link className="button button--secondary" href={`/sign-in${nextQuery}`}>Back to sign in</Link><p className="auth-legal">By continuing, you agree to the <Link href="/terms">Terms</Link> and acknowledge the <Link href="/privacy">Privacy Policy</Link>.</p></div>;
 
   return <div className={`auth-card auth-card--${mode}`}>
     {details.eyebrow ? <p className="auth-eyebrow">{details.eyebrow}</p> : null}<h1>{details.title}</h1>{details.description ? <p className="auth-description">{details.description}</p> : null}
     {oauthError && <p className="auth-form-error" role="alert">{oauthErrorMessage(oauthError)}</p>}
-    {(mode === "sign-in" || mode === "sign-up") && <><form action="/auth/google" method="get"><input type="hidden" name="next" value={nextPath} /><button className="auth-google" type="submit"><GoogleMark /><span className="auth-google__label">{mode === "sign-up" ? "Sign up with Google" : "Continue with Google"}</span></button></form><div className="auth-divider"><span>or continue with email</span></div></>}
+    {(mode === "sign-in" || mode === "sign-up") && <><a className="auth-google" href={`/auth/google?next=${encodeURIComponent(nextPath)}`}><GoogleMark /><span className="auth-google__label">{mode === "sign-up" ? "Sign up with Google" : "Continue with Google"}</span></a><div className="auth-divider"><span>or continue with email</span></div></>}
     <form action={formAction}>
       <input type="hidden" name="next" value={nextPath} />
       {mode === "reset" && <input type="hidden" name="token" value={resetToken ?? ""} />}
@@ -97,6 +105,6 @@ export function AuthForm({ mode, nextPath = "/dashboard", oauthError, resetToken
       <button className="button button--primary auth-submit" type="submit" disabled={pending}>{pending ? "Please wait…" : details.submit}<ArrowRight size={17} aria-hidden="true" /></button>
     </form>
     <p className="auth-switch">{mode === "sign-in" ? <>New to Scripted Fox? <Link href={`/sign-up${nextQuery}`}>Create an account</Link></> : mode === "sign-up" ? <>Already have an account? <Link href={`/sign-in${nextQuery}`}>Log In</Link></> : mode === "forgot" ? <Link href="/sign-in">Return to sign in</Link> : null}</p>
-    <p className="auth-legal">By continuing, you agree to the <Link href="/terms">Terms and Privacy</Link> Policy.</p>
+    <p className="auth-legal">By continuing, you agree to the <Link href="/terms">Terms</Link> and acknowledge the <Link href="/privacy">Privacy Policy</Link>.</p>
   </div>;
 }

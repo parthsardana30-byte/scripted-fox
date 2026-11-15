@@ -908,7 +908,7 @@
   color: #1f9d68;
 }
 
-.youtube-landing .script-ready-demo__message h3 {
+.youtube-landing .script-ready-demo__message h2 {
   max-width: 13ch;
   color: var(--landing-ink);
   font-size: clamp(1.7rem, 3vw, 3rem);
@@ -1995,7 +1995,7 @@
     padding: 1.25rem;
   }
 
-  .youtube-landing .script-ready-demo__message h3 {
+  .youtube-landing .script-ready-demo__message h2 {
     font-size: clamp(2rem, 10vw, 3rem);
   }
 
@@ -2029,6 +2029,15 @@
   .youtube-landing .video-plan .tabs-list {
     display: flex;
     overflow-x: auto;
+    padding-block-end: .45rem;
+    scroll-padding-inline: .25rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .youtube-landing .video-plan .tabs-trigger {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
   }
 
   .youtube-landing .video-plan__surface {

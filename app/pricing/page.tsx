@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PricingCatalogue } from "@/components/billing/pricing-catalogue";
@@ -7,14 +6,15 @@ import { SiteHeader } from "@/components/landing/site-header";
 import { isPayuConfigured } from "@/lib/billing/payu";
 import { featureLabels, isBillingFeature } from "@/lib/billing/plans";
 import { getLandingUser } from "@/lib/landing-user";
+import { pageMetadata } from "@/lib/seo";
 import "../landing-youtube.css";
 import "./pricing.css";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Pricing",
   description: "Choose how much planning, writing, and channel analysis you need.",
-  alternates: { canonical: "/pricing" },
-};
+  path: "/pricing",
+});
 
 function safeInternalPath(value: string | string[] | undefined) {
   const path = typeof value === "string" ? value : null;

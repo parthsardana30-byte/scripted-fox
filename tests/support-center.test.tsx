@@ -55,6 +55,7 @@ describe("FoxAiChat", () => {
     const fetchMock = vi.fn().mockReturnValue(new Promise((resolve) => { resolveFetch = resolve; }));
     vi.stubGlobal("fetch", fetchMock);
     render(<FoxAiChat />);
+    expect(screen.getByRole("button", { name: "Open Fox AI support" }).querySelector('img[src*="scripted-fox-support-logo.png"]')).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Open Fox AI support" }));
     await user.type(screen.getByRole("textbox", { name: "Ask Fox AI" }), "Why is YouTube not syncing?");

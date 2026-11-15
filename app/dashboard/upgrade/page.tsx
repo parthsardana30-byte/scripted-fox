@@ -55,7 +55,7 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
         </div> : null}
         <PricingCatalogue
           compact
-          currentPlan={access.plan}
+          currentPlan={access.displayPlan}
           signedIn
           payuConfigured={payuConfigured}
           celebrationPlan={paymentStatus === "success" ? (requestedPlan ?? access.plan) : undefined}

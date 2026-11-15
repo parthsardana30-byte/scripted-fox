@@ -10,11 +10,12 @@ import "./dashboard.css";
 export const metadata: Metadata = {
   title: { default: "Dashboard · Scripted Fox", template: "%s · Scripted Fox" },
   description: "Plan, write, and improve your next YouTube video.",
+  robots: { index: false, follow: false },
 };
 
 export default async function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const user = await getAuthenticatedUser();
   if (!user) redirect("/sign-in?next=/dashboard");
   const access = await getBillingAccess(user.id);
-  return <DashboardShell plan={access.plan}>{children}</DashboardShell>;
+  return <DashboardShell plan={access.displayPlan}>{children}</DashboardShell>;
 }

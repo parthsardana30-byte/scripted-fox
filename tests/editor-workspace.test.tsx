@@ -1,12 +1,12 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { EditorWorkspace } from "@/components/dashboard/editor-workspace";
 
-const navigationMocks = vi.hoisted(() => ({ push: vi.fn() }));
+const navigationMocks = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: navigationMocks.push }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: navigationMocks.push, replace: navigationMocks.replace }) }));
 
 const revisedDraft = {
   title: "A sharper test video",
@@ -22,9 +22,38 @@ afterEach(() => {
   vi.unstubAllGlobals();
   window.sessionStorage.clear();
   navigationMocks.push.mockReset();
+  navigationMocks.replace.mockReset();
 });
 
 describe("EditorWorkspace", () => {
+  it("does not navigate to the first save while newer edits are pending", async () => {
+    let finishFirst!: (value: unknown) => void;
+    let finishSecond!: (value: unknown) => void;
+    const fetchMock = vi.fn()
+      .mockImplementationOnce(() => new Promise(resolve => { finishFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise(resolve => { finishSecond = resolve; }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<EditorWorkspace persistProjects />);
+    fireEvent.change(screen.getByLabelText("Script content"), { target: { value: "First draft" } });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    fireEvent.change(screen.getByLabelText("Script content"), { target: { value: "Newer unsaved draft" } });
+    const leaving = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(leaving);
+    expect(leaving.defaultPrevented).toBe(true);
+    await act(async () => finishFirst({ ok: true, json: async () => ({ projectId: "project-123" }) }));
+    expect(navigationMocks.replace).not.toHaveBeenCalled();
+    expect(screen.getByText("Saving…")).toBeVisible();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2), { timeout: 2000 });
+    const second = JSON.parse(fetchMock.mock.calls[1][1].body);
+    expect(second.projectId).toBe("project-123");
+    expect(second.document.draft.sections[0].body).toBe("Newer unsaved draft");
+    await act(async () => finishSecond({ ok: true, json: async () => ({ projectId: "project-123" }) }));
+    expect(navigationMocks.replace).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Saved")).toBeVisible();
+    const savedLeaving = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(savedLeaving);
+    expect(savedLeaving.defaultPrevented).toBe(false);
+  });
   it("prefills the assistant with the idea captured on the landing page", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
@@ -67,6 +96,26 @@ describe("EditorWorkspace", () => {
     expect(screen.queryByRole("tablist", { name: "Editor view" })).not.toBeInTheDocument();
   });
 
+  it("shows Saved only after a new script is persisted", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ projectId: "project-123", savedAt: new Date().toISOString() }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<EditorWorkspace persistProjects />);
+
+    await user.type(screen.getByLabelText("Script content"), "A persisted opening");
+    expect(screen.getByText("Saving…")).toBeVisible();
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/projects",
+      expect.objectContaining({ method: "POST" }),
+    ), { timeout: 2_000 });
+    await waitFor(() => expect(screen.getByText("Saved")).toBeVisible());
+    expect(navigationMocks.replace).toHaveBeenCalledWith("/dashboard/editor/project-123");
+  });
+
   it("routes free users to upgrade when they request an advanced export", async () => {
     const user = userEvent.setup();
     render(<EditorWorkspace />);
@@ -77,10 +126,7 @@ describe("EditorWorkspace", () => {
       "href",
       "/dashboard/upgrade?feature=advanced_exports",
     );
-    expect(screen.getByRole("menuitem", { name: /Word document Upgrade/ })).toHaveAttribute(
-      "href",
-      "/dashboard/upgrade?feature=advanced_exports",
-    );
+    expect(screen.queryByRole("menuitem", { name: /Word document/ })).not.toBeInTheDocument();
   });
 
   it("downloads a professional PDF for plans with advanced exports", async () => {

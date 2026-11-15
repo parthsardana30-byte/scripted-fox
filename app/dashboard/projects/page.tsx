@@ -1,2 +1,8 @@
 import { ProjectsView } from "@/components/dashboard/projects-view";
-export default function ProjectsPage() { return <ProjectsView />; }
+import { requireAuthenticatedUser } from "@/lib/auth/session";
+import { listProjects } from "@/lib/projects/repository";
+
+export default async function ProjectsPage() {
+  const user = await requireAuthenticatedUser();
+  return <ProjectsView initialProjects={await listProjects(user.id)} />;
+}

@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AnalyticsView } from "@/components/dashboard/analytics-view";
 import type { ChannelAnalyticsState } from "@/lib/youtube/analytics";
@@ -50,7 +50,7 @@ describe("AnalyticsView", () => {
       },
     };
 
-    render(<AnalyticsView state={state} />);
+    render(<AnalyticsView state={state} syncAction={vi.fn()} />);
 
     expect(screen.getByText("See what’s working across your channel.")).toBeVisible();
     expect(screen.queryByText(/Creator channel/)).not.toBeInTheDocument();
@@ -58,6 +58,6 @@ describe("AnalyticsView", () => {
     expect(screen.queryByText("6 gained · 2 lost")).not.toBeInTheDocument();
     expect(screen.getByText("8 gained · 2 lost")).toBeVisible();
     expect(screen.queryByText("Demo channel data")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sync channel analytics" })).toHaveAttribute("href", "/dashboard/analytics?sync=1");
+    expect(screen.getByRole("button", { name: "Sync channel analytics" })).toBeEnabled();
   });
 });

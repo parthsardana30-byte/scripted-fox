@@ -176,6 +176,10 @@ body:has(.auth-shell) {
 .auth-otp-field input { font-family: var(--font-mono); font-size: 1.35rem; font-weight: 750; letter-spacing: .32em; text-align: center; }
 .auth-otp-field input::placeholder { letter-spacing: .32em; }
 .auth-otp-help { margin-block-start: calc(var(--space-xs) * -1); color: var(--auth-muted); font-size: var(--text-xs); text-align: center; }
+.auth-card form.auth-resend { margin-block-start: var(--space-sm); gap: var(--space-xs); }
+.auth-resend .button { width: 100%; justify-content: center; }
+.auth-resend-success { margin: 0; color: #16803c; font-size: var(--text-xs); font-weight: 700; text-align: center; }
+:root[data-next-video-theme="dark"] .auth-resend-success { color: #6fda91; }
 
 .auth-eyebrow {
   color: var(--auth-signal);
@@ -1125,7 +1129,7 @@ body:has(.auth-shell) {
 
 @media (max-width: 30rem) {
   .auth-header--global {
-    inset: 1rem;
+    inset: 1rem 1rem auto;
   }
 
   .auth-header--global .auth-wordmark .brand-logo__symbol {
@@ -1139,5 +1143,9 @@ body:has(.auth-shell) {
 
   .auth-shell__stage {
     padding: 6.5rem 1rem 2rem;
+  }
+
+  .auth-card form input {
+    font-size: 16px;
   }
 }

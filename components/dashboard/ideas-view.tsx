@@ -19,6 +19,8 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedde
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [dismissed, setDismissed] = useState<{ idea: IdeaRecommendation; wasSaved: boolean } | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [recommendationError, setRecommendationError] = useState<string | null>(null);
+  const recommendationPending = useRef(false);
   const [generatingIds, setGeneratingIds] = useState<string[]>([]);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [source, setSource] = useState<RecommendationSource>(process.env.NODE_ENV === "test" || demoMode ? "demo" : "loading");
@@ -37,13 +39,18 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedde
       ? [...current, ...payload.ideas!.filter((idea) => !current.some((item) => item.id === idea.id))]
       : payload.ideas!);
     setSource("live");
+    setRecommendationError(null);
   }, []);
 
   useEffect(() => () => window.clearTimeout(dismissTimer.current), []);
   useEffect(() => {
     if (process.env.NODE_ENV === "test" || demoMode) return;
     const timer = window.setTimeout(() => {
-      void fetchRecommendations([], false).catch(() => setSource("error"));
+      recommendationPending.current = true;
+      void fetchRecommendations([], false).catch((error: unknown) => {
+        setRecommendationError(error instanceof Error ? error.message : "Video ideas could not be loaded.");
+        setSource("error");
+      }).finally(() => { recommendationPending.current = false; });
     }, 0);
     return () => window.clearTimeout(timer);
   }, [demoMode, fetchRecommendations]);
@@ -81,18 +88,24 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedde
   };
 
   const loadMore = async () => {
+    if (recommendationPending.current) return;
+    recommendationPending.current = true;
     setLoadingMore(true);
+    setRecommendationError(null);
     if (demoMode) {
       setIdeas([...dashboardSnapshot.recommendations].reverse().slice(0, 5));
       setLoadingMore(false);
+      recommendationPending.current = false;
       return;
     }
     try {
       await fetchRecommendations(ideas.map((idea) => idea.title), false);
-    } catch {
+    } catch (error) {
+      setRecommendationError(error instanceof Error ? error.message : "Video ideas could not be loaded.");
       setSource("error");
     } finally {
       setLoadingMore(false);
+      recommendationPending.current = false;
     }
   };
 
@@ -126,9 +139,22 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedde
       if (!response.ok) throw new Error(payload.error || "The script could not be generated.");
       const parsedDraft = scriptDraftSchema.safeParse(payload.draft);
       if (!parsedDraft.success) throw new Error("The generated script was incomplete.");
+      const firstVersion = {
+        number: 1,
+        label: "AI first draft",
+        origin: "ai" as const,
+        createdAt: new Date().toISOString(),
+        snapshot: { title: parsedDraft.data.title, author: "", draft: parsedDraft.data },
+      };
+      const saveResponse = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document: firstVersion.snapshot, versions: [firstVersion] }),
+      });
+      const saved = await saveResponse.json() as { projectId?: string; error?: string };
+      if (!saveResponse.ok || !saved.projectId) throw new Error(saved.error || "The script could not be saved.");
       persistIdeaStatus(idea.id, "used");
-      window.sessionStorage.setItem("next-video:draft", JSON.stringify(parsedDraft.data));
-      router.push("/dashboard/editor/new-script");
+      router.push(`/dashboard/editor/${saved.projectId}`);
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : "The script could not be generated.");
     } finally {
@@ -146,6 +172,8 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedde
       <div className="dashboard-subtabs" role="tablist" aria-label="Idea lists">
         {(["Recommended", "Saved"] as IdeasTab[]).map((item) => <button key={item} role="tab" type="button" aria-selected={tab === item} onClick={() => setTab(item)}>{item}</button>)}
       </div>
+
+      {recommendationError && <p role="alert">{recommendationError}</p>}
 
       {source === "loading" ? <div className="trending-grid" aria-label="Finding niche topics">{Array.from({ length: 5 }).map((_, index) => <div className="trending-card trending-card--loading" key={index} />)}</div> : visibleIdeas.length > 0 ? <div className="idea-list">
         {visibleIdeas.map((idea, index) => {
@@ -169,7 +197,7 @@ export function IdeasView({ canUseScriptWriter = true, demoMode = false, embedde
             </div>
           </article>;
         })}
-      </div> : <div className="dashboard-empty"><Lightbulb size={24} aria-hidden="true" /><h2>{tab === "Saved" ? "No saved ideas yet" : source === "error" ? "Your niche topics need another scan" : "You’re caught up"}</h2><p>{tab === "Saved" ? "Save a recommendation and it will stay here without adding another sidebar page." : source === "error" ? "We won’t show generic filler. Retry to generate five topics matched to your niche and current YouTube signals." : "Ask for more ideas when you are ready."}</p>{tab === "Saved" ? <button className="button button--secondary button--small" type="button" onClick={() => setTab("Recommended")}>Browse recommendations</button> : source === "error" ? <button className="button button--primary button--small" type="button" onClick={loadMore}>Retry niche scan</button> : null}</div>}
+      </div> : <div className="dashboard-empty"><Lightbulb size={24} aria-hidden="true" /><h2>{tab === "Saved" ? "No saved ideas yet" : source === "error" ? "Video ideas are unavailable right now" : "You’re caught up"}</h2><p>{tab === "Saved" ? "Save a recommendation and it will stay here without adding another sidebar page." : source === "error" ? "Daily Topics creates fresh video ideas from your previous uploads. Check the message above before retrying." : "Ask for more ideas when you are ready."}</p>{tab === "Saved" ? <button className="button button--secondary button--small" type="button" onClick={() => setTab("Recommended")}>Browse recommendations</button> : source === "error" ? <button className="button button--primary button--small" type="button" onClick={loadMore} disabled={loadingMore}>{loadingMore ? "Generating ideas…" : "Retry ideas"}</button> : null}</div>}
 
       {dismissed && <div className="dashboard-toast" role="status" onMouseEnter={() => window.clearTimeout(dismissTimer.current)} onMouseLeave={startUndoTimer} onFocus={() => window.clearTimeout(dismissTimer.current)} onBlur={startUndoTimer}><span>“{dismissed.idea.title}” removed</span><button type="button" onClick={undoDismiss}><RotateCcw size={15} aria-hidden="true" /> Undo</button></div>}
       {generationError && <div className="dashboard-toast" role="alert"><span>{generationError}</span><button type="button" onClick={() => setGenerationError(null)}>Dismiss</button></div>}

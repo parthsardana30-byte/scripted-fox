@@ -21,6 +21,7 @@ type PricingCatalogueProps = {
   payuConfigured?: boolean;
   celebrationPlan?: PlanCode;
   compact?: boolean;
+  preview?: boolean;
 };
 
 const compactFeatures = {
@@ -28,25 +29,21 @@ const compactFeatures = {
     { label: "15 niche-matched ideas per day", included: true },
     { label: "500 credits · 7-day access", included: true },
     { label: "AI scripts & Fox AI editing", included: true },
-    { label: "Standard publishing kit", included: true },
-    { label: "Limited export formats", included: true },
-    { label: "Deep Research & credit top-ups", included: false },
+    { label: "Text, Markdown & subtitle exports", included: true },
   ],
   pro: [
     { label: "15 niche-matched ideas per day", included: true },
-    { label: "3,000 monthly credits & top-ups", included: true },
+    { label: "3,000 credits per paid month", included: true },
     { label: "AI scripts & Fox AI editing", included: true },
     { label: "Channel-based recommendations", included: true },
-    { label: "30-day history · limited exports", included: true },
-    { label: "Deep Research", included: false },
+    { label: "10 saved AI changes · PDF exports", included: true },
   ],
   elite: [
     { label: "30 niche-matched ideas per day", included: true },
-    { label: "8,000 monthly credits & top-ups", included: true },
-    { label: "Advanced scripts & personalization", included: true },
-    { label: "Deep Research with sources", included: true },
-    { label: "Full publishing kit & thumbnails", included: true },
-    { label: "Unlimited history · all exports", included: true },
+    { label: "8,000 credits per paid month", included: true },
+    { label: "Scripts & channel personalization", included: true },
+    { label: "Advanced channel analytics", included: true },
+    { label: "20 saved AI changes · PDF exports", included: true },
   ],
 };
 
@@ -57,6 +54,7 @@ export function PricingCatalogue({
   payuConfigured = false,
   celebrationPlan,
   compact = false,
+  preview = false,
 }: PricingCatalogueProps) {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [selectingPlan, setSelectingPlan] = useState<PlanCode | null>(null);
@@ -157,7 +155,7 @@ export function PricingCatalogue({
               <small>{billingPeriod === "annual" ? "₹" + annualTotal?.toLocaleString("en-IN") + " paid for 12 months" : "One payment for one month"}</small>
             </>}
           </div>
-          {signedIn && payuConfigured && !isCurrent && plan.code !== "free"
+          {preview ? <button className={buttonClass} type="button" onClick={() => setFeedback("Local plan preview — checkout is disabled.")}>{isCurrent ? "Current plan" : `Select ${plan.name}`}</button> : signedIn && payuConfigured && !isCurrent && plan.code !== "free"
               ? <button className={buttonClass} type="button" disabled={selectingPlan !== null} onClick={() => { setPendingPlan(plan.code); setFeedback(""); }}>
                   {"Pay with PayU · " + plan.name}
                 </button>
@@ -213,6 +211,7 @@ export function PricingCatalogue({
           </button>
         </form>
         <p className="pricing-checkout-dialog__secure"><LockKeyhole size={15} aria-hidden="true" /> Payment details are entered only on PayU&apos;s secure checkout.</p>
+        <p className="pricing-checkout-dialog__legal">By continuing, you agree to the <Link href="/terms">Terms</Link> and <Link href="/refund-policy">Refund &amp; Cancellation Policy</Link>.</p>
       </DialogContent> : null}
     </Dialog>
     <Dialog open={Boolean(visibleCelebrationPlan)} onOpenChange={(open) => {

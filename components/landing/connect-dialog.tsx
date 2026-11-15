@@ -29,7 +29,7 @@ export function ConnectDialog({ triggerLabel = "Find my next video" }: { trigger
         <Button asChild>
           <Link href="/connect">Connect YouTube</Link>
         </Button>
-        <p className="demo-disclosure">Connection is a safe placeholder in this landing-page build.</p>
+        <p className="demo-disclosure">Google will show exactly which read-only YouTube permissions are requested before you approve.</p>
       </DialogContent>
     </Dialog>
   );

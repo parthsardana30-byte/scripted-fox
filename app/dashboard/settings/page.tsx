@@ -53,8 +53,12 @@ export default async function SettingsPage() {
       status: connected ? `Status: ${connection?.status}` : "Add channel context to recommendations and analytics.",
     },
     plan: {
-      name: getPlanDisplayName(access.plan),
-      description: access.status === "trialing" ? "Trial access is active." : access.plan === "free" ? "No subscription is attached." : `Status: ${access.status}`,
+      name: getPlanDisplayName(access.displayPlan),
+      description: access.status === "trialing"
+        ? `Trial active · ${access.creditsRemaining.toLocaleString("en-IN")} of ${access.creditsAllowance.toLocaleString("en-IN")} credits left`
+        : access.plan === "free"
+          ? "No subscription is attached."
+          : `${access.creditsRemaining.toLocaleString("en-IN")} of ${access.creditsAllowance.toLocaleString("en-IN")} credits left`,
     },
   }} channel={connected && channelNiche ? {
     name: connection?.channel_title ?? "YouTube channel",

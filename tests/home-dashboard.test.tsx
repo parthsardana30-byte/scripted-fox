@@ -6,6 +6,12 @@ import { HomeDashboard } from "@/components/dashboard/home-dashboard";
 afterEach(cleanup);
 
 describe("HomeDashboard connection state", () => {
+  it("does not show the redundant credits and thumbnail strip", () => {
+    render(<HomeDashboard demoMode setup={{ accountCreated: true, channelConnected: true, preferencesSet: true }} />);
+    expect(screen.queryByRole("region", { name: "Fox Credits and thumbnails" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Create thumbnail")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Daily Topics" })).toBeVisible();
+  });
   it("shows one focused YouTube action without restoring the old setup checklist", () => {
     render(<HomeDashboard setup={{ accountCreated: true, channelConnected: false, preferencesSet: false }} userName="Aryan" />);
 

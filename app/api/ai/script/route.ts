@@ -6,8 +6,10 @@ import { inferCreatorNiche } from "@/lib/ai/niche";
 import { assistWithScript, generateScriptDraft } from "@/lib/ai/script";
 import { aiRequestSchema } from "@/lib/ai/types";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
+import { readJsonBody, RequestBodyError } from "@/lib/security/request-body";
 import { createClient } from "@/lib/db/client";
 import { getBillingAccess, hasBillingFeature } from "@/lib/billing/access";
+import { consumeCredits, refundCredits } from "@/lib/billing/credits";
 import { getCachedPublicTrends, trendSummaryForTitle } from "@/lib/youtube/trends";
 import type { Json } from "@/types/database";
 
@@ -103,7 +105,7 @@ async function enforceRateLimit(userId: string) {
 
 async function recordUsage(userId: string, mode: "generate" | "assist", completion: { provider: string; model: string; inputTokens: number | null; outputTokens: number | null }) {
   const supabase = await createClient();
-  await supabase.from("usage_events").insert({
+  const { error } = await supabase.from("usage_events").insert({
     user_id: userId,
     operation: `ai_script_${mode}`,
     provider: completion.provider,
@@ -113,6 +115,7 @@ async function recordUsage(userId: string, mode: "generate" | "assist", completi
     cost_microunits: null,
     metadata: { source: "script_editor" },
   });
+  if (error) throw error;
 }
 
 export async function POST(request: Request) {
@@ -124,38 +127,42 @@ export async function POST(request: Request) {
     return Response.json({ error: "This request is too large." }, { status: 413 });
   }
 
+  let reservedForUser: string | null = null;
   try {
     const user = await requireAuthenticatedUser();
     const access = await getBillingAccess(user.id);
     if (!hasBillingFeature(access, "ai_script_writer")) {
-      return Response.json({ error: "Choose Plus or Pro to use AI script writing." }, { status: 402 });
+      return Response.json({ error: "Start a trial or choose Pro or Gold to use AI script writing." }, { status: 402 });
     }
     if (!(await enforceRateLimit(user.id))) {
       return Response.json({ error: "You’re generating too quickly. Wait a minute and try again." }, { status: 429 });
     }
 
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return Response.json({ error: "The request body must be valid JSON." }, { status: 400 });
-    }
+    const body = await readJsonBody(request, MAX_REQUEST_BYTES);
     const parsed = aiRequestSchema.safeParse(body);
     if (!parsed.success) {
       return Response.json({ error: "Check the script details and try again." }, { status: 400 });
     }
+    if (!(await consumeCredits(user.id, 1))) {
+      return Response.json({ error: "You have used all available Fox Credits for this plan." }, { status: 402 });
+    }
+    reservedForUser = user.id;
     const context = await loadCreatorContext(user.id, parsed.data.title);
 
     if (parsed.data.mode === "generate") {
       const { draft, completion } = await generateScriptDraft({ ...parsed.data, context });
       await recordUsage(user.id, "generate", completion);
+      reservedForUser = null;
       return Response.json({ draft });
     }
 
     const result = await assistWithScript({ ...parsed.data, context });
     await recordUsage(user.id, "assist", result.completion);
+    reservedForUser = null;
     return Response.json({ draft: result.draft, message: result.message });
   } catch (error) {
+    if (reservedForUser) await refundCredits(reservedForUser, 1).catch(() => undefined);
+    if (error instanceof RequestBodyError) return Response.json({ error: error.message }, { status: error.status });
     if (error instanceof AuthenticationRequiredError) {
       return Response.json({ error: "Sign in to use AI writing." }, { status: 401 });
     }

@@ -1,14 +1,14 @@
 .fox-ai-launcher { position: fixed; z-index: 70; inset: auto 1.35rem 1.35rem auto; min-height: 3.25rem; width: 3.25rem; padding: .45rem; display: inline-flex; align-items: center; gap: 0; overflow: hidden; border: 1px solid rgb(239 35 60 / .48); border-radius: 999px; background: #111; color: #fff; cursor: pointer; box-shadow: 0 1rem 2.8rem rgb(17 17 17 / .24), 0 0 1.6rem rgb(239 35 60 / .12); font: 750 .84rem/1 var(--font-sans, sans-serif); transition: width 220ms ease, gap 220ms ease, transform 160ms ease, box-shadow 160ms ease; }
 .fox-ai-launcher:hover, .fox-ai-launcher:focus-visible { width: 9.8rem; gap: .65rem; transform: translateY(-2px); box-shadow: 0 1.2rem 3rem rgb(17 17 17 / .3), 0 0 2rem rgb(239 35 60 / .18); }
 .fox-ai-launcher:focus-visible, .fox-ai-panel button:focus-visible, .fox-ai-panel a:focus-visible, .fox-ai-panel input:focus-visible { outline: 2px solid #ff5266; outline-offset: 3px; }
-.fox-ai-launcher > span { width: 2.35rem; height: 2.35rem; display: grid; place-items: center; border-radius: 50%; background: #ef233c; box-shadow: 0 .4rem 1rem rgb(239 35 60 / .32); }
+.fox-ai-launcher > span { width: 2.35rem; height: 2.35rem; display: grid; place-items: center; border: 1px solid rgb(255 255 255 / .72); border-radius: 50%; background: #fffaf7; box-shadow: 0 .4rem 1rem rgb(239 35 60 / .32), inset 0 0 0 1px rgb(17 17 17 / .04); }
 .fox-ai-launcher strong { max-width: 0; overflow: hidden; opacity: 0; white-space: nowrap; transition: max-width 220ms ease, opacity 140ms ease; }
 .fox-ai-launcher:hover strong, .fox-ai-launcher:focus-visible strong { max-width: 7rem; opacity: 1; transition-delay: 80ms; }
-.fox-ai-favicon { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: inherit; }
+.fox-ai-support-mark { width: 2.15rem; height: 2.15rem; display: block; object-fit: contain; filter: drop-shadow(0 .18rem .2rem rgb(23 19 19 / .18)); }
 .fox-ai-scrim { position: fixed; z-index: 78; inset: 0; border: 0; background: rgb(9 8 8 / .42); -webkit-backdrop-filter: blur(.7rem) saturate(80%); backdrop-filter: blur(.7rem) saturate(80%); animation: fox-ai-fade 160ms ease-out; }
-.fox-ai-panel { box-sizing: border-box; position: fixed; z-index: 79; inset: auto 1.25rem 1.25rem auto; width: min(27rem, calc(100vw - 2rem)); height: min(42rem, calc(100dvh - 2rem)); overflow: hidden; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; border: 1px solid #302b2c; border-radius: 1.35rem; background: #f8f6f3; color: #211f20; box-shadow: 0 2rem 6rem rgb(9 8 8 / .34); animation: fox-ai-enter 220ms cubic-bezier(.22, 1, .36, 1); }
+.fox-ai-panel { box-sizing: border-box; position: fixed; z-index: 79; inset: auto 1.25rem 1.25rem auto; width: min(27rem, calc(100vw - 2rem)); height: min(42rem, calc(100dvh - 2rem)); overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; border: 1px solid #302b2c; border-radius: 1.35rem; background: #f8f6f3; color: #211f20; box-shadow: 0 2rem 6rem rgb(9 8 8 / .34); animation: fox-ai-enter 220ms cubic-bezier(.22, 1, .36, 1); }
 .fox-ai-panel > header { min-height: 5rem; padding: .85rem 1rem; display: grid; grid-template-columns: 2.75rem minmax(0, 1fr) auto; align-items: center; gap: .7rem; background: radial-gradient(circle at 16% 0%, rgb(239 35 60 / .2), transparent 9rem), #111; color: #fff; }
-.fox-ai-avatar { width: 2.7rem; height: 2.7rem; display: grid; place-items: center; border-radius: .82rem; background: #ef233c; box-shadow: 0 .5rem 1.2rem rgb(239 35 60 / .3); }
+.fox-ai-avatar { width: 2.7rem; height: 2.7rem; display: grid; place-items: center; border: 1px solid rgb(255 255 255 / .78); border-radius: .82rem; background: #fffaf7; box-shadow: 0 .5rem 1.2rem rgb(239 35 60 / .28), inset 0 0 0 1px rgb(17 17 17 / .05); }
 .fox-ai-panel > header div { min-width: 0; display: grid; gap: .22rem; }
 .fox-ai-panel > header strong { font-size: 1rem; }
 .fox-ai-panel > header p { display: flex; align-items: center; gap: .4rem; color: #aaa3a0; font-size: .72rem; }
@@ -19,7 +19,8 @@
 .fox-ai-message { max-width: 88%; display: grid; grid-template-columns: 1.65rem minmax(0, 1fr); align-items: end; gap: .45rem; }
 .fox-ai-message.is-user { margin-inline-start: auto; grid-template-columns: minmax(0, 1fr) 1.65rem; }
 .fox-ai-message > span { width: 1.65rem; height: 1.65rem; display: grid; place-items: center; border-radius: .5rem; background: #e7e2de; color: #5f5955; }
-.fox-ai-message-favicon { width: 1.1rem; height: 1.1rem; border-radius: .3rem; }
+.fox-ai-message.is-assistant > span { border: 1px solid #eadfdb; background: #fffaf7; }
+.fox-ai-message-mark { width: 1.35rem; height: 1.35rem; display: block; object-fit: contain; filter: drop-shadow(0 .1rem .1rem rgb(23 19 19 / .14)); }
 .fox-ai-message.is-user > span { grid-column: 2; background: #ffd8dd; color: #b80d27; }
 .fox-ai-message > div { padding: .75rem .82rem; border: 1px solid #ded9d6; border-radius: .9rem .9rem .9rem .2rem; background: #fff; font-size: .84rem; line-height: 1.55; }
 .fox-ai-message.is-user > div { grid-row: 1; border-color: #201d1e; border-radius: .9rem .9rem .2rem .9rem; background: #171516; color: #fff; }

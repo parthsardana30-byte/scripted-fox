@@ -32,8 +32,13 @@ export type FoxAiMessage = { role: "user" | "assistant"; content: string };
 
 function configuration() {
   const { FOX_AI_API_URL: url, FOX_AI_API_KEY: apiKey, FOX_AI_MODEL: model } = serverEnvironment;
-  if (!url || !apiKey || !model) throw new FoxAiConfigurationError("Fox AI configuration is incomplete.");
-  return { url, apiKey, model };
+  if (url && apiKey && model) return { url, apiKey, model };
+  if (serverEnvironment.GEMINI_API_KEY && serverEnvironment.GEMINI_MODEL) return {
+    url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    apiKey: serverEnvironment.GEMINI_API_KEY,
+    model: serverEnvironment.GEMINI_MODEL,
+  };
+  throw new FoxAiConfigurationError("Fox AI configuration is incomplete.");
 }
 
 export async function askFoxAi(input: { messages: FoxAiMessage[]; page: string; feature?: string; locale?: string }) {
@@ -46,7 +51,8 @@ export async function askFoxAi(input: { messages: FoxAiMessage[]; page: string; 
       ...input.messages,
     ],
     temperature: 0.2,
-    max_completion_tokens: 900,
+    max_completion_tokens: 1800,
+    ...(new URL(url).hostname === "generativelanguage.googleapis.com" ? { reasoning_effort: "low" } : {}),
     response_format: { type: "json_object" },
   });
 

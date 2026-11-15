@@ -1,4 +1,9 @@
 import { notFound } from "next/navigation";
+import { CreditPacks } from "@/components/billing/credit-packs";
+import { PricingCatalogue } from "@/components/billing/pricing-catalogue";
+import "../landing-youtube.css";
+import "../pricing/pricing.css";
+import "../dashboard/upgrade/upgrade.css";
 import { AnalyticsView } from "@/components/dashboard/analytics-view";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { EditorWorkspace } from "@/components/dashboard/editor-workspace";
@@ -6,6 +11,7 @@ import { HomeDashboard } from "@/components/dashboard/home-dashboard";
 import { IdeasView } from "@/components/dashboard/ideas-view";
 import { NicheConfirmationDialog } from "@/components/dashboard/niche-confirmation-dialog";
 import { SettingsView } from "@/components/dashboard/settings-view";
+import { ThumbnailStudio } from "@/components/dashboard/thumbnail-studio";
 import { TrendingHub, type TrendSignal } from "@/components/dashboard/trending-hub";
 import type { ChannelAnalyticsState } from "@/lib/youtube/analytics";
 
@@ -43,9 +49,9 @@ export default async function UiPreviewPage({ searchParams }: { searchParams: Pr
   if (process.env.NODE_ENV === "production") notFound();
   const params = await searchParams;
   const requestedView = params.view ?? "overview";
-  const activeView = ["overview", "trending", "script", "topics", "analytics", "settings"].includes(requestedView) ? requestedView : "overview";
+  const activeView = ["overview", "trending", "script", "topics", "analytics", "settings", "thumbnails", "plans", "credits"].includes(requestedView) ? requestedView : "overview";
 
-  const content = activeView === "trending" ? <TrendingHub demoSignals={demoTrends} />
+  const content = activeView === "credits" ? <CreditPacks preview /> : activeView === "plans" ? <div className="dashboard-page dashboard-pricing youtube-landing pricing-shell"><div className="pricing-page"><header className="section-shell dashboard-pricing__header"><h1>A plan for your next <span>chapter.</span></h1><p className="dashboard-pricing__subtitle">Local preview · choose the plan that fits your workflow.</p></header><section className="section-shell pricing-section"><PricingCatalogue compact preview currentPlan="pro" /></section></div></div> : activeView === "thumbnails" ? <ThumbnailStudio preview /> : activeView === "trending" ? <TrendingHub demoSignals={demoTrends} />
     : activeView === "script" ? <EditorWorkspace canUseAdvancedExports canUseScriptWriter versionChangeLimit={10} returnPath="/ui-preview?view=script" initialPrompt={params.topic ?? ""} />
       : activeView === "topics" ? <IdeasView canUseScriptWriter demoMode />
         : activeView === "analytics" ? <AnalyticsView state={demoAnalytics} syncHref="/ui-preview?view=analytics" />
@@ -60,7 +66,7 @@ export default async function UiPreviewPage({ searchParams }: { searchParams: Pr
                 channelNiche: "Creator Education",
                 channelGoal: "growth",
                 connection: { active: true, title: "Parth Creates", status: "Status: connected" },
-                plan: { name: "Plus", description: "Trial access is active." },
+                plan: { name: "Basic", description: "Trial access is active." },
               }}
               channel={{ name: "Parth Creates", niche: "Creator Education" }}
               initialValues={{ language: "en", secondaryLanguage: "none", market: "IN", tone: "clear", videoLength: "7-10", openingStyle: "value-first" }}

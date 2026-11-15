@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   FileText,
-  House,
+  ImagePlus,
   Lightbulb,
   Menu,
   MessagesSquare,
@@ -20,12 +20,15 @@ import { DashboardGooeyNav } from "@/components/dashboard/dashboard-gooey-nav";
 import { ThemeToggle } from "@/components/landing/theme-toggle";
 import { getPlanDisplayName, type PlanCode } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
+import { CreditBadge } from "./credit-badge";
+import creditStyles from "./credit-badge.module.css";
 
 const primaryNavigation = [
   { href: "/dashboard/trending", label: "Trending Hub", icon: TrendingUp },
   { href: "/dashboard/editor", label: "Script Hub", icon: FileText },
   { href: "/dashboard/ideas", label: "Recommendations", icon: Lightbulb },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/thumbnails", label: "Thumbnail Studio", icon: ImagePlus },
 ];
 
 const utilityNavigation = [
@@ -44,6 +47,9 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const previewView = (href: string) => href === "/dashboard" ? "overview"
+    : href === "/dashboard/upgrade" ? "plans"
+    : href === "/dashboard/credits" ? "credits"
+    : href === "/dashboard/thumbnails" ? "thumbnails"
     : href === "/dashboard/trending" ? "trending"
       : href === "/dashboard/editor" ? "script"
         : href === "/dashboard/ideas" ? "topics"
@@ -69,7 +75,7 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
         <button className="dashboard-icon-button" type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
           <Menu size={20} aria-hidden="true" />
         </button>
-        <Link className="dashboard-wordmark" href={destination("/dashboard")} prefetch aria-label="Scripted Fox dashboard"><BrandLogo /></Link>
+        <Link className="dashboard-wordmark" href={destination("/dashboard")} prefetch aria-label="Scripted Fox dashboard" title="Home" aria-current={isActive("/dashboard", true) ? "page" : undefined}><BrandLogo /></Link>
         <div className="dashboard-mobile-actions">
           <span className="dashboard-mobile-theme"><ThemeToggle /></span>
           <Link className="dashboard-mobile-new" href={destination("/dashboard/editor")} prefetch aria-label="Open Script Hub"><Plus size={19} aria-hidden="true" /></Link>
@@ -92,7 +98,7 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
         }}
       >
         <div className="dashboard-sidebar__top">
-          <Link className="dashboard-wordmark" href={destination("/dashboard")} prefetch aria-label="Scripted Fox dashboard" onClick={() => setMobileOpen(false)}>
+          <Link className="dashboard-wordmark" href={destination("/dashboard")} prefetch aria-label="Scripted Fox dashboard" title="Home" aria-current={isActive("/dashboard", true) ? "page" : undefined} onClick={() => setMobileOpen(false)}>
             <BrandLogo labelClassName="dashboard-nav-label" />
           </Link>
           <button className="dashboard-sidebar__close" type="button" onClick={() => setMobileOpen(false)} aria-label="Close navigation">
@@ -100,14 +106,9 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
           </button>
         </div>
 
-        <Link className="dashboard-new-script" href={destination("/dashboard")} prefetch aria-label="Home" title="Home" aria-current={isActive("/dashboard", true) ? "page" : undefined} onClick={() => setMobileOpen(false)}>
-          <House size={18} aria-hidden="true" />
-          <span className="dashboard-nav-label">Home</span>
-        </Link>
-
         {previewMode && <div className="dashboard-demo-session" title="Local preview account">
           <span aria-hidden="true" />
-          <div className="dashboard-nav-label"><strong>Demo session</strong><small>Parth · Plus</small></div>
+          <div className="dashboard-nav-label"><strong>Demo session</strong><small>Parth · Basic</small></div>
         </div>}
 
         <DashboardGooeyNav
@@ -138,8 +139,9 @@ export function DashboardShell({ children, previewMode = false, activePreview = 
       </aside>
 
       <main className={cn("dashboard-main", usesScrollableWorkspace && "dashboard-main--scroll-frame", isHelpPage && "dashboard-main--support")} id="dashboard-content" tabIndex={-1}>
-        <div className="dashboard-global-tools" aria-label="Dashboard tools">
+        <div className={`dashboard-global-tools ${creditStyles.tools}`} aria-label="Dashboard tools">
           <div className="dashboard-global-controls">
+            <CreditBadge preview={previewMode} />
             <Link className={`dashboard-plan-badge dashboard-plan-badge--${planUi.key}`} href={destination("/dashboard/upgrade")} aria-label={`Current plan: ${planUi.label}`}>
               <strong>{planUi.label}</strong>
             </Link>

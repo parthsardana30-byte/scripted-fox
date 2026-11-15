@@ -68,9 +68,10 @@ export function createPayuCheckoutFields(input: {
   firstName: string;
   email: string;
   phone: string;
+  creditProductInfo?: string;
 }) {
-  const productInfo = "Scripted Fox " + getPlanDisplayName(input.plan) + " "
-    + (input.billingPeriod === "annual" ? "Annual" : "Monthly");
+  const productInfo = input.creditProductInfo ?? ("Scripted Fox " + getPlanDisplayName(input.plan) + " "
+    + (input.billingPeriod === "annual" ? "Annual" : "Monthly"));
   const callbackUrl = new URL("/api/billing/payu/callback", publicEnvironment.NEXT_PUBLIC_SITE_URL).toString();
   const webhookUrl = new URL("/api/billing/payu/webhook", publicEnvironment.NEXT_PUBLIC_SITE_URL).toString();
   const fields = {

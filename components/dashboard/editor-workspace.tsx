@@ -17,7 +17,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { z } from "zod";
 
 import {
   canGenerateFromEmptyScript,
@@ -27,31 +26,14 @@ import {
   type ScriptDraft,
 } from "@/lib/ai/types";
 import { pricingHref } from "@/lib/billing/plans";
+import type { ScriptDocument, StoredScriptVersion } from "@/lib/projects/types";
 
-type SaveState = "Saved" | "Saving…";
+type SaveState = "Saved" | "Saving…" | "Save failed";
 type ChatMessage = { id: string; role: "user" | "assistant"; content: string };
 type VersionOrigin = "initial" | "ai" | "restore";
 
 class ScriptWriterAccessRequiredError extends Error {}
-type ScriptVersion = {
-  number: number;
-  label: string;
-  origin: VersionOrigin;
-  createdAt: string;
-  snapshot: { title: string; author: string; draft: ScriptDraft };
-};
-
-const versionHistorySchema = z.array(z.object({
-  number: z.number().int().positive(),
-  label: z.string().min(1).max(120),
-  origin: z.enum(["initial", "ai", "restore"]),
-  createdAt: z.string(),
-  snapshot: z.object({
-    title: z.string().max(200),
-    author: z.string().max(100),
-    draft: scriptDraftSchema,
-  }),
-})).min(1);
+type ScriptVersion = StoredScriptVersion;
 
 function emptyDraft(title: string): ScriptDraft {
   return {
@@ -68,6 +50,13 @@ function initialVersion(title: string): ScriptVersion {
     origin: "initial",
     createdAt: new Date().toISOString(),
     snapshot: { title, author: "", draft },
+  };
+}
+
+function initialVersionForDocument(document: ScriptDocument): ScriptVersion {
+  return {
+    ...initialVersion(document.title),
+    snapshot: document,
   };
 }
 
@@ -107,6 +96,10 @@ function ScriptSection({ id, label, body, onInput }: { id: string; label: string
 export function EditorWorkspace({
   projectTitle = "Untitled script",
   projectKey = "untitled",
+  persistedProjectId = null,
+  initialDocument,
+  initialVersions = [],
+  persistProjects = false,
   loadSessionDraft = false,
   canUseAdvancedExports = false,
   canUseScriptWriter = true,
@@ -118,6 +111,10 @@ export function EditorWorkspace({
 }: {
   projectTitle?: string;
   projectKey?: string;
+  persistedProjectId?: string | null;
+  initialDocument?: ScriptDocument;
+  initialVersions?: StoredScriptVersion[];
+  persistProjects?: boolean;
   loadSessionDraft?: boolean;
   canUseAdvancedExports?: boolean;
   canUseScriptWriter?: boolean;
@@ -128,9 +125,11 @@ export function EditorWorkspace({
   autoGenerateInitialPrompt?: boolean;
 }) {
   const router = useRouter();
-  const [title, setTitle] = useState(projectTitle);
-  const [author, setAuthor] = useState("");
-  const [draft, setDraft] = useState<ScriptDraft>(() => emptyDraft(projectTitle));
+  void projectKey;
+  const startingDocument = initialDocument ?? { title: projectTitle, author: "", draft: emptyDraft(projectTitle) };
+  const [title, setTitle] = useState(startingDocument.title);
+  const [author, setAuthor] = useState(startingDocument.author);
+  const [draft, setDraft] = useState<ScriptDraft>(startingDocument.draft);
   const [aiOpen, setAiOpen] = useState(initialAiOpen);
   const [exportOpen, setExportOpen] = useState(false);
   const [pdfExportBusy, setPdfExportBusy] = useState(false);
@@ -145,22 +144,28 @@ export function EditorWorkspace({
   const [aiStatus, setAiStatus] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [versions, setVersions] = useState<ScriptVersion[]>(() => [initialVersion(projectTitle)]);
+  const initialHistory = initialVersions.length ? initialVersions : [initialVersionForDocument(startingDocument)];
+  const [versions, setVersions] = useState<ScriptVersion[]>(() => initialHistory);
   const saveTimer = useRef<number | undefined>(undefined);
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
+  const saveSequence = useRef(0);
+  const projectIdRef = useRef<string | null>(persistedProjectId);
+  const projectRouteSynced = useRef(Boolean(persistedProjectId));
+  const editorStateRef = useRef({ title: startingDocument.title, author: startingDocument.author, draft: startingDocument.draft, versions: initialHistory });
   const editRevision = useRef(0);
   const messageSequence = useRef(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const versionMenuRef = useRef<HTMLDivElement>(null);
-  const historyHydrated = useRef(false);
   const initialGenerationStarted = useRef(false);
-  const historyStorageKey = 
-`next-video:versions:${encodeURIComponent(projectKey)}`;
 
   const nextMessageId = () => `message-${messageSequence.current++}`;
 
   useEffect(() => {
+    editorStateRef.current = { title, author, draft, versions };
+  }, [author, draft, title, versions]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
-      let restoredHistory: ScriptVersion[] | null = null;
       if (loadSessionDraft) {
         const serializedDraft = window.sessionStorage.getItem("next-video:draft");
         if (serializedDraft) {
@@ -168,43 +173,33 @@ export function EditorWorkspace({
             const parsedDraft = scriptDraftSchema.safeParse(JSON.parse(serializedDraft));
             if (parsedDraft.success) {
               const first = initialVersion(parsedDraft.data.title);
-              restoredHistory = [{ ...first, snapshot: { ...first.snapshot, draft: parsedDraft.data, title: parsedDraft.data.title } }];
+              const restoredHistory = [{ ...first, snapshot: { ...first.snapshot, draft: parsedDraft.data, title: parsedDraft.data.title } }];
+              const current = restoredHistory[0];
+              setVersions(restoredHistory);
+              setTitle(current.snapshot.title);
+              setAuthor(current.snapshot.author);
+              setDraft(current.snapshot.draft);
               window.sessionStorage.removeItem("next-video:draft");
             }
           } catch {
-            restoredHistory = null;
+            // Ignore an invalid legacy handoff and keep the blank draft available.
           }
         }
       }
-      if (!restoredHistory) {
-        const serializedHistory = window.sessionStorage.getItem(historyStorageKey);
-        if (serializedHistory) {
-          try {
-            const parsedHistory = versionHistorySchema.safeParse(JSON.parse(serializedHistory));
-            if (parsedHistory.success) restoredHistory = parsedHistory.data.slice(-(versionChangeLimit + 1));
-          } catch {
-            restoredHistory = null;
-          }
-        }
-      }
-      if (restoredHistory) {
-        const current = restoredHistory.at(-1)!;
-        setVersions(restoredHistory);
-        setTitle(current.snapshot.title);
-        setAuthor(current.snapshot.author);
-        setDraft(current.snapshot.draft);
-      }
-      historyHydrated.current = true;
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [historyStorageKey, loadSessionDraft, versionChangeLimit]);
-
-  useEffect(() => {
-    if (!historyHydrated.current) return;
-    window.sessionStorage.setItem(historyStorageKey, JSON.stringify(versions));
-  }, [historyStorageKey, versions]);
+  }, [loadSessionDraft]);
 
   useEffect(() => () => window.clearTimeout(saveTimer.current), []);
+  useEffect(() => {
+    if (!persistProjects || saveState === "Saved") return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [persistProjects, saveState]);
   useEffect(() => {
     if (!initialPrompt) return;
     void fetch("/api/landing-intent", { method: "DELETE", keepalive: true });
@@ -229,9 +224,43 @@ export function EditorWorkspace({
   }, [versionsOpen]);
 
   const scheduleSave = () => {
+    const sequence = ++saveSequence.current;
     setSaveState("Saving…");
     window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => setSaveState("Saved"), 700);
+    saveTimer.current = window.setTimeout(async () => {
+      if (!persistProjects) {
+        setSaveState("Saved");
+        return;
+      }
+      const current = structuredClone(editorStateRef.current);
+      saveQueue.current = saveQueue.current.catch(() => undefined).then(async () => {
+        try {
+        const response = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: projectIdRef.current,
+            document: { title: current.title, author: current.author, draft: current.draft },
+            versions: current.versions,
+          }),
+        });
+        const result = await response.json() as { projectId?: string; error?: string };
+        if (!response.ok || !result.projectId) throw new Error(result.error || "Save failed");
+        projectIdRef.current = result.projectId;
+        if (saveSequence.current === sequence) {
+          setSaveState("Saved");
+          // A first save can finish after newer edits. Do not navigate away
+          // (and clear their debounce timer) until the latest draft is saved.
+          if (!projectRouteSynced.current) {
+            projectRouteSynced.current = true;
+            router.replace(`/dashboard/editor/${result.projectId}`);
+          }
+        }
+        } catch {
+          if (saveSequence.current === sequence) setSaveState("Save failed");
+        }
+      });
+    }, 700);
   };
 
   const markUserChanged = () => {
@@ -262,10 +291,10 @@ export function EditorWorkspace({
     const message = versionChangeLimit >= 20
       ? "This script has used all 20 version changes. Restore or edit the current version manually to continue."
       : versionChangeLimit >= 10
-        ? "This script has used all 10 Plus version changes. Pro keeps up to 20 changes per script."
+        ? "This script has used all 10 Pro version changes. Gold keeps up to 20 changes per script."
         : versionChangeLimit > 0
           ? `This script has used the ${versionChangeLimit} version change available on this plan.`
-        : "AI script writing is available on Plus and Pro.";
+        : "AI script writing is available on Pro and Gold.";
     addMessage("assistant", message);
   };
 
@@ -515,7 +544,7 @@ export function EditorWorkspace({
                   </button>;
                 })}
               </div>
-              {versionLimitReached && <Link href={scriptWriterPricingHref}>{versionChangeLimit === 0 ? "View Plus and Pro" : versionChangeLimit < 20 ? "Get 20 changes with Pro" : "View plan details"}</Link>}
+              {versionLimitReached && <Link href={scriptWriterPricingHref}>{versionChangeLimit === 0 ? "View Pro and Gold" : versionChangeLimit < 20 ? "Get 20 changes with Gold" : "View plan details"}</Link>}
             </div>}
           </div>
         </div>
@@ -531,11 +560,9 @@ export function EditorWorkspace({
                   {pdfExportBusy ? <><RefreshCw className="spin" size={14} aria-hidden="true" /> Designing PDF</> : "PDF"}
                   <span>{hasScript ? ".pdf" : "Add script text"}</span>
                 </button>
-                <button type="button" role="menuitem" disabled>Word document <span>Coming soon</span></button>
                 {pdfExportError && <p className="editor-export__error" role="status">{pdfExportError}</p>}
               </> : <>
                 <Link role="menuitem" href="/dashboard/upgrade?feature=advanced_exports">PDF <span>Upgrade</span></Link>
-                <Link role="menuitem" href="/dashboard/upgrade?feature=advanced_exports">Word document <span>Upgrade</span></Link>
               </>}
               <button type="button" role="menuitem" onClick={() => navigator.clipboard?.writeText(scriptText)}><Copy size={14} aria-hidden="true" /> Copy all</button>
               <button type="button" role="menuitem" onClick={() => { setExportOpen(false); setTeleprompter(true); }}><Play size={14} aria-hidden="true" /> Teleprompter view</button>
@@ -548,7 +575,7 @@ export function EditorWorkspace({
       <div className="editor-stage">
         <div className="editor-canvas-wrap">
           <article className="script-document" aria-label="Script document">
-            <header><p>Working draft</p><label className="sr-only" htmlFor="script-title">Script title</label><input className="script-title-input" id="script-title" value={title} onChange={(event) => { const nextTitle = event.target.value; const nextDraft = { ...draft, title: nextTitle }; setTitle(nextTitle); setDraft(nextDraft); syncCurrentVersion(nextDraft, nextTitle); markUserChanged(); }} placeholder="Untitled script" /><div className="script-author-field"><span aria-hidden="true">By</span><label className="sr-only" htmlFor="script-author">Author name</label><input id="script-author" value={author} onChange={(event) => { const nextAuthor = event.target.value; setAuthor(nextAuthor); syncCurrentVersion(draft, title, nextAuthor); scheduleSave(); }} placeholder="Add author name" maxLength={100} autoComplete="name" /></div><span>{wordCount === 0 ? "Start writing or ask the assistant for a draft" : "AI-assisted draft · review before recording"}</span></header>
+            <header><p>Working draft</p><label className="sr-only" htmlFor="script-title">Script title</label><input className="script-title-input" id="script-title" value={title} maxLength={160} onChange={(event) => { const nextTitle = event.target.value; const nextDraft = { ...draft, title: nextTitle }; setTitle(nextTitle); setDraft(nextDraft); syncCurrentVersion(nextDraft, nextTitle); markUserChanged(); }} placeholder="Untitled script" /><div className="script-author-field"><span aria-hidden="true">By</span><label className="sr-only" htmlFor="script-author">Author name</label><input id="script-author" value={author} onChange={(event) => { const nextAuthor = event.target.value; setAuthor(nextAuthor); syncCurrentVersion(draft, title, nextAuthor); scheduleSave(); }} placeholder="Add author name" maxLength={100} autoComplete="name" /></div><span>{wordCount === 0 ? "Start writing or ask the assistant for a draft" : "AI-assisted draft · review before recording"}</span></header>
             {draft.sections.map((section, index) => <ScriptSection id={`script-section-${index}`} key={`${section.label}-${index}`} label={section.label} body={section.body} onInput={(body) => { const nextDraft = { ...draft, sections: draft.sections.map((item, itemIndex) => itemIndex === index ? { ...item, body } : item) }; setDraft(nextDraft); syncCurrentVersion(nextDraft); markUserChanged(); }} />)}
           </article>
         </div>

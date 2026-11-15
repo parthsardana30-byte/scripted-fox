@@ -57,9 +57,10 @@ This project is built using modern web technologies to ensure a high-performance
    one shared development database, coordinate migrations and securely share the
    matching environment credentials outside Git.
 
-   Email/password signup also requires `RESEND_API_KEY` and a verified
-   `AUTH_EMAIL_FROM` sender. Without them, Google signup remains available but
-   email signup is disabled instead of creating an unverified session.
+   Email/password signup requires `AUTH_EMAIL_FROM` plus either `RESEND_API_KEY`
+   or direct SMTP credentials (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and
+   `SMTP_PASSWORD`). Without them, Google signup remains available but email
+   signup is disabled instead of creating an unverified session.
 
 4. Create the Better Auth and application tables:
 

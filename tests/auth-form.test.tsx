@@ -14,4 +14,8 @@ describe("AuthForm OAuth errors", () => {
       "Google sign-in was not completed. Please try again.",
     );
   });
+
+  it("explains an expired Google OAuth state", () => {
+    expect(oauthErrorMessage("state_mismatch")).toContain("expired");
+  });
 });

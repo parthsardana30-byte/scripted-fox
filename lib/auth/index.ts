@@ -8,13 +8,15 @@ import { databasePool } from "@/lib/db/pool";
 import { publicEnvironment } from "@/lib/env/public";
 import { serverEnvironment } from "@/lib/env/server";
 import { revokeConnectedYouTubeAccess } from "@/lib/auth/delete-account";
-import { sendAccountDeletionEmail, sendPasswordResetEmail, sendVerificationCodeEmail } from "@/lib/email/verification-email";
+import { isVerificationEmailConfigured, sendAccountDeletionEmail, sendPasswordResetEmail, sendVerificationCodeEmail } from "@/lib/email/verification-email";
+import { googleSignInCallbackUrl, googleSignInCredentials } from "@/lib/auth/google-config";
 
-const google = serverEnvironment.GOOGLE_AUTH_CLIENT_ID && serverEnvironment.GOOGLE_AUTH_CLIENT_SECRET
+const google = googleSignInCredentials
   ? {
       google: {
-        clientId: serverEnvironment.GOOGLE_AUTH_CLIENT_ID,
-        clientSecret: serverEnvironment.GOOGLE_AUTH_CLIENT_SECRET,
+        clientId: googleSignInCredentials.clientId,
+        clientSecret: googleSignInCredentials.clientSecret,
+        redirectURI: googleSignInCallbackUrl,
       },
     }
   : undefined;
@@ -22,6 +24,7 @@ const google = serverEnvironment.GOOGLE_AUTH_CLIENT_ID && serverEnvironment.GOOG
 export const auth = betterAuth({
   appName: "Scripted Fox",
   baseURL: publicEnvironment.NEXT_PUBLIC_SITE_URL,
+  trustedOrigins: [new URL(publicEnvironment.NEXT_PUBLIC_SITE_URL).origin],
   secret: serverEnvironment.BETTER_AUTH_SECRET,
   database: databasePool,
   emailAndPassword: {
@@ -54,7 +57,7 @@ export const auth = betterAuth({
     deleteUser: {
       enabled: true,
       beforeDelete: async (user) => revokeConnectedYouTubeAccess(user.id),
-      ...(serverEnvironment.RESEND_API_KEY && serverEnvironment.AUTH_EMAIL_FROM
+      ...(isVerificationEmailConfigured()
         ? {
             sendDeleteAccountVerification: async ({ user, url }: { user: { email: string }; url: string }) => {
               await sendAccountDeletionEmail(user.email, url);
@@ -78,8 +81,8 @@ export const auth = betterAuth({
             [user.id],
           );
           await databasePool.query(
-            `INSERT INTO billing_accounts (user_id, plan_code, status, trial_ends_at)
-             VALUES ($1, 'pro', 'trialing', now() + interval '7 days')
+            `INSERT INTO billing_accounts (user_id, plan_code, status, trial_ends_at, credits_allowance, credits_remaining)
+             VALUES ($1, 'pro', 'trialing', now() + interval '7 days', 500, 500)
              ON CONFLICT (user_id) DO NOTHING`,
             [user.id],
           );

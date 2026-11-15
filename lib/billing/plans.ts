@@ -16,8 +16,6 @@ export const billingFeatures = [
   "channel_aware_ideas",
   "advanced_exports",
   "advanced_analytics",
-  "priority_generation",
-  "shared_workspace",
 ] as const;
 export type BillingFeature = (typeof billingFeatures)[number];
 
@@ -44,6 +42,18 @@ export const scriptVersionChangeLimits: Record<PlanCode, number> = {
   elite: 20,
 };
 
+export const planCreditAllowances: Record<PlanCode, number> = {
+  free: 0,
+  pro: 3_000,
+  elite: 8_000,
+};
+
+export const dailyIdeaLimits: Record<PlanCode, number> = {
+  free: 0,
+  pro: 15,
+  elite: 30,
+};
+
 export const plans: PlanDefinition[] = [
   {
     code: "free",
@@ -56,10 +66,7 @@ export const plans: PlanDefinition[] = [
       { label: "500 Fox Credits for the trial", included: true },
       { label: "AI script generation and Fox AI editing", included: true },
       { label: "Recommendations based on your channel and niche", included: true },
-      { label: "Deep Research and source-backed scripts", included: false },
-      { label: "Standard Publishing Kit generation", included: true },
-      { label: "Limited export formats", included: true },
-      { label: "Additional credit recharges", included: false },
+      { label: "Text, Markdown, and subtitle exports", included: true },
     ],
   },
   {
@@ -70,12 +77,11 @@ export const plans: PlanDefinition[] = [
     description: "For creators who publish consistently and want a complete writing workflow.",
     features: [
       { label: "15 personalized video ideas every day", included: true },
-      { label: "3,000 monthly Fox Credits with optional recharges", included: true },
+      { label: "3,000 Fox Credits per paid month", included: true },
       { label: "AI script generation and Fox AI editing", included: true },
       { label: "Recommendations based on channel analytics and niche", included: true },
-      { label: "Deep Research and source-backed scripts", included: false },
-      { label: "30-day script version history", included: true },
-      { label: "Limited export formats", included: true },
+      { label: "10 saved AI changes per script", included: true },
+      { label: "PDF, text, Markdown, and subtitle exports", included: true },
     ],
     highlighted: true,
   },
@@ -84,24 +90,15 @@ export const plans: PlanDefinition[] = [
     name: planDisplayNames.elite,
     monthlyPriceInr: 150,
     annualMonthlyPriceInr: 120,
-    description: "For serious creators who need deeper research, more content and publish-ready assets.",
+    description: "For serious creators who need deeper analytics, more ideas, and more AI capacity.",
     features: [
       { label: "30 personalized video ideas every day", included: true },
-      { label: "8,000 monthly Fox Credits with optional recharges", included: true },
-      { label: "Advanced AI script generation and Fox AI editing", included: true },
-      { label: "Advanced channel voice and audience personalization", included: true },
-      { label: "Deep Research with sources and research notes", included: true },
-      { label: "Advanced Publishing Kit for every project", included: true },
-      { label: "20 title variations across different angles", included: true },
-      { label: "5 thumbnail concepts", included: true },
-      { label: "AI-generated thumbnail renders", included: true },
-      { label: "2 optimized YouTube descriptions", included: true },
-      { label: "Chapters and timestamps", included: true },
-      { label: "Hashtags and keywords", included: true },
-      { label: "Pinned comment", included: true },
-      { label: "Community post", included: true },
-      { label: "Unlimited script version history", included: true },
-      { label: "All export formats and priority generation", included: true },
+      { label: "8,000 Fox Credits per paid month", included: true },
+      { label: "AI script generation and Fox AI editing", included: true },
+      { label: "Channel voice and audience personalization", included: true },
+      { label: "Advanced channel analytics", included: true },
+      { label: "20 saved AI changes per script", included: true },
+      { label: "PDF, text, Markdown, and subtitle exports", included: true },
     ],
   },
 ];
@@ -111,8 +108,6 @@ const featureMinimumPlan: Record<BillingFeature, PlanCode> = {
   channel_aware_ideas: "pro",
   advanced_exports: "pro",
   advanced_analytics: "elite",
-  priority_generation: "elite",
-  shared_workspace: "elite",
 };
 
 const planRank: Record<PlanCode, number> = { free: 0, pro: 1, elite: 2 };
@@ -149,10 +144,8 @@ export function pricingHref(feature?: BillingFeature, returnTo?: string, plan?: 
 export const featureLabels: Record<BillingFeature, string> = {
   ai_script_writer: "AI script writer",
   channel_aware_ideas: "Channel-aware recommendations",
-  advanced_exports: "PDF and Word export",
+  advanced_exports: "PDF export",
   advanced_analytics: "Advanced channel analytics",
-  priority_generation: "Priority AI generation",
-  shared_workspace: "Shared workspace controls",
 };
 
 export function getScriptVersionChangeLimit(plan: PlanCode) {

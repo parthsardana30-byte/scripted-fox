@@ -17,11 +17,37 @@ export type AuthActionState = {
 };
 
 export type EmailVerificationActionState = {
-  status: "idle" | "error";
+  status: "idle" | "error" | "success";
   message?: string;
   email: string;
   next?: string;
 };
+
+export async function resendSignUpOTP(
+  state: EmailVerificationActionState,
+  formData: FormData,
+): Promise<EmailVerificationActionState> {
+  const parsed = z.object({ email: emailSchema, next: nextPathSchema }).safeParse({
+    email: formData.get("email"),
+    next: formData.get("next") || undefined,
+  });
+
+  if (!parsed.success) return { ...state, status: "error", message: "Enter a valid email address." };
+  if (!isVerificationEmailConfigured()) {
+    return { email: parsed.data.email, next: parsed.data.next, status: "error", message: "Email verification is temporarily unavailable." };
+  }
+
+  try {
+    await auth.api.sendVerificationOTP({
+      body: { email: parsed.data.email, type: "email-verification" },
+      headers: await headers(),
+    });
+  } catch {
+    return { email: parsed.data.email, next: parsed.data.next, status: "error", message: "Please wait a minute before requesting another code." };
+  }
+
+  return { email: parsed.data.email, next: parsed.data.next, status: "success", message: "A new 6-digit code has been sent." };
+}
 
 const emailSchema = z.email("Enter a valid email address").max(254).transform((value) => value.trim().toLowerCase());
 const passwordSchema = z.string().min(8, "Use at least 8 characters").max(72, "Use no more than 72 characters");

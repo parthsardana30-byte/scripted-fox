@@ -11,7 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         "/dashboard/",
         "/connect",
         "/create",
-        "/video-plan",
         "/ui-preview",
         "/sign-in",
         "/sign-up",

@@ -7,6 +7,7 @@ import { requireAuthenticatedUser, AuthenticationRequiredError } from "@/lib/aut
 import { getBillingAccess, hasBillingFeature } from "@/lib/billing/access";
 import { createScriptPdf } from "@/lib/export/script-pdf";
 import { isTrustedSameOriginRequest } from "@/lib/security/origin";
+import { readJsonBody, RequestBodyError } from "@/lib/security/request-body";
 
 export const runtime = "nodejs";
 
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     if (!hasBillingFeature(access, "advanced_exports")) {
       return Response.json({ error: "PDF export is not included in your current plan." }, { status: 403 });
     }
-    const parsed = requestSchema.safeParse(await request.json());
+    const parsed = requestSchema.safeParse(await readJsonBody(request, 160000));
     if (!parsed.success) return Response.json({ error: "Add a title and script content before exporting." }, { status: 400 });
     const assets = await loadPdfAssets();
     const bytes = await createScriptPdf({ ...parsed.data, ...assets });
@@ -72,6 +73,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (error instanceof RequestBodyError) return Response.json({ error: error.message }, { status: error.status });
     if (error instanceof AuthenticationRequiredError) return Response.json({ error: "Sign in to export this script." }, { status: 401 });
     console.error("[PDF export] Generation failed", error instanceof Error ? { name: error.name, message: error.message } : { name: "UnknownError" });
     return Response.json({ error: "The PDF could not be generated. Please try again." }, { status: 500 });

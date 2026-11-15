@@ -10,6 +10,9 @@ export async function GET() {
     const access = await getBillingAccess(user.id);
     return Response.json({
       plan: access.plan,
+      displayPlan: access.displayPlan,
+      creditsAllowance: access.creditsAllowance,
+      creditsRemaining: access.creditsRemaining,
       status: access.status,
       trialEndsAt: access.trialEndsAt,
       currentPeriodEnd: access.currentPeriodEnd,

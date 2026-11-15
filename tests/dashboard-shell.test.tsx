@@ -12,6 +12,45 @@ afterEach(() => {
 });
 
 describe("DashboardShell", () => {
+  it("uses the brand logos as Home links without a separate Home button", () => {
+    routeState.pathname = "/dashboard";
+    const { container } = render(<DashboardShell><h1>Overview</h1></DashboardShell>);
+    expect(screen.queryByRole("link", { name: /^Home$/ })).not.toBeInTheDocument();
+    expect(container.querySelector(".dashboard-new-script")).toBeNull();
+    for (const logo of screen.getAllByRole("link", { name: "Scripted Fox dashboard" })) {
+      expect(logo).toHaveAttribute("href", "/dashboard");
+      expect(logo).toHaveAttribute("aria-current", "page");
+    }
+  });
+  it("closes mobile navigation when its logo is clicked", async () => {
+    const { container } = render(<DashboardShell><h1>Trending</h1></DashboardShell>);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Open navigation" }));
+    expect(container.querySelector("aside")).toHaveClass("dashboard-sidebar--open");
+    const logo = container.querySelector("aside .dashboard-wordmark")!;
+    logo.addEventListener("click", (event) => event.preventDefault());
+    await user.click(logo);
+    expect(container.querySelector("aside")).not.toHaveClass("dashboard-sidebar--open");
+  });
+  it("routes preview plan and credits badges to their separate pages", () => {
+    render(<DashboardShell previewMode plan="pro"><h1>Preview</h1></DashboardShell>);
+    expect(screen.getByRole("link", { name: "Current plan: Pro" })).toHaveAttribute("href", "/ui-preview?view=plans");
+    expect(screen.getByRole("link", { name: "Preview: 500 Fox Credits" })).toHaveAttribute("href", "/ui-preview?view=credits");
+  });
+  it("does not highlight Trending Hub when Home is selected", () => {
+    routeState.pathname = "/dashboard";
+    const { container } = render(<DashboardShell><h1>Home</h1></DashboardShell>);
+    expect(container.querySelector(".dashboard-gooey-effect")).toHaveStyle({ opacity: "0" });
+    expect(screen.getByRole("link", { name: "Trending Hub" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("uses a persistent liquid selection on the current primary route", () => {
+    const { container } = render(<DashboardShell><h1>Trending</h1></DashboardShell>);
+    expect(container.querySelector(".dashboard-gooey-effect")).toHaveStyle({ opacity: "1" });
+    expect(container.querySelector(".dashboard-gooey-effect")?.getAttribute("style")).toMatch(/url\(["']?#/);
+    expect(container.querySelector("feColorMatrix")).toBeInTheDocument();
+  });
+
   it("marks the current page and reveals the desktop navigation on hover", async () => {
     const user = userEvent.setup();
     const { container } = render(<DashboardShell plan="pro"><h1>Ideas</h1></DashboardShell>);

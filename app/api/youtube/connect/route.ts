@@ -2,15 +2,16 @@ import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/lib/auth/session";
+import { publicEnvironment } from "@/lib/env/public";
 import { createYouTubeAuthorizationUrl } from "@/lib/youtube/google";
 
 export const runtime = "nodejs";
 
 const OAUTH_COOKIE_MAX_AGE = 10 * 60;
 
-export async function GET(request: Request) {
+export async function GET() {
   const user = await getAuthenticatedUser();
-  if (!user) return NextResponse.redirect(new URL("/sign-in?next=/connect", request.url));
+  if (!user) return NextResponse.redirect(new URL("/sign-in?next=/connect", publicEnvironment.NEXT_PUBLIC_SITE_URL));
 
   try {
     const state = randomBytes(32).toString("base64url");
@@ -30,6 +31,6 @@ export async function GET(request: Request) {
     response.cookies.set("youtube_oauth_verifier", codeVerifier, cookieOptions);
     return response;
   } catch {
-    return NextResponse.redirect(new URL("/connect?error=not_configured", request.url));
+    return NextResponse.redirect(new URL("/connect?error=not_configured", publicEnvironment.NEXT_PUBLIC_SITE_URL));
   }
 }

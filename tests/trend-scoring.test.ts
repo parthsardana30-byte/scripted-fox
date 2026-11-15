@@ -3,6 +3,19 @@ import { describe, expect, it } from "vitest";
 import { relevanceScore, scoreTrendVideos, selectDiverseTrends } from "@/lib/youtube/trend-scoring";
 
 describe("YouTube trend scoring", () => {
+  it("keeps the rising/breakout mix, deduplicates titles and does not mutate input", () => {
+    const videos = [
+      { id: "r1", title: "Orchid garden tour", channelTitle: "A", score: 10, outlook: "rising-now" as const },
+      { id: "duplicate-title", title: "Orchid garden tour!", channelTitle: "B", score: 9, outlook: "rising-now" as const },
+      { id: "r2", title: "Volcano lava expedition", channelTitle: "C", score: 8, outlook: "rising-now" as const },
+      { id: "b1", title: "Mechanical keyboard repair", channelTitle: "D", score: 90, outlook: "breakout-candidate" as const },
+      { id: "s1", title: "Sourdough baking technique", channelTitle: "E", score: 100, outlook: "steady" as const },
+    ];
+    const original = structuredClone(videos);
+    expect(selectDiverseTrends(videos, 4).map(video => video.id)).toEqual(["r1", "r2", "b1", "s1"]);
+    expect(videos).toEqual(original);
+    expect(selectDiverseTrends(videos, 0)).toEqual([]);
+  });
   it("ranks recent high-velocity videos above older slow videos", () => {
     const now = new Date("2026-08-25T12:00:00.000Z");
     const ranked = scoreTrendVideos([

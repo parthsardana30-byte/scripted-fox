@@ -22,6 +22,7 @@
   --color-on-graphite: oklch(94% 0.01 62);
   --color-on-graphite-muted: oklch(76% 0.012 62);
 
+  --font-sans: "Manrope Variable", "Segoe UI", Arial, ui-sans-serif, sans-serif;
   --font-display: "Segoe UI", Arial, ui-sans-serif, sans-serif;
   --font-body: "Segoe UI", Arial, ui-sans-serif, sans-serif;
   --font-wordmark: "Segoe UI", Arial, ui-sans-serif, sans-serif;

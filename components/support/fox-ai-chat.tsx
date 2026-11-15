@@ -1,10 +1,11 @@
 "use client";
 
-import { ExternalLink, Mail, RotateCcw, Send, Sparkles, UserRound, X } from "lucide-react";
+import { ExternalLink, Mail, RotateCcw, Send, UserRound, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
 import { gmailComposeUrl, mailtoUrl, type EmailEscalation } from "@/lib/support/email-links";
+import { SupportAiMark } from "@/components/support/support-ai-mark";
 
 type ChatMessage = { id: string; role: "user" | "assistant"; content: string; escalation?: EmailEscalation };
 type ChatResponse = { message?: string; escalation?: EmailEscalation; error?: string };
@@ -12,12 +13,8 @@ type ChatResponse = { message?: string; escalation?: EmailEscalation; error?: st
 const initialMessage: ChatMessage = {
   id: "fox-ai-welcome",
   role: "assistant",
-  content: "Hi, I’m Fox AI. How can i help?",
+  content: "Hi, I’m Fox AI. How can I help?",
 };
-
-function FoxFavicon({ className }: { className?: string }) {
-  return <img className={className} src="/icon.svg" alt="" aria-hidden="true" />;
-}
 
 function featureForPath(pathname: string) {
   if (pathname === "/") return "home";
@@ -127,20 +124,19 @@ export function FoxAiChat() {
 
   return <>
     <button ref={launcherRef} className="fox-ai-launcher" type="button" onClick={() => setOpen(true)} aria-label="Open Fox AI support" aria-expanded={open}>
-      <span><FoxFavicon className="fox-ai-favicon" /></span><strong>Ask Fox AI</strong>
+      <span><SupportAiMark className="fox-ai-support-mark" /></span><strong>Ask Fox AI</strong>
     </button>
     {open ? <>
       <button className="fox-ai-scrim" type="button" aria-label="Close Fox AI support" onClick={closePanel} />
       <section ref={panelRef} className="fox-ai-panel" role="dialog" aria-modal="true" aria-label="Fox AI support">
         <header>
-          <span className="fox-ai-avatar"><FoxFavicon className="fox-ai-favicon" /></span>
-          <div><strong>Fox AI</strong><p><i />Scripted Fox support</p></div>
+          <span className="fox-ai-avatar"><SupportAiMark className="fox-ai-support-mark" /></span>
+          <div><strong>Fox AI</strong></div>
           <button type="button" aria-label="Close Fox AI support" onClick={closePanel}><X size={20} /></button>
         </header>
-        <div className="fox-ai-context"><Sparkles size={14} aria-hidden="true" /><span>Helping with {featureForPath(pathname)}</span></div>
         <div className="fox-ai-messages" aria-live="polite">
           {messages.map((message) => <article className={`fox-ai-message is-${message.role}`} key={message.id}>
-            <span>{message.role === "assistant" ? <FoxFavicon className="fox-ai-message-favicon" /> : <UserRound size={15} />}</span>
+            <span>{message.role === "assistant" ? <SupportAiMark className="fox-ai-message-mark" /> : <UserRound size={15} />}</span>
             <div><p>{message.content}</p>{message.escalation ? <div className="fox-ai-escalation">
               <strong>Need a person?</strong>
               <a href={gmailComposeUrl(message.escalation)} target="_blank" rel="noreferrer"><Mail size={15} />Email support in Gmail<ExternalLink size={13} /></a>

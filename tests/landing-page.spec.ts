@@ -12,7 +12,7 @@ test("validates the hero and carries an anonymous visitor's idea into sign up", 
   await page.getByLabel("Start with your video idea").fill("Compare five free editing tools on the same short video");
   await page.getByRole("button", { name: "Create my script" }).click();
   await expect(page).toHaveURL(/\/sign-up\?next=%2Fdashboard%2Feditor/);
-  await expect(page.getByRole("heading", { name: "Sign up to Scripted Fox" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign Up" })).toBeVisible();
 });
 
 test("supports the connection explanation and animated script preview", async ({ page }) => {
@@ -34,3 +34,13 @@ test("mobile layout keeps the primary action usable", async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("Google sign-in uses a direct OAuth navigation link", async ({ page }) => {
+  await page.goto("/sign-in");
+
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toHaveAttribute(
+    "href",
+    "/auth/google?next=%2Fdashboard",
+  );
+});
+

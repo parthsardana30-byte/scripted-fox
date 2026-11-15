@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -9,13 +8,14 @@ import { OutcomeStrip } from "@/components/landing/outcome-strip";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteHeader } from "@/components/landing/site-header";
 import { getLandingUser } from "@/lib/landing-user";
+import { pageMetadata } from "@/lib/seo";
 import "../landing-youtube.css";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "How it works",
   description: "See how Scripted Fox turns a rough YouTube idea into a focused, record-ready script.",
-  alternates: { canonical: "/how-it-works" },
-};
+  path: "/how-it-works",
+});
 
 export default async function HowItWorksPage() {
   const user = await getLandingUser();

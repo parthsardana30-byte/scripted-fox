@@ -32,6 +32,7 @@ class QueryBuilder implements PromiseLike<Result> {
   private head = false;
   private countRequested = false;
   private conflictColumn?: string;
+  private execution?: Promise<Result>;
 
   constructor(private readonly table: string) {
     identifier(table);
@@ -74,6 +75,10 @@ class QueryBuilder implements PromiseLike<Result> {
   like(column: string, value: unknown) { return this.filter(column, "LIKE", value); }
 
   private filter(column: string, operator: string, value: unknown) {
+    if (operator === "=" && value === null) {
+      this.filters.push(`${identifier(column)} IS NULL`);
+      return this;
+    }
     this.values.push(value);
     this.filters.push(`${identifier(column)} ${operator} $${this.values.length}`);
     return this;
@@ -85,6 +90,7 @@ class QueryBuilder implements PromiseLike<Result> {
   }
 
   limit(value: number) {
+    if (!Number.isFinite(value)) throw new RangeError("Row limit must be finite.");
     this.rowLimit = Math.max(0, Math.floor(value));
     return this;
   }
@@ -112,29 +118,32 @@ class QueryBuilder implements PromiseLike<Result> {
 
   private async execute(): Promise<Result> {
     try {
+      const values = [...this.values];
       const table = identifier(this.table);
       let sql: string;
 
       if (this.operation === "select") {
-        const projection = this.countRequested ? "COUNT(*)::int AS count" : selectedColumns(this.columns);
+        const countOnly = this.countRequested && this.head;
+        const projection = countOnly ? "COUNT(*)::int AS count" : selectedColumns(this.columns);
         sql = `SELECT ${projection} FROM ${table}${this.whereClause()}`;
-        if (this.ordering.length) sql += ` ORDER BY ${this.ordering.join(", ")}`;
-        if (this.rowLimit !== undefined) sql += ` LIMIT ${this.rowLimit}`;
+        if (!countOnly && this.ordering.length) sql += ` ORDER BY ${this.ordering.join(", ")}`;
+        if (!countOnly && this.rowLimit !== undefined) sql += ` LIMIT ${this.rowLimit}`;
       } else if (this.operation === "delete") {
         sql = `DELETE FROM ${table}${this.whereClause()}${this.returningClause()}`;
       } else if (this.operation === "update") {
         const payload = this.payload as Record<string, unknown>;
         const assignments = Object.entries(payload).map(([column, value]) => {
-          this.values.push(value);
-          return `${identifier(column)} = $${this.values.length}`;
+          values.push(value);
+          return `${identifier(column)} = $${values.length}`;
         });
         sql = `UPDATE ${table} SET ${assignments.join(", ")}${this.whereClause()}${this.returningClause()}`;
       } else {
         const rows = Array.isArray(this.payload) ? this.payload : [this.payload as Record<string, unknown>];
+        if (rows.length === 0) return { data: [], error: null, count: 0 };
         const columns = Object.keys(rows[0] ?? {});
         const tuples = rows.map((row) => `(${columns.map((column) => {
-          this.values.push(row[column]);
-          return `$${this.values.length}`;
+          values.push(row[column]);
+          return `$${values.length}`;
         }).join(", ")})`);
         sql = `INSERT INTO ${table} (${columns.map(identifier).join(", ")}) VALUES ${tuples.join(", ")}`;
         if (this.operation === "upsert") {
@@ -142,13 +151,17 @@ class QueryBuilder implements PromiseLike<Result> {
           const conflict = identifier(this.conflictColumn);
           const updates = columns.filter((column) => column !== this.conflictColumn)
             .map((column) => `${identifier(column)} = EXCLUDED.${identifier(column)}`);
-          sql += ` ON CONFLICT (${conflict}) DO UPDATE SET ${updates.join(", ")}`;
+          sql += updates.length ? ` ON CONFLICT (${conflict}) DO UPDATE SET ${updates.join(", ")}` : ` ON CONFLICT (${conflict}) DO NOTHING`;
         }
         sql += this.returningClause();
       }
 
-      const result = await databasePool.query(sql, this.values);
-      const count = this.countRequested ? Number(result.rows[0]?.count ?? 0) : result.rowCount;
+      const result = await databasePool.query(sql, values);
+      let count = this.countRequested && this.head ? Number(result.rows[0]?.count ?? 0) : result.rowCount;
+      if (this.operation === "select" && this.countRequested && !this.head) {
+        const total = await databasePool.query(`SELECT COUNT(*)::int AS count FROM ${table}${this.whereClause()}`, this.values);
+        count = Number(total.rows[0]?.count ?? 0);
+      }
       if (this.countRequested && this.head) return { data: null, error: null, count };
       if (this.singleRow) {
         if (!result.rows[0] && !this.allowMissing) throw new Error("Expected one database row.");
@@ -164,7 +177,8 @@ class QueryBuilder implements PromiseLike<Result> {
     onfulfilled?: ((value: Result) => TResult1 | PromiseLike<TResult1>) | null,
     onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
   ): PromiseLike<TResult1 | TResult2> {
-    return this.execute().then(onfulfilled, onrejected);
+    this.execution ??= this.execute();
+    return this.execution.then(onfulfilled, onrejected);
   }
 }
 
